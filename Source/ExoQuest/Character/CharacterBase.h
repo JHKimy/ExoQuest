@@ -1,0 +1,134 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Character.h"
+#include <InputAction.h> // 인풋 액션
+
+#include "CharacterBase.generated.h"
+
+//class ARifle;
+//class Shotgun;
+//class RocketLauncher;
+
+// 무기 타입
+UENUM(BlueprintType)
+enum class EWeaponType : uint8
+{
+	None,
+	Rifle,
+	Shotgun,
+	RocketLauncher,
+	Sword
+};
+
+// 캐릭터 상태
+UENUM(BlueprintType)
+enum class ECharacterState : uint8
+{
+	NoWeaponMode,
+	RifleMode,
+	ShotgunMode,
+	RocketLauncherMode,
+	SwordMode
+};
+
+
+UCLASS()
+class EXOQUEST_API ACharacterBase : public ACharacter
+{
+	GENERATED_BODY()
+
+public:
+	ACharacterBase();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:	
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+
+//=====================================================================================
+public:
+	// class APlayerController* EQPlayerController;
+
+protected:
+	// SpringArm
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	class USpringArmComponent* springArmComp;
+
+	// Camera
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	class UCameraComponent* tpsCamComp;
+
+
+public:
+	// 획득 무기들
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EquippedWeapons)
+	TArray<EWeaponType> EquippedWeapons;
+
+	// 주 무기
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
+	EWeaponType PrimaryWeapon;
+
+	// 라이플
+	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EquippedWeapons)
+	// ARifle* Rifle;
+
+
+public:
+
+	// 캐릭터 상태
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = CharacterState)
+	ECharacterState EQCharacterState;
+
+
+	// 회득한 무기 초기화, 소켓에 무기 부착
+	UFUNCTION(BlueprintCallable)
+	void CheckEquipWeapon();
+
+
+	// 무기에 따른 캐릭터 상태 변경 
+	UFUNCTION(BlueprintCallable)
+	void ChangeState();
+
+
+	// 마우스 우클릭 이동
+	UFUNCTION(BlueprintCallable)
+	void MouseClickMove();
+
+	// WASD 입력 함수
+	UFUNCTION(BlueprintCallable)
+	void WASDClick(const FInputActionValue& InputValue);
+
+	// 마우스 회전	
+	UFUNCTION(BlueprintCallable)
+	void Rotate(const FInputActionValue& InputValue);
+
+	// 점프
+	UFUNCTION(BlueprintCallable)
+	void CustomJump();
+
+	// 달리기
+	UFUNCTION(BlueprintCallable)
+	void RunStart();
+	UFUNCTION(BlueprintCallable)
+	void RunStop();
+
+	// 대쉬
+	UFUNCTION(BlueprintCallable)
+	void DashStart();
+	void StopDash();
+	void ResetDash();
+
+	// 대쉬 쿨 타임
+	bool bCanDash = true;
+	FVector beforeDashVelocity;
+	FTimerHandle DashTimer;
+	// 대쉬 쿨타임
+	float dashCoolTime{ 1.f };
+
+
+};

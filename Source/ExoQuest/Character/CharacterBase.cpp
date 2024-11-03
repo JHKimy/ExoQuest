@@ -13,6 +13,11 @@
 
 #include "Character/Animation/EQAnimInstance.h"
 
+#include <Blueprint/UserWidget.h>	// 위젯
+#include "Enemy/EnemyFSM.h"
+#include <Kismet/GameplayStatics.h>
+
+
 //#include "GameFramework/PlayerController.h"	// 컨트롤러
 
 
@@ -23,7 +28,7 @@ ACharacterBase::ACharacterBase()
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Asset/Character/Character3/SM_Character3.SM_Character3'"));
-	
+
 	if (TempMesh.Succeeded())
 	{
 		// 1. 스켈레탈 메쉬 생성
@@ -56,18 +61,37 @@ void ACharacterBase::BeginPlay()
 	ChangeState();
 
 
+
+
 	USkeletalMeshComponent* localMesh = GetMesh();
 	UClass* AnimBP;
 	// StaticLoadClass를 사용하여 애니메이션 블루프린트 클래스 로드
-	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr, 
+	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
 		TEXT("/Game/BluePrint/Character/ABP_EQAnimation.ABP_EQAnimation_C"));
-	
+
 	if (AnimBP)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ANi Connnecting"));
 
 	}
 	localMesh->SetAnimInstanceClass(AnimBP);
+
+
+
+
+	// EnemyFSM 컴포넌트를 가져와 초기화
+	enemyFSM = Cast<UEnemyFSM>(UGameplayStatics::GetActorOfClass(GetWorld(), UEnemyFSM::StaticClass()));
+
+	// 조준 UI 크로스 헤어 인스턴스 생성
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController)
+	{
+		crosshairUI = CreateWidget<UUserWidget>(PlayerController, crosshairUIFactory);
+		if (crosshairUI)
+		{
+			crosshairUI->AddToViewport();
+		}
+	}
 
 }
 
@@ -90,10 +114,15 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 void ACharacterBase::CheckEquipWeapon()
 {
 	// 무기 하나라도 있으면 
-	if (EquippedWeapons.Num() > 0) 
+	if (EquippedWeapons.Num() > 0)
 	{
 		PrimaryWeapon = EquippedWeapons[0];
-		
+
+		if (enemyFSM)
+		{
+			enemyFSM->UpdateWeaponDamage();
+		}
+
 	}
 	else {
 		// 없으면 무시
@@ -103,11 +132,11 @@ void ACharacterBase::CheckEquipWeapon()
 	// WeaponForEquip으로 주무기 소켓에 붙이기
 	switch (PrimaryWeapon)
 	{
-	//case EWeaponType::None:
+		//case EWeaponType::None:
 
-	//	break;
+		//	break;
 
-	
+
 	case EWeaponType::Rifle:
 	{
 		FName RifleSocket(TEXT("Rifle"));
@@ -123,7 +152,7 @@ void ACharacterBase::CheckEquipWeapon()
 		EQCharacterState = ECharacterState::RifleMode;
 
 	}
-		break;
+	break;
 
 	case EWeaponType::Shotgun:
 
@@ -141,6 +170,8 @@ void ACharacterBase::CheckEquipWeapon()
 	default:
 		break;
 	}
+
+
 }
 
 void ACharacterBase::ChangeState()
@@ -175,7 +206,7 @@ void ACharacterBase::ChangeState()
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		bUseControllerRotationYaw = true;
 
-		
+
 		break;
 
 	case ECharacterState::ShotgunMode:
@@ -217,7 +248,7 @@ void ACharacterBase::MouseClickMove()
 {
 	// 무기 획득하면 무시
 	if (EquippedWeapons.Num() > 0) return;
-	
+
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
 	if (PlayerController)
@@ -230,7 +261,7 @@ void ACharacterBase::MouseClickMove()
 
 		// 2D화면 좌표 가져와서 3D 좌표로 역투영
 		PlayerController->DeprojectMousePositionToWorld(WorldLocation, WorldDirection);
-		
+
 		// 라인 트레이스를 통해 클릭한 위치를 계산
 		FVector TraceEnd = WorldLocation + (WorldDirection * TraceDistance);
 
@@ -240,7 +271,7 @@ void ACharacterBase::MouseClickMove()
 		// WorldLocation -> TraceEnd 까지 
 		// ECC_Visibility 충돌채널의 충돌 지점을 HitResult에 저장
 		GetWorld()->LineTraceSingleByChannel(HitResult, WorldLocation, TraceEnd, ECC_Visibility);
-		
+
 
 		if (HitResult.IsValidBlockingHit())
 		{
@@ -286,7 +317,7 @@ void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 }
 
 void ACharacterBase::Rotate(const FInputActionValue& InputValue)
-{	
+{
 	// 무기가 없으면 무시
 	if (EquippedWeapons.Num() == 0) return;
 
@@ -296,7 +327,7 @@ void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
 	float ValueX = -MovementVector.X; // ?
 	float ValueY = MovementVector.Y;
-	
+
 	EQPlayerController->AddYawInput(ValueX);
 	EQPlayerController->AddPitchInput(ValueY);
 }
@@ -335,8 +366,8 @@ void ACharacterBase::DashStart()
 	if (EquippedWeapons.Num() == 0) return;
 
 	// 대쉬가 쿨타임 중이면 함수 종료
-	if (!bCanDash) return; 
-	
+	if (!bCanDash) return;
+
 
 
 
@@ -345,7 +376,7 @@ void ACharacterBase::DashStart()
 
 	// 캐릭터의 이동 방향 가져오기
 	FVector CurrentVelocity = GetVelocity();
-	
+
 	// 대쉬 전 속도 저장
 	beforeDashVelocity = CurrentVelocity;
 
@@ -368,7 +399,7 @@ void ACharacterBase::DashStart()
 	// 대쉬 작동 후
 	GetWorld()->GetTimerManager().SetTimer
 	(DashTimer, this, &ACharacterBase::StopDash, 0.1f, false);
-	
+
 }
 
 void ACharacterBase::StopDash()
@@ -386,4 +417,29 @@ void ACharacterBase::ResetDash()
 	// 대쉬 가능 
 	bCanDash = true;
 
+}
+
+void ACharacterBase::WeaponAttack()
+{
+	switch (PrimaryWeapon)
+	{
+		//case EWeaponType::None:
+		//	break;
+
+	case EWeaponType::Rifle:
+
+		break;
+
+	case EWeaponType::Shotgun:
+		break;
+
+	case EWeaponType::RocketLauncher:
+		break;
+
+	case EWeaponType::Sword:
+		break;
+
+	default:
+		break;
+	}
 }

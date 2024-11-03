@@ -44,13 +44,13 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 
-//=====================================================================================
+	//=====================================================================================
 public:
 	// class APlayerController* EQPlayerController;
 
@@ -62,6 +62,14 @@ protected:
 	// Camera
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* tpsCamComp;
+
+
+	// 일반 조준 크로스 헤어 UI 위젯
+	UPROPERTY(EditDefaultsOnly, Category = CrossHair)
+	TSubclassOf<class UUserWidget> crosshairUIFactory;
+
+	// 크로스헤어 인스턴스
+	class UUserWidget* crosshairUI;
 
 
 public:
@@ -130,5 +138,13 @@ public:
 	// 대쉬 쿨타임
 	float dashCoolTime{ 1.f };
 
+
+	// 총 발사
+	UFUNCTION(BlueprintCallable)
+	void WeaponAttack();
+
+
+	UPROPERTY(EditAnywhere, Category = Damage)
+	class UEnemyFSM* enemyFSM;
 
 };

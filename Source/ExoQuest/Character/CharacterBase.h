@@ -21,6 +21,7 @@ enum class EWeaponType : uint8
 	Sword
 };
 
+
 // 캐릭터 상태
 UENUM(BlueprintType)
 enum class ECharacterState : uint8
@@ -54,7 +55,7 @@ public:
 public:
 	// class APlayerController* EQPlayerController;
 
-protected:
+public:
 	// SpringArm
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* springArmComp;
@@ -80,6 +81,13 @@ public:
 	// 주 무기
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Weapon)
 	EWeaponType PrimaryWeapon;
+
+	// 무기 변경 시에만 호출하여 성능 최적화를 위한 이전 무기 상태 저장 
+	// 매 Tick마다 중복 연산을 방지하고, 무기가 변경될 때 한 번만 업데이트
+	// 이전 무기 타입 추적용 변수
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = PlayerWeapon)
+	EWeaponType PreviousWeaponType = EWeaponType::None;
+
 
 	// 라이플
 	// UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = EquippedWeapons)
@@ -138,6 +146,8 @@ public:
 	// 대쉬 쿨타임
 	float dashCoolTime{ 1.f };
 
+	// 대쉬 중인지 상태를 확인하는 변수
+	bool bIsDashing = false;
 
 	// 총 발사
 	UFUNCTION(BlueprintCallable)
@@ -146,5 +156,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Damage)
 	class UEnemyFSM* enemyFSM;
+
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
+	class ARifle* playerRifle;
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
+	class AShotgun* playerShotgun;
+	
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
+	class ARocketLauncher* playerRocketLauncher;
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
+	class ASword* playerSword;
 
 };

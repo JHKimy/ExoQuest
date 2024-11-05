@@ -88,23 +88,18 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	switch (WeaponType)
 	{
 	case EWeaponTypeForEquip::Rifle:
-		
-		UKismetSystemLibrary::PrintString(this, TEXT("Get Rifle"), true, true, FColor::Green, 5.0f);
 		EquipCharacter->EquippedWeapons.Add(EWeaponType::Rifle);
 		break;
 
 	case EWeaponTypeForEquip::Shotgun:
-		UKismetSystemLibrary::PrintString(this, TEXT("Get Shotgun"), true, true, FColor::Green, 5.0f);
 		EquipCharacter->EquippedWeapons.Add(EWeaponType::Shotgun);
 		break;
 
 	case EWeaponTypeForEquip::RocketLauncher:
-		UKismetSystemLibrary::PrintString(this, TEXT("Get RocketLauncher"), true, true, FColor::Green, 5.0f); \
 		EquipCharacter->EquippedWeapons.Add(EWeaponType::RocketLauncher);
 		break;
 
 	case EWeaponTypeForEquip::Sword:
-		UKismetSystemLibrary::PrintString(this, TEXT("Get Sword"), true, true, FColor::Green, 5.0f);
 		EquipCharacter->EquippedWeapons.Add(EWeaponType::Sword);
 		break;
 	

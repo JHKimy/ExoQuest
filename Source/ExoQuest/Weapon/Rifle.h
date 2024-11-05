@@ -46,4 +46,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void Fire();
+
+
+	// 발사 쿨다운 시간
+	float fireCooldown {0.1f};
+
+	// 마지막 발사 시간
+	float lastFireTime;
 };

@@ -27,7 +27,7 @@ void UEnemyFSM::BeginPlay()
 
 	enemy = Cast<AEnemyBase>(GetOwner());
 
-
+	
 	// 데미지 초기화
 	//switch (target->PrimaryWeapon)
 	//{
@@ -81,6 +81,16 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		break;
 	}
 
+	// 획득무기에 따른 데미지
+	UpdateWeaponDamage();
+
+	// 캐릭터의 주무기가 이전 무기와 다를때
+	// 즉, 무기가 바뀌면
+	if (target && target->PrimaryWeapon != target->PreviousWeaponType)
+	{
+		UpdateWeaponDamage();
+		target->PreviousWeaponType = target->PrimaryWeapon;
+	}
 }
 
 void UEnemyFSM::IdleState()
@@ -174,7 +184,7 @@ void UEnemyFSM::OnDamageProcess()
 			break;
 
 		case EWeaponType::Shotgun:
-
+			enemy->health -= shotgunDamage;
 			break;
 
 		case EWeaponType::RocketLauncher:
@@ -187,6 +197,7 @@ void UEnemyFSM::OnDamageProcess()
 		}
 	}
 
+	// 체력 다 떨어지면
 	if (enemy->health > 0)
 	{
 		EState = EEnemyState::Damage;
@@ -213,13 +224,13 @@ void UEnemyFSM::UpdateWeaponDamage()
 			}
 			break;
 
-			//case EWeaponType::Shotgun:
-			//	shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), AShotgun::StaticClass()));
-			//	if (shotgunInstance)
-			//	{
-			//		shotgunDamage = shotgunInstance->damage;
-			//	}
-			//	break;
+		case EWeaponType::Shotgun:
+			shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), AShotgun::StaticClass()));
+			if (shotgunInstance)
+			{
+				shotgunDamage = shotgunInstance->damage;
+			}
+			break;
 
 			//case EWeaponType::RocketLauncher:
 			//	rocketLauncherInstance = Cast<ARocketLauncher>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketLauncher::StaticClass()));

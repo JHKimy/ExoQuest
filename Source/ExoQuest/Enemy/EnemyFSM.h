@@ -17,6 +17,8 @@ enum class EEnemyState : uint8
 	Die			UMETA(DisplayName = "Die State")
 };
 
+
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class EXOQUEST_API UEnemyFSM : public UActorComponent
 {
@@ -35,6 +37,8 @@ public:
 	// 상태 변수
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
 	EEnemyState EState = EEnemyState::Idle;
+
+
 
 	// 대기 상태
 	void IdleState();

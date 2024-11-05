@@ -28,14 +28,7 @@ void AEQPlayerController::BeginPlay()
 		// 블루프린트에서 할당된 IMC_Control을 사용
 		if (IMC_Control)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("IMC_Control Connnecting"));
-
 			Subsystem->AddMappingContext(IMC_Control, 0);
-		}
-		else if (IMC_Control)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("!!!!!!!!!IMC_Control Connnecting"));
-
 		}
 	}
 
@@ -70,7 +63,6 @@ void AEQPlayerController::SetupInputComponent()
 
 void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 {
-	UE_LOG(LogTemp, Warning, TEXT("SetupInputBindings Connnecting"));
 
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(InputComponent))
 	{
@@ -101,6 +93,10 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		if (IA_Dash)
 		{
 			EnhancedInputComponent->BindAction(IA_Dash, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::DashStart);
+		}
+		if (IA_Attack)
+		{
+			EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::WeaponAttack);
 		}
 	}
 }

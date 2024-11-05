@@ -53,5 +53,4 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 void UEQAnimInstance::SetCharacterState(ECharacterState NewState)
 {
 	CharacterState = NewState;
-	UE_LOG(LogTemp, Warning, TEXT("SetCharacterState called with state: %d"), (int32)NewState);
 }

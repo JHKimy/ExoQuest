@@ -63,4 +63,7 @@ protected:
 	// 대쉬
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
 	TObjectPtr<UInputAction> IA_Dash;
+	// 공격
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
+	TObjectPtr<UInputAction> IA_Attack;
 };

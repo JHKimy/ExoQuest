@@ -9,7 +9,12 @@
 #include "Player/EQPlayerController.h"		// 애니메이션 관련 헤더
 #include "Weapon/WeaponForEquip.h"
 
+
 #include "Weapon/Rifle.h"
+#include "Weapon/Shotgun.h"
+#include "Weapon/RocketLauncher.h"
+#include "Weapon/Sword.h"			// 무기
+
 
 #include "Character/Animation/EQAnimInstance.h"
 
@@ -17,6 +22,7 @@
 #include "Enemy/EnemyFSM.h"
 #include <Kismet/GameplayStatics.h>
 
+#include "Kismet/KismetSystemLibrary.h" // PrintString 함수 사용을 위해 포함
 
 //#include "GameFramework/PlayerController.h"	// 컨트롤러
 
@@ -69,11 +75,6 @@ void ACharacterBase::BeginPlay()
 	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
 		TEXT("/Game/BluePrint/Character/ABP_EQAnimation.ABP_EQAnimation_C"));
 
-	if (AnimBP)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ANi Connnecting"));
-
-	}
 	localMesh->SetAnimInstanceClass(AnimBP);
 
 
@@ -82,26 +83,82 @@ void ACharacterBase::BeginPlay()
 	// EnemyFSM 컴포넌트를 가져와 초기화
 	enemyFSM = Cast<UEnemyFSM>(UGameplayStatics::GetActorOfClass(GetWorld(), UEnemyFSM::StaticClass()));
 
-	// 조준 UI 크로스 헤어 인스턴스 생성
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController)
-	{
-		crosshairUI = CreateWidget<UUserWidget>(PlayerController, crosshairUIFactory);
-		if (crosshairUI)
-		{
-			crosshairUI->AddToViewport();
-		}
-	}
+
 
 }
 
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	// 무기 확인
-	CheckEquipWeapon();
-	// 무기에 따른 설정 변경
-	ChangeState();
+
+	// 무기 확인과 상태 업데이트가 필요할 때만 실행
+	if (EquippedWeapons.Num() > 0)
+	{
+		// 무기 확인
+		CheckEquipWeapon();
+		// 무기에 따른 설정 변경
+		ChangeState();
+	}
+
+
+
+
+
+
+
+	FString WeaponsList = "Equipped Weapons : ";
+
+	for (EWeaponType WeaponType : EquippedWeapons)
+	{
+		switch (WeaponType)
+		{
+		case EWeaponType::Rifle:
+			WeaponsList += "Rifle / ";
+			break;
+		case EWeaponType::Shotgun:
+			WeaponsList += "Shotgun / ";
+			break;
+		case EWeaponType::RocketLauncher:
+			WeaponsList += "RocketLauncher / ";
+			break;
+		case EWeaponType::Sword:
+			WeaponsList += "Sword / ";
+			break;
+		default:
+			WeaponsList += "Unknown / ";
+			break;
+		}
+	}
+
+	UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 2.0f);
+
+	FString PrimaryWeaponName;
+	switch (PrimaryWeapon)
+	{
+	case EWeaponType::Rifle:
+		PrimaryWeaponName = "Rifle";
+		break;
+	case EWeaponType::Shotgun:
+		PrimaryWeaponName = "Shotgun";
+		break;
+	case EWeaponType::RocketLauncher:
+		PrimaryWeaponName = "RocketLauncher";
+		break;
+	case EWeaponType::Sword:
+		PrimaryWeaponName = "Sword";
+		break;
+	default:
+		PrimaryWeaponName = "Unknown";
+		break;
+	}
+	UKismetSystemLibrary::PrintString(this, PrimaryWeaponName, true, true, FColor::Red, 2.0f);
+
+
+
+
+
+
+
 
 
 }
@@ -113,62 +170,102 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ACharacterBase::CheckEquipWeapon()
 {
+	// 무기가 하나도 없으면 실행 중단
+	if (EquippedWeapons.IsEmpty()) return;
+
 	// 무기 하나라도 있으면 
-	if (EquippedWeapons.Num() > 0)
-	{
-		PrimaryWeapon = EquippedWeapons[0];
+	PrimaryWeapon = EquippedWeapons[0];
 
-		if (enemyFSM)
+	if (enemyFSM)
+	{
+		enemyFSM->UpdateWeaponDamage();
+	}
+
+	// 조준 UI 크로스 헤어 인스턴스 생성
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	if (PlayerController && !crosshairUI)
+	{
+		crosshairUI = CreateWidget<UUserWidget>(PlayerController, crosshairUIFactory);
+		if (crosshairUI)
 		{
-			enemyFSM->UpdateWeaponDamage();
+			crosshairUI->AddToViewport();
+		}
+	}
+
+
+
+
+
+	// WeaponForEquip으로 획득한 무기 확인
+	for (EWeaponType WeaponType : EquippedWeapons)
+	{
+		FName SocketName;
+		AActor* WeaponActor = nullptr;
+
+		switch (WeaponType)
+		{
+		case EWeaponType::Rifle:
+			if (playerRifle) continue; // 이미 획득한 무기는 중복 생성 방지
+			// 다른 무기가 있는 경우 등에 부착
+			SocketName = (EquippedWeapons.Contains(EWeaponType::Shotgun) ||
+				EquippedWeapons.Contains(EWeaponType::RocketLauncher) ||
+				EquippedWeapons.Contains(EWeaponType::Sword))
+				? FName(TEXT("RifleBack"))
+				: FName(TEXT("Rifle"));
+
+			playerRifle = GetWorld()->SpawnActor<ARifle>();
+			WeaponActor = playerRifle;
+			EQCharacterState = PrimaryWeapon == EWeaponType::Rifle ? ECharacterState::RifleMode : EQCharacterState;
+			
+			break;
+
+
+
+		case EWeaponType::Shotgun:
+			if (playerShotgun) continue;
+			// 다른 무기가 있는 경우 등에 부착
+			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
+				EquippedWeapons.Contains(EWeaponType::RocketLauncher) ||
+				EquippedWeapons.Contains(EWeaponType::Sword))
+				? FName(TEXT("ShotgunBack"))
+				: FName(TEXT("Shotgun"));
+
+			playerShotgun = GetWorld()->SpawnActor<AShotgun>();
+			WeaponActor = playerShotgun;
+			EQCharacterState = PrimaryWeapon == EWeaponType::Shotgun ? ECharacterState::ShotgunMode : EQCharacterState;
+			
+			break;
+
+
+
+		case EWeaponType::RocketLauncher:
+			if (playerRocketLauncher) continue;
+			// 다른 무기가 있는 경우 등에 부착
+			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
+				EquippedWeapons.Contains(EWeaponType::Shotgun) ||
+				EquippedWeapons.Contains(EWeaponType::Sword))
+				? FName(TEXT("RocketLauncherBack"))
+				: FName(TEXT("RocketLauncher"));
+
+			playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
+			WeaponActor = playerRocketLauncher;
+			EQCharacterState = PrimaryWeapon == EWeaponType::RocketLauncher ? ECharacterState::RocketLauncherMode : EQCharacterState;
+
+			break;
+
+		case EWeaponType::Sword:
+
+			break;
+
+
+		default:
+			break;
 		}
 
-	}
-	else {
-		// 없으면 무시
-		return;
-	}
-
-	// WeaponForEquip으로 주무기 소켓에 붙이기
-	switch (PrimaryWeapon)
-	{
-		//case EWeaponType::None:
-
-		//	break;
-
-
-	case EWeaponType::Rifle:
-	{
-		FName RifleSocket(TEXT("Rifle"));
-		auto RifleforEquip = GetWorld()->SpawnActor<ARifle>(FVector::ZeroVector, FRotator::ZeroRotator);
-
-		// 소켓에 부착
-		if (RifleforEquip)
+		if (WeaponActor)
 		{
-			RifleforEquip->AttachToComponent(GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				RifleSocket);
+			WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 		}
-		EQCharacterState = ECharacterState::RifleMode;
-
-	}
-	break;
-
-	case EWeaponType::Shotgun:
-
-		break;
-
-	case EWeaponType::RocketLauncher:
-
-		break;
-
-	case EWeaponType::Sword:
-
-		break;
-
-
-	default:
-		break;
 	}
 
 
@@ -205,18 +302,30 @@ void ACharacterBase::ChangeState()
 		springArmComp->SocketOffset.Y = 70;
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		bUseControllerRotationYaw = true;
-
-
 		break;
 
 	case ECharacterState::ShotgunMode:
+		springArmComp->TargetArmLength = 200;
+		springArmComp->SocketOffset.Z = 200;
+		springArmComp->SocketOffset.Y = 70;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
+		break;
 
-
+	case ECharacterState::RocketLauncherMode:
+		springArmComp->TargetArmLength = 200;
+		springArmComp->SocketOffset.Z = 200;
+		springArmComp->SocketOffset.Y = 70;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
 		break;
 
 	case ECharacterState::SwordMode:
-
-
+		springArmComp->TargetArmLength = 200;
+		springArmComp->SocketOffset.Z = 200;
+		springArmComp->SocketOffset.Y = 70;
+		GetCharacterMovement()->bOrientRotationToMovement = false;
+		bUseControllerRotationYaw = true;
 		break;
 
 	default:
@@ -369,7 +478,7 @@ void ACharacterBase::DashStart()
 	if (!bCanDash) return;
 
 
-
+	bIsDashing = true;  // 대쉬 시작 시 상태 설정
 
 	// 대쉬 가능
 	bCanDash = false;
@@ -407,6 +516,8 @@ void ACharacterBase::StopDash()
 	// 대쉬 전 속도로 돌아가기
 	GetMovementComponent()->Velocity = beforeDashVelocity;
 
+	bIsDashing = false;
+
 	// 2초 후에 대쉬 가능 상태로 복구
 	GetWorld()->GetTimerManager().SetTimer
 	(DashTimer, this, &ACharacterBase::ResetDash, dashCoolTime, false);
@@ -421,19 +532,25 @@ void ACharacterBase::ResetDash()
 
 void ACharacterBase::WeaponAttack()
 {
+	// 대쉬 중일 때는 발사하지 않음
+	if (bIsDashing) return;
+
 	switch (PrimaryWeapon)
 	{
-		//case EWeaponType::None:
-		//	break;
+
+	case EWeaponType::None:
+		break;
 
 	case EWeaponType::Rifle:
-
+		playerRifle->Fire();
 		break;
 
 	case EWeaponType::Shotgun:
-		break;
+		playerShotgun->Fire();
+			break;
 
 	case EWeaponType::RocketLauncher:
+		playerRocketLauncher->Fire();
 		break;
 
 	case EWeaponType::Sword:

@@ -55,6 +55,7 @@ ACharacterBase::ACharacterBase()
 	tpsCamComp->SetupAttachment(springArmComp);
 	tpsCamComp->SetRelativeRotation(FRotator(-40, 0, 0));
 
+	bmouseMoveMode = true;
 }
 
 void ACharacterBase::BeginPlay()
@@ -175,6 +176,7 @@ void ACharacterBase::CheckEquipWeapon()
 
 	// 무기 하나라도 있으면 
 	PrimaryWeapon = EquippedWeapons[0];
+	bmouseMoveMode = false;
 
 	if (enemyFSM)
 	{
@@ -398,6 +400,7 @@ void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 	// 무기가 없으면 무시
 	if (EquippedWeapons.Num() == 0) return;
 
+
 	// 입력된 값에서 X, Y 값을 추출
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
 	float ValueX = MovementVector.X;
@@ -434,7 +437,7 @@ void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 
 	// 입력된 값에서 X, Y 값을 추출
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
-	float ValueX = -MovementVector.X; // ?
+	float ValueX = - MovementVector.X; // ?
 	float ValueY = MovementVector.Y;
 
 	EQPlayerController->AddYawInput(ValueX);
@@ -455,6 +458,8 @@ void ACharacterBase::RunStart()
 	if (EquippedWeapons.Num() == 0) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
+	
+	bIsRunning = true;
 }
 
 void ACharacterBase::RunStop()
@@ -466,6 +471,8 @@ void ACharacterBase::RunStop()
 
 	GetCharacterMovement()->bOrientRotationToMovement = false;
 	bUseControllerRotationYaw = true;
+
+	bIsRunning = false;
 }
 
 // 대쉬 스킬
@@ -532,8 +539,8 @@ void ACharacterBase::ResetDash()
 
 void ACharacterBase::WeaponAttack()
 {
-	// 대쉬 중일 때는 발사하지 않음
-	if (bIsDashing) return;
+	// 대쉬나 달리기 중일 때는 발사하지 않음
+	if (bIsDashing || bIsRunning) return;
 
 	switch (PrimaryWeapon)
 	{
@@ -547,7 +554,7 @@ void ACharacterBase::WeaponAttack()
 
 	case EWeaponType::Shotgun:
 		playerShotgun->Fire();
-			break;
+		break;
 
 	case EWeaponType::RocketLauncher:
 		playerRocketLauncher->Fire();
@@ -559,4 +566,26 @@ void ACharacterBase::WeaponAttack()
 	default:
 		break;
 	}
+}
+
+void ACharacterBase::ZoomIn()
+{
+	if (bmouseMoveMode) return;
+	tpsCamComp->SetFieldOfView(45.f);
+	springArmComp->SetRelativeLocation(FVector(0, 0, 30));
+	springArmComp->SocketOffset.Y = 30;
+}
+
+void ACharacterBase::ZoomOut()
+{
+	if (bmouseMoveMode) return;
+
+	tpsCamComp->SetFieldOfView(90.f);
+	springArmComp->SetRelativeLocation(FVector(0, 0, 30));
+	//springArmComp->TargetArmLength = 400;
+	//springArmComp->SocketOffset.Z = 400;
+
+	//springArmComp->TargetArmLength = 200;
+	//springArmComp->SocketOffset.Z = 200;
+	springArmComp->SocketOffset.Y = 70;
 }

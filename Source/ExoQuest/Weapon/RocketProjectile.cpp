@@ -1,6 +1,7 @@
 #include "Weapon/RocketProjectile.h"
 #include "Components/SphereComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/CharacterBase.h"
 
@@ -14,7 +15,6 @@ ARocketProjectile::ARocketProjectile()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-
 	// 충돌체 생성 및 설정
 	collisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
 	collisionComponent->InitSphereRadius(15.0f);
@@ -26,7 +26,6 @@ ARocketProjectile::ARocketProjectile()
 
 	// 충돌 이벤트 연결
 	collisionComponent->OnComponentHit.AddDynamic(this, &ARocketProjectile::OnHit);
-
 
 	// 메쉬 컴포넌트 추가
 	meshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComponent"));
@@ -42,10 +41,13 @@ ARocketProjectile::ARocketProjectile()
 	meshComponent->SetupAttachment(RootComponent);
 
 
+
 	Speed = 4000.f; // 초기 속도를 설정
-	maxSpeed = 5000.f;
+	maxSpeed = 4000.f;
 	gravity = 2.f;
 	damage = 50.f;
+
+
 
 	// 이동 컴포넌트 추가
 	movementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
@@ -94,23 +96,25 @@ void ARocketProjectile::BeginPlay()
 		}
 	}
 
-	GetWorld()->GetTimerManager().SetTimer(destroyTimerHandle, FTimerDelegate::CreateLambda([this]()->void
-		{
-			Destroy();
-		}), 10.0f, false);
+	//GetWorld()->GetTimerManager().SetTimer(destroyTimerHandle, FTimerDelegate::CreateLambda([this]()->void
+	//	{
+	//		Destroy();
+	//	}), 10.0f, false);
 	// 10초 지나면 알아서 삭제
 	
+
 }
 
 void ARocketProjectile::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 예측 경로 시각화
+	//VisualizeProjectilePath();
 }
 
 void ARocketProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
-
 	// 소유자와의 충돌 무시
 	if (OtherActor == GetOwner())
 	{
@@ -129,11 +133,8 @@ void ARocketProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	// 로켓 제거
 	Destroy();
 
-
-
 	if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(OtherActor->GetComponentByClass(UEnemyFSM::StaticClass() ) ))
 	{
 		EnemyFSM->OnDamageProcess();
 	}
-
 }

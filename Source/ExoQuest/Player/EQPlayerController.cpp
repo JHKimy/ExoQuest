@@ -10,7 +10,6 @@
 
 AEQPlayerController::AEQPlayerController()
 {
-
 }
 
 void AEQPlayerController::BeginPlay()
@@ -97,6 +96,11 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		if (IA_Attack)
 		{
 			EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::WeaponAttack);
+		}
+		if (IA_Zoom)
+		{
+			EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Started, myCharacter, &ACharacterBase::ZoomIn);
+			EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ZoomOut);
 		}
 	}
 }

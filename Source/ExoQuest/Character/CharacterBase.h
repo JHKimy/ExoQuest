@@ -115,6 +115,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void MouseClickMove();
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = mouseMoveMode)
+	bool bmouseMoveMode;
+
 	// WASD 입력 함수
 	UFUNCTION(BlueprintCallable)
 	void WASDClick(const FInputActionValue& InputValue);
@@ -148,10 +151,21 @@ public:
 
 	// 대쉬 중인지 상태를 확인하는 변수
 	bool bIsDashing = false;
+	
+	// 달리기 중인지 상태를 확인하는 변수
+	bool bIsRunning = false;
+
+
 
 	// 총 발사
 	UFUNCTION(BlueprintCallable)
 	void WeaponAttack();
+
+	// 조준 줌
+	UFUNCTION(BlueprintCallable)
+	void ZoomIn();
+	UFUNCTION(BlueprintCallable)
+	void ZoomOut();
 
 
 	UPROPERTY(EditAnywhere, Category = Damage)

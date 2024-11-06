@@ -7,6 +7,9 @@
 //#include "RocketProjectile.h" // ARocketProjectile 클래스 포함
 #include "Weapon/RocketProjectile.h"
 
+#include "DrawDebugHelpers.h"
+
+
 ARocketLauncher::ARocketLauncher()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -50,6 +53,12 @@ void ARocketLauncher::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 발사 전 예측 경로 시각화
+	if (bCanFire)
+	{
+		ShowProjectilePrediction();
+	}
+
 }
 
 void ARocketLauncher::Fire()
@@ -92,3 +101,48 @@ void ARocketLauncher::ResetFire()
     bCanFire = true; // 쿨타임 해제, 발사 가능 상태로 전환
 }
 
+
+
+void ARocketLauncher::ShowProjectilePrediction()
+{
+    if (RocketProjectileClass && muzzleLocation)
+    {
+        FVector StartLocation = muzzleLocation->GetComponentLocation();
+        FRotator LaunchRotation;
+
+        // 카메라 방향을 반영한 발사 방향 계산
+        if (APlayerController* PlayerController = GetWorld()->GetFirstPlayerController())
+        {
+            FVector CameraLocation;
+            FRotator CameraRotation;
+            PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+            LaunchRotation = CameraRotation;
+        }
+        else
+        {
+            // 기본적으로 총구 방향으로 설정
+            LaunchRotation = muzzleLocation->GetComponentRotation();
+        }
+
+        // 카메라 방향 또는 총구 방향을 기반으로 한 초기 속도 설정
+        FVector LaunchVelocity = LaunchRotation.Vector() * 4000.0f; // 로켓 발사 속도와 일치하는 초기 속도 설정
+
+        // FPredictProjectilePathParams 설정
+        FPredictProjectilePathParams PredictParams;
+        PredictParams.StartLocation = StartLocation;
+        PredictParams.LaunchVelocity = LaunchVelocity;
+        PredictParams.bTraceWithCollision = true;
+        PredictParams.ProjectileRadius = 15.0f; // 발사체 크기와 일치하도록 설정
+        PredictParams.MaxSimTime = 5.0f; // 시뮬레이션 시간 (초)
+
+        PredictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
+
+        
+        PredictParams.SimFrequency = 15.0f;
+        PredictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;
+        PredictParams.DrawDebugTime = 0.1f;
+
+        FPredictProjectilePathResult PredictResult;
+        UGameplayStatics::PredictProjectilePath(this, PredictParams, PredictResult);
+    }
+}

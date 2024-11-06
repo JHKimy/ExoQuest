@@ -50,8 +50,8 @@ public:
 	class UParticleSystem* bulletEffectFactory;
 
 	// 데미지
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
-	float damage =100.f;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
+	//float damage =100.f;
 
 
 	UFUNCTION(BlueprintCallable)
@@ -61,8 +61,8 @@ public:
 	FTimerHandle FireRateTimerHandle; // 타이머 핸들
 
 	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
-	float FireRateDelay = 2.0f; // 발사 대기 시간 (초 단위)
+	float FireRateDelay = 0.5f; // 발사 대기 시간 (초 단위)
 
-	void ResetFire(); // 발사 가능 상태로 리셋하는 함수
 
+	void ResetFire();
 };

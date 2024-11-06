@@ -23,15 +23,21 @@ public:
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 	// 속도, 데미지 등 설정
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
 	float Speed;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Projectile")
-	float Damage;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float maxSpeed;
 
-private:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float gravity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float damage;
+
+public:
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* meshComponent;
+	class UStaticMeshComponent* meshComponent;
 
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class USphereComponent* collisionComponent;
@@ -39,7 +45,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	class UProjectileMovementComponent* movementComponent;
 
-	UPROPERTY(EditAnywhere)
-	UParticleSystem* explosionEffect;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+	class UParticleSystem* explosionEffect;
+
+
+	FTimerHandle destroyTimerHandle; // 타이머 핸들
 
 };

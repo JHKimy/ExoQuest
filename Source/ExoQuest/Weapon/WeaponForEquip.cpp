@@ -78,34 +78,34 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 {
 	ACharacterBase* EquipCharacter = Cast<ACharacterBase>(OtherActor);
 	
-	if (EquipCharacter) 
+	if (EquipCharacter)
 	{
 		Destroy();
+
+
+
+
+		switch (WeaponType)
+		{
+		case EWeaponTypeForEquip::Rifle:
+			EquipCharacter->EquippedWeapons.Add(EWeaponType::Rifle);
+			break;
+
+		case EWeaponTypeForEquip::Shotgun:
+			EquipCharacter->EquippedWeapons.Add(EWeaponType::Shotgun);
+			break;
+
+		case EWeaponTypeForEquip::RocketLauncher:
+			EquipCharacter->EquippedWeapons.Add(EWeaponType::RocketLauncher);
+			break;
+
+		case EWeaponTypeForEquip::Sword:
+			EquipCharacter->EquippedWeapons.Add(EWeaponType::Sword);
+			break;
+
+		default:
+			break;
+		}
 	}
-
-	
-
-	switch (WeaponType)
-	{
-	case EWeaponTypeForEquip::Rifle:
-		EquipCharacter->EquippedWeapons.Add(EWeaponType::Rifle);
-		break;
-
-	case EWeaponTypeForEquip::Shotgun:
-		EquipCharacter->EquippedWeapons.Add(EWeaponType::Shotgun);
-		break;
-
-	case EWeaponTypeForEquip::RocketLauncher:
-		EquipCharacter->EquippedWeapons.Add(EWeaponType::RocketLauncher);
-		break;
-
-	case EWeaponTypeForEquip::Sword:
-		EquipCharacter->EquippedWeapons.Add(EWeaponType::Sword);
-		break;
-	
-	default:
-		break;
-	}
-
 }
 

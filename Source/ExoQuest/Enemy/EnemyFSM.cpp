@@ -7,6 +7,7 @@
 #include "Weapon/Rifle.h"
 #include "Weapon/Shotgun.h"
 #include "Weapon/RocketLauncher.h"
+#include "Weapon/RocketProjectile.h"
 #include "Weapon/Sword.h"
 
 
@@ -188,6 +189,7 @@ void UEnemyFSM::OnDamageProcess()
 			break;
 
 		case EWeaponType::RocketLauncher:
+			enemy->health -= rocketLaunchetDamage;
 
 			break;
 
@@ -232,13 +234,14 @@ void UEnemyFSM::UpdateWeaponDamage()
 			}
 			break;
 
-			//case EWeaponType::RocketLauncher:
-			//	rocketLauncherInstance = Cast<ARocketLauncher>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketLauncher::StaticClass()));
-			//	if (rocketLauncherInstance)
-			//	{
-			//		rocketLaunchetDamage = rocketLauncherInstance->damage;
-			//	}
-			//	break;
+		case EWeaponType::RocketLauncher:
+			// 여기서만 발사체로 넣어주기
+			rocketLauncherInstance = Cast<ARocketProjectile>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketProjectile::StaticClass()));
+			if (rocketLauncherInstance)
+			{
+				rocketLaunchetDamage = rocketLauncherInstance->damage;
+			}
+			break;
 
 			//case EWeaponType::Sword:
 			//	swordInstance = Cast<ASword>(UGameplayStatics::GetActorOfClass(GetWorld(), ASword::StaticClass()));

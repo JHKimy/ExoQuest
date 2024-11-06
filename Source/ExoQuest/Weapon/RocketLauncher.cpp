@@ -25,15 +25,17 @@ ARocketLauncher::ARocketLauncher()
 	muzzleLocation->SetupAttachment(RootComponent);
 
 	// 기본 위치 설정 (총구 앞부분으로 위치 설정)
-	muzzleLocation->SetRelativeLocation(FVector(0.f, 40.f, 2.f)); // X, Y, Z 좌표 조정 가능
+	muzzleLocation->SetRelativeLocation(FVector(0.f, 60.f, 2.f)); // X, Y, Z 좌표 조정 가능
 
     // 블루프린트 오버라이드
-    //// RocketProjectileClass 초기화
-    //static ConstructorHelpers::FClassFinder<ARocketProjectile> RocketProjectileBP(TEXT("/Game/BluePrint/Weapon/BP_RocketProjectile.BP_RocketProjectile_C"));
-    //if (RocketProjectileBP.Succeeded())
-    //{
-    //    RocketProjectileClass = RocketProjectileBP.Class;
-    //}
+    // RocketProjectileClass 초기화
+    static ConstructorHelpers::FClassFinder<ARocketProjectile> RocketProjectileBP(TEXT("/Game/BluePrint/Weapon/BP_RocketProjectile.BP_RocketProjectile_C"));
+    if (RocketProjectileBP.Succeeded())
+    {
+        RocketProjectileClass = RocketProjectileBP.Class;
+    }
+
+    bCanFire = true; // 시작 시 발사 가능 상태로 설정
 }
 
 void ARocketLauncher::BeginPlay()
@@ -41,7 +43,6 @@ void ARocketLauncher::BeginPlay()
 	Super::BeginPlay();
 
 	ownerCharacter = Cast<ACharacterBase>(UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass()));
-
 	
 }
 
@@ -53,6 +54,10 @@ void ARocketLauncher::Tick(float DeltaTime)
 
 void ARocketLauncher::Fire()
 {
+    if (!bCanFire) return;
+    
+    bCanFire = false; // 발사 후 쿨타임 동안 발사 불가
+
     UKismetSystemLibrary::PrintString(this, TEXT("Firing Rocket!"), true, true, FColor::Red, 2.0f);
 
     if (RocketProjectileClass)
@@ -76,10 +81,14 @@ void ARocketLauncher::Fire()
     {
         UKismetSystemLibrary::PrintString(this, TEXT("Projectile Class Not Set"), true, true, FColor::Red, 2.0f);
     }
+
+    GetWorldTimerManager().SetTimer(
+        FireRateTimerHandle, this, &ARocketLauncher::ResetFire, FireRateDelay, false);
 }
 
 
 void ARocketLauncher::ResetFire()
 {
+    bCanFire = true; // 쿨타임 해제, 발사 가능 상태로 전환
 }
 

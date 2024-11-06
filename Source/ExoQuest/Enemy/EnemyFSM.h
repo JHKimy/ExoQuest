@@ -95,7 +95,8 @@ public:
 	// 무기 인스턴스 
 	class ARifle* rifleInstance;
 	class AShotgun* shotgunInstance;
-	class ARocketLauncher* rocketLauncherInstance;
+	//class ARocketLauncher* rocketLauncherInstance;
+	class ARocketProjectile* rocketLauncherInstance;
 	class ASword* swordInstance;
 
 	// 무기별 데미지

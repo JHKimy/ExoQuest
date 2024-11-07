@@ -38,11 +38,11 @@ public:
 	class UEnemyFSM* fsm;
 
 
-	//UFUNCTION(BlueprintCallable, Category = "Damage")
-	//virtual float TakeDamage
-	//(float DamageAmount,
-	//	FDamageEvent const& DamageEvent,
-	//	AController* EventInstigator,
-	//	AActor* DamageCauser) override;
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	virtual float TakeDamage
+	(float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
 
 };

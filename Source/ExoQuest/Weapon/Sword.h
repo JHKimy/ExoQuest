@@ -32,4 +32,19 @@ public:
 	UFUNCTION()
 	void OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	// 공격 함수
+	UFUNCTION()
+	void Slash();
+
+	// 공격 리셋
+	UFUNCTION()
+	void ResetSlash();
+
+private:
+	UPROPERTY(VisibleAnywhere, Category = "Attack")
+	bool bIsAttacking = false;
+
+	FTimerHandle SalshTimer;
+
+	float coolTime;
 };

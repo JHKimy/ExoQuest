@@ -256,6 +256,17 @@ void ACharacterBase::CheckEquipWeapon()
 			break;
 
 		case EWeaponType::Sword:
+			if (playerSword) continue;
+			// 다른 무기가 있는 경우 등에 부착
+			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
+				EquippedWeapons.Contains(EWeaponType::Shotgun) ||
+				EquippedWeapons.Contains(EWeaponType::RocketLauncher))
+				? FName(TEXT("SwordBack"))
+				: FName(TEXT("Sword"));
+
+			playerSword = GetWorld()->SpawnActor<ASword>();
+			WeaponActor = playerSword;
+			EQCharacterState = PrimaryWeapon == EWeaponType::Sword ? ECharacterState::SwordMode : EQCharacterState;
 
 			break;
 
@@ -267,6 +278,9 @@ void ACharacterBase::CheckEquipWeapon()
 		if (WeaponActor)
 		{
 			WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+			// 데미지 시스템때문에 주인 정해줘야함
+			WeaponActor->SetOwner(this);  // 'this'는 무기의 소유자가 될 액터
+			
 		}
 	}
 
@@ -561,6 +575,8 @@ void ACharacterBase::WeaponAttack()
 		break;
 
 	case EWeaponType::Sword:
+		GetMesh()->PlayAnimation(LoadObject<UAnimSequence>(nullptr, TEXT("/Script/Engine.AnimSequence'/Game/Asset/Character/Character3/Animation/Character3_Sword_Slash.Character3_Sword_Slash'")), false);
+		playerSword->Slash();
 		break;
 
 	default:

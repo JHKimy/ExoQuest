@@ -194,6 +194,7 @@ void UEnemyFSM::OnDamageProcess()
 			break;
 
 		case EWeaponType::Sword:
+			// µû·Î EenmyBase¿¡ ¸¸µê
 
 			break;
 		}

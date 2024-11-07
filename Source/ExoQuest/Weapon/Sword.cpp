@@ -29,6 +29,8 @@ ASword::ASword()
 
 	// 데미지
 	damage = 30.f;
+	// 쿨타임
+	coolTime = 0.2f;
 }
 
 void ASword::BeginPlay()
@@ -44,6 +46,8 @@ void ASword::Tick(float DeltaTime)
 
 void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!bIsAttacking) return; // 공격 중이 아닐 경우 데미지를 입히지 않음
+
 	APawn* OwnerPawn = Cast<APawn>(GetOwner());  // 무기 소유자 확인
 
 	// 적 캐릭터에 대한 타격 감지
@@ -58,5 +62,21 @@ void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 		}
 	}
 
+}
+
+void ASword::Slash()
+{
+	// 공격 상태를 활성화
+	bIsAttacking = true;
+
+	// 일정 시간 후 공격 상태 해제 (타이머 사용)
+	GetWorld()->GetTimerManager().SetTimer(
+		SalshTimer, this, &ASword::ResetSlash, coolTime, false); // 0.5초 후 해제
+	
+}
+
+void ASword::ResetSlash()
+{
+	bIsAttacking = false;
 }
 

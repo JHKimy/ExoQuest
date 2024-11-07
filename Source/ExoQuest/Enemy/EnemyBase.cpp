@@ -52,46 +52,45 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-//float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-//{
-//	return 0.0f;
-//}
 
-//float AEnemyBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-//{
-//
-//	auto fsm2 = Cast<AEnemyBase>(GetComponentByClass(AEnemyBase::StaticClass()));
-//
-//
-//	health -= DamageAmount;
-//
-//	// 현재 체력 출력
-//	FString HealthString = FString::Printf(TEXT("Current Health: %f"), health);
-//	UKismetSystemLibrary::PrintString(GetWorld(), HealthString, true, false, FLinearColor::Blue, 2.f);
-//
-//	//fsm2->mState = EEnemyState::Damage;
-//
-//
-//
-//	// 체력이 0 이하가 되면 사망 처리
-//	if (health <= 0.0f)
-//	{
-//		// FSM이 nullptr인지 확인
-//		if (fsm2)
-//		{
-//			fsm2->mState = EEnemyState::Die;  // FSM 상태 전환
-//			fsm2->me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//
-//			UKismetSystemLibrary::PrintString
-//			(GetWorld(), TEXT("oops!!"), true, false, FLinearColor::Green, 2.f);
-//		}
-//		else
-//		{
-//			// FSM이 nullptr인 경우 에러 처리
-//			UKismetSystemLibrary::PrintString
-//			(GetWorld(), TEXT("NULL!!"), true, false, FLinearColor::Red, 2.f);
-//		}
-//	}
-//
-//	return DamageAmount;
-//}
+
+// ## 어플라이 테이크 데미지 사용해 보고 싶어서 스워드 시스템만 이걸로 작성 ##
+// 칼로 할때 데미지
+float AEnemyBase::TakeDamage(
+	float DamageAmount, FDamageEvent const& DamageEvent, 
+	AController* EventInstigator, AActor* DamageCauser)
+{
+	// FSM 가져오기
+	auto fsmForDamage = Cast<UEnemyFSM>(GetComponentByClass(UEnemyFSM::StaticClass()));
+
+	// 체력 
+	health -= DamageAmount;
+
+	// 현재 체력 출력
+	FString HealthString = FString::Printf(TEXT("Current Health: %f"), health);
+	UKismetSystemLibrary::PrintString(GetWorld(), HealthString, true, false, FLinearColor::Blue, 2.f);
+
+	// 체력이 0 이하가 되면 사망 처리
+	if (health <= 0.0f)
+	{
+		// FSM이 nullptr인지 확인
+		if (fsmForDamage)
+		{
+			fsmForDamage->EState = EEnemyState::Die;  // FSM 상태 전환
+			// 처치시 충돌체 지우기
+			fsmForDamage->enemy->GetCapsuleComponent()->
+				SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			UKismetSystemLibrary::PrintString
+			(GetWorld(), TEXT("oops!!"), true, false, FLinearColor::Green, 2.f);
+		}
+		else
+		{
+			// FSM이 nullptr인 경우 에러 처리
+			UKismetSystemLibrary::PrintString
+			(GetWorld(), TEXT("NULL!!"), true, false, FLinearColor::Red, 2.f);
+		}
+	}
+
+	return DamageAmount;
+}

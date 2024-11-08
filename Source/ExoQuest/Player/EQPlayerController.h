@@ -69,4 +69,7 @@ protected:
 	// 조준 줌인
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
 	TObjectPtr<UInputAction> IA_Zoom;
+	// 대검 공격
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
+	TObjectPtr<UInputAction> IA_SwordAttack;
 };

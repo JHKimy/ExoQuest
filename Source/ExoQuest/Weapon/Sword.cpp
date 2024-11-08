@@ -4,6 +4,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "GameFramework/Controller.h"
 #include "Engine/DamageEvents.h"
+#include "DrawDebugHelpers.h"
 
 
 ASword::ASword()
@@ -28,9 +29,9 @@ ASword::ASword()
 	attackCollision->OnComponentBeginOverlap.AddDynamic(this, &ASword::OnWeaponOverlapBegin);
 
 	// 데미지
-	damage = 30.f;
+	damage = 10.f;
 	// 쿨타임
-	coolTime = 0.2f;
+	coolTime = 0.45f;
 }
 
 void ASword::BeginPlay()
@@ -41,7 +42,17 @@ void ASword::BeginPlay()
 void ASword::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	// 공격 중일 때 경로를 따라 박스를 그려줌
+	if (bIsAttacking && attackCollision)
+	{
+		FVector BoxLocation = attackCollision->GetComponentLocation();
+		FVector BoxExtent = attackCollision->GetScaledBoxExtent();
+		FRotator BoxRotation = attackCollision->GetComponentRotation();
 
+		// DrawDebugBox 함수로 디버그 시각화 (3초 동안 유지)
+		DrawDebugBox(GetWorld(), BoxLocation, BoxExtent, BoxRotation.Quaternion(), FColor::Red, false, 0.5f, 0, 1.0f);
+	}
 }
 
 void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -68,6 +79,10 @@ void ASword::Slash()
 {
 	// 공격 상태를 활성화
 	bIsAttacking = true;
+
+
+
+	//ResetSlash();
 
 	// 일정 시간 후 공격 상태 해제 (타이머 사용)
 	GetWorld()->GetTimerManager().SetTimer(

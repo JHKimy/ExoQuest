@@ -27,6 +27,16 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		
 		// 속력 구하기
 		velocity = AnimCharacter->GetVelocity().Size();
+
+
+
+		// 정지상태인지 파악
+		if (velocity > 0) {
+			bIsMoving = true;
+		}
+		else if (velocity == 0) {
+			bIsMoving = false;
+		}
 	}
 
 

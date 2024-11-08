@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Velocity)
 	float velocity;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Move)
+	bool bIsMoving;
+
 	// 캐릭터 상태
 	UPROPERTY(BlueprintReadOnly, Category = "Character State")
 	ECharacterState CharacterState;

@@ -26,6 +26,10 @@
 
 //#include "GameFramework/PlayerController.h"	// 컨트롤러
 
+#include "Animation/AnimMontage.h"	// 몽타주
+#include "Animation/AnimInstance.h"	// 애니메이션인스턴스
+
+
 
 
 ACharacterBase::ACharacterBase()
@@ -71,7 +75,6 @@ void ACharacterBase::BeginPlay()
 
 
 	USkeletalMeshComponent* localMesh = GetMesh();
-	UClass* AnimBP;
 	// StaticLoadClass를 사용하여 애니메이션 블루프린트 클래스 로드
 	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
 		TEXT("/Game/BluePrint/Character/ABP_EQAnimation.ABP_EQAnimation_C"));
@@ -86,6 +89,13 @@ void ACharacterBase::BeginPlay()
 
 
 
+
+
+
+
+
+	///////////////////////////////////////////////////
+	currentCombo = 0;
 }
 
 void ACharacterBase::Tick(float DeltaTime)
@@ -168,6 +178,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
+
 
 void ACharacterBase::CheckEquipWeapon()
 {
@@ -295,7 +306,8 @@ void ACharacterBase::ChangeState()
 	{
 		UEQAnimInstance* EQAnimInstance = Cast<UEQAnimInstance>(AnimInstance);
 		if (EQAnimInstance)
-		{
+		{	
+			// 애니메이션 상태 변수
 			EQAnimInstance->SetCharacterState(EQCharacterState);
 		}
 	}
@@ -554,7 +566,8 @@ void ACharacterBase::ResetDash()
 void ACharacterBase::WeaponAttack()
 {
 	// 대쉬나 달리기 중일 때는 발사하지 않음
-	if (bIsDashing || bIsRunning) return;
+	// 콤보 공격을 위한 공격가능 변수
+	if (bIsDashing || bIsRunning ) return;
 
 	switch (PrimaryWeapon)
 	{
@@ -574,15 +587,84 @@ void ACharacterBase::WeaponAttack()
 		playerRocketLauncher->Fire();
 		break;
 
-	case EWeaponType::Sword:
-		GetMesh()->PlayAnimation(LoadObject<UAnimSequence>(nullptr, TEXT("/Script/Engine.AnimSequence'/Game/Asset/Character/Character3/Animation/Character3_Sword_Slash.Character3_Sword_Slash'")), false);
-		playerSword->Slash();
+	case EWeaponType::Sword: 
+		{
+		//playerSword->Slash();
+		//
+		//// 섹션
+		//const char* comboList[] = { "RIghtSlash","LeftSlash"};
+
+		//// UAnimInstance를 올바르게 가져옴
+		//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		//if (AnimInstance && swordComboMontage)
+		//{
+
+
+		//	if (currentCombo == 0)
+		//	{
+		//		AnimInstance->Montage_Play(swordComboMontage);
+		//		AnimInstance->Montage_JumpToSection(FName("RightSlash"));
+		//		currentCombo = 1;
+		//		// 타이머 시작 - 0.5초 내에 두 번째 입력이 없으면 콤보 초기화
+		//		GetWorld()->GetTimerManager().SetTimer(ComboResetTimerHandle, this, &ACharacterBase::ResetCombo, 0.1f, false);
+		//	}
+
+
+		//	// 두 번째 섹션으로 이동
+		//	else if (currentCombo == 1)
+		//	{
+		//		//bCanAttack = false; // 다음 입력 방지
+		//		
+		//		currentCombo = 0;
+		//		AnimInstance->Montage_JumpToSection(FName("LeftSlash"));
+		//		GetWorld()->GetTimerManager().ClearTimer(ComboResetTimerHandle);
+		//		// 타이머 초기화 (두 번째 공격이 성공적으로 연결되었기 때문에 초기화)
+		//	}
+			
+			
+		// }
 		break;
+		}
 
 	default:
 		break;
 	}
 }
+
+void ACharacterBase::SwordAttack()
+{
+	if (bIsDashing || bIsRunning) return;
+
+	playerSword->Slash();
+
+	// 섹션
+	//const char* comboList[] = { "RIghtSlash","LeftSlash" };
+
+	// UAnimInstance를 올바르게 가져옴
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && swordComboMontage)
+	{
+		AnimInstance->Montage_Play(swordComboMontage);
+		if (currentCombo == 0)
+		{
+			AnimInstance->Montage_JumpToSection(FName("RightSlash"));
+			currentCombo = 1;
+			// 타이머 시작 - 일정 시간 내에 두 번째 입력이 없으면 콤보 초기화
+			GetWorld()->GetTimerManager().SetTimer(ComboResetTimerHandle, this, &ACharacterBase::ResetCombo, 0.5f, false);
+		}
+		else if (currentCombo == 1)
+		{
+			AnimInstance->Montage_JumpToSection(FName("LeftSlash"));
+			currentCombo = 0;
+			// 타이머 초기화 (두 번째 공격이 성공적으로 연결되었기 때문에 초기화)
+			GetWorld()->GetTimerManager().ClearTimer(ComboResetTimerHandle);
+		}
+
+	}
+}
+
 
 void ACharacterBase::ZoomIn()
 {

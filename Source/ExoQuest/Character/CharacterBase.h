@@ -96,6 +96,35 @@ public:
 
 public:
 
+
+	// 애니메이션
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Animation)
+	UClass* AnimBP;
+
+
+
+
+	// 대검 콤보 공격 몽타주
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = Combo)
+	class UAnimMontage* swordComboMontage;
+
+
+	UFUNCTION()
+	void SwordAttack();
+
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = Combo)
+	int currentCombo;
+
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = Combo)
+	FTimerHandle ComboResetTimerHandle;
+
+	UFUNCTION()
+	void ResetCombo() { currentCombo = 0; }
+	
+	
+
 	// 캐릭터 상태
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = CharacterState)
 	ECharacterState EQCharacterState;

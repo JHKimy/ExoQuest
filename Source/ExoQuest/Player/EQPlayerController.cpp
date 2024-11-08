@@ -94,9 +94,16 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 			EnhancedInputComponent->BindAction(IA_Dash, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::DashStart);
 		}
 		if (IA_Attack)
-		{
+		{				
 			EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::WeaponAttack);
 		}
+
+		if (IA_SwordAttack)
+		{
+			EnhancedInputComponent->BindAction(IA_Attack, ETriggerEvent::Started, myCharacter, &ACharacterBase::SwordAttack);
+
+		}
+
 		if (IA_Zoom)
 		{
 			EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Started, myCharacter, &ACharacterBase::ZoomIn);

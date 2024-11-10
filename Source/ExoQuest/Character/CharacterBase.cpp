@@ -634,7 +634,7 @@ void ACharacterBase::WeaponAttack()
 
 void ACharacterBase::SwordAttack()
 {
-	if (bIsDashing || bIsRunning) return;
+	if (bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;
 
 	playerSword->Slash();
 

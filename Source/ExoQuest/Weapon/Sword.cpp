@@ -77,17 +77,26 @@ void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 
 void ASword::Slash()
 {
-	// 공격 상태를 활성화
+
+	if (bIsAttacking)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Slash()가 이미 진행 중입니다."));
+		return;
+	}
+
 	bIsAttacking = true;
+	UE_LOG(LogTemp, Log, TEXT("Slash()가 시작되었습니다."));
 
-
-
-	//ResetSlash();
-
-	// 일정 시간 후 공격 상태 해제 (타이머 사용)
-	GetWorld()->GetTimerManager().SetTimer(
-		SalshTimer, this, &ASword::ResetSlash, coolTime, false); // 0.5초 후 해제
-	
+	if (GetWorld())
+	{
+		UE_LOG(LogTemp, Log, TEXT("GetWorld()가 성공적으로 호출되었습니다."));
+		GetWorld()->GetTimerManager().SetTimer(
+			SalshTimer, this, &ASword::ResetSlash, coolTime, false);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("GetWorld()가 null입니다."));
+	}
 }
 
 void ASword::ResetSlash()

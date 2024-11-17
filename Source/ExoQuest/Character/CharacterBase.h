@@ -64,6 +64,13 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* tpsCamComp;
 
+	// MiniMap
+	UPROPERTY(VisibleAnywhere, Category = MiniMap)
+	class USpringArmComponent* miniMapSpringArmComp;
+	
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = MiniMap)
+	class USceneCaptureComponent2D* miniMapCam;
+
 
 	// 일반 조준 크로스 헤어 UI 위젯
 	UPROPERTY(EditDefaultsOnly, Category = CrossHair)

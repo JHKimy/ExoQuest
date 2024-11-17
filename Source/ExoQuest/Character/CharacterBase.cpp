@@ -1,6 +1,9 @@
 #include "Character/CharacterBase.h"
 #include <GameFramework/SpringArmComponent.h>	//스프링 팔
 #include <Camera/CameraComponent.h>				// 카메라
+
+#include "Components/SceneCaptureComponent2D.h"
+
 #include "GameFramework/CharacterMovementComponent.h" // 캐릭터 움직임
 
 #include "NavigationSystem.h"		// 마우스 움직임 네비
@@ -58,6 +61,21 @@ ACharacterBase::ACharacterBase()
 	tpsCamComp = CreateDefaultSubobject<UCameraComponent>(TEXT("TpsCamComp"));
 	tpsCamComp->SetupAttachment(springArmComp);
 	tpsCamComp->SetRelativeRotation(FRotator(-40, 0, 0));
+
+	// 미니맵
+	miniMapSpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringArm"));
+	miniMapSpringArmComp->SetupAttachment(RootComponent);
+	miniMapSpringArmComp->SetRelativeLocationAndRotation(FVector(0, 0, 60.f), FRotator(-45.f, 0.f, 0.f));
+	miniMapSpringArmComp->TargetArmLength = 400;
+	miniMapSpringArmComp->SocketOffset.Z = 400;
+
+	miniMapCam = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCam"));
+	miniMapCam->SetupAttachment(miniMapSpringArmComp); // RootComponent와의 연결
+	miniMapCam->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
+	miniMapCam->ProjectionType = ECameraProjectionMode::Orthographic;
+	miniMapCam->OrthoWidth = 1500.f;
+
+	//miniMapCam->SetRelativeLocationAndRotation(FVector(0, 0, 1000.f), FRotator(-90.f, 0.f, 0));
 
 	bmouseMoveMode = true;
 }

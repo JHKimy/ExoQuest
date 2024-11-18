@@ -5,6 +5,7 @@
 #include <InputAction.h> // 인풋 액션
 
 #include "CharacterBase.generated.h"
+//#include <string>
 
 //class ARifle;
 //class Shotgun;
@@ -71,6 +72,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = MiniMap)
 	class USceneCaptureComponent2D* miniMapCam;
 
+	// 미니맵 화살표
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = MiniMap)
+	class UPaperSpriteComponent* characterPositionArrow;
 
 	// 일반 조준 크로스 헤어 UI 위젯
 	UPROPERTY(EditDefaultsOnly, Category = CrossHair)
@@ -79,6 +83,18 @@ public:
 	// 크로스헤어 인스턴스
 	class UUserWidget* crosshairUI;
 
+	//=======================================
+	// STATS
+	//=======================================
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	int32 maxHealth;
+
+	UPROPERTY(EditDefaultsOnly,BluePrintReadWrite, Category = Stats)
+	int32 health;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	FString healthString;
 
 public:
 	// 획득 무기들

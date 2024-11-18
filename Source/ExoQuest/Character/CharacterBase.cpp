@@ -32,8 +32,7 @@
 #include "Animation/AnimMontage.h"	// 몽타주
 #include "Animation/AnimInstance.h"	// 애니메이션인스턴스
 
-
-
+#include "PaperSpriteComponent.h"
 
 ACharacterBase::ACharacterBase()
 {
@@ -69,15 +68,23 @@ ACharacterBase::ACharacterBase()
 	miniMapSpringArmComp->TargetArmLength = 400;
 	miniMapSpringArmComp->SocketOffset.Z = 400;
 
+	// 화살표가 캐릭터 따라 회전
+	miniMapSpringArmComp->bInheritPitch = false;
+	miniMapSpringArmComp->bInheritYaw = false;
+	miniMapSpringArmComp->bInheritRoll = false;
+
 	miniMapCam = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCam"));
 	miniMapCam->SetupAttachment(miniMapSpringArmComp); // RootComponent와의 연결
 	miniMapCam->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
 	miniMapCam->ProjectionType = ECameraProjectionMode::Orthographic;
-	miniMapCam->OrthoWidth = 1500.f;
+	miniMapCam->OrthoWidth = 1024.f;
 
-	//miniMapCam->SetRelativeLocationAndRotation(FVector(0, 0, 1000.f), FRotator(-90.f, 0.f, 0));
+	//characterPositionArrow->OwnerNosee
+
 
 	bmouseMoveMode = true;
+	maxHealth = 100;
+	health = 100;
 }
 
 void ACharacterBase::BeginPlay()

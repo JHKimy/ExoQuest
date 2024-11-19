@@ -19,6 +19,10 @@ void UMainUI::NativeConstruct()
 		// healthRatio에 초기값 할당
 		healthRatio = Character->health / Character->maxHealth;
 		healthString = FString::FromInt(Character->health);
+
+		// healthRatio에 초기값 할당
+		staminaRatio = Character->stamina / Character->maxStamina;
+		staminaString = FString::FromInt(Character->stamina);
 	}
 }
 
@@ -32,5 +36,8 @@ void UMainUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 	{
 		healthRatio = Character->health / Character->maxHealth;
 		healthString = FString::FromInt(Character->health);
+
+		staminaRatio = Character->stamina / Character->maxStamina;
+		staminaString = FString::FromInt(Character->stamina);
 	}
 }

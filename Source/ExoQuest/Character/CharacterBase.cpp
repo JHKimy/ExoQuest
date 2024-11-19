@@ -83,8 +83,12 @@ ACharacterBase::ACharacterBase()
 
 
 	bmouseMoveMode = true;
-	maxHealth = 100;
-	health = 100;
+	maxHealth = 100.f;
+	health = 50.f;
+
+	maxStamina = 100.f;
+	stamina = 100.f;
+	staminaDrainRate = 15.0f; // 초당 감소하는 값
 }
 
 void ACharacterBase::BeginPlay()
@@ -192,7 +196,8 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 
-
+	// 스태미나 관리 함수 호출
+	HandleStamina(DeltaTime);
 
 
 
@@ -655,6 +660,28 @@ void ACharacterBase::WeaponAttack()
 	default:
 		break;
 	}
+}
+
+void ACharacterBase::HandleStamina(float DeltaTime)
+{
+	if (bIsRunning && stamina > 0.0f)
+	{
+		stamina -= staminaDrainRate * DeltaTime;
+		if (stamina <= 0.0f)
+		{
+			stamina = 0.0f;
+			RunStop(); // 스태미나가 다 닳으면 자동으로 달리기 멈춤
+		}
+	}
+	else if (!bIsRunning && stamina < maxStamina) // 달리기 멈췄을 때 서서히 회복
+	{
+		stamina += staminaDrainRate * 0.5f * DeltaTime; 
+		if (stamina > maxStamina)
+		{
+			stamina = maxStamina;
+		}
+	}
+
 }
 
 void ACharacterBase::SwordAttack()

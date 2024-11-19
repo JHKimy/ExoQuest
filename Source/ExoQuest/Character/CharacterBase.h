@@ -88,13 +88,30 @@ public:
 	//=======================================
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
-	int32 maxHealth;
+	float maxHealth;
 
 	UPROPERTY(EditDefaultsOnly,BluePrintReadWrite, Category = Stats)
-	int32 health;
+	float health;
 
 	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
 	FString healthString;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	float maxStamina;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	float stamina;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	FString staminaString;
+
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category = Stats)
+	float staminaDrainRate; // 초당 감소량
+
+
+	// 스태미나 관리 함수 호출
+	UFUNCTION()
+	void HandleStamina(float DeltaTime);
 
 public:
 	// 획득 무기들

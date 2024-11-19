@@ -21,5 +21,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = health)
 	float healthRatio;
 
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = stamina)
+	FString staminaString;
+	
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = stamina)
+	float staminaRatio;
 
 };

@@ -59,9 +59,12 @@ void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 {
 	if (!bIsAttacking) return; // 공격 중이 아닐 경우 데미지를 입히지 않음
 
-	APawn* OwnerPawn = Cast<APawn>(GetOwner());  // 무기 소유자 확인
+	APawn* OwnerPawn = Cast<APawn>(GetOwner());
+	if (!OwnerPawn)
+	{
+		return;
+	}
 
-	// 적 캐릭터에 대한 타격 감지
 	if (OtherActor && OtherActor != this)
 	{
 		AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
@@ -71,8 +74,11 @@ void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 			// UGameplayStatics::ApplyDamage 사용
 			UGameplayStatics::ApplyDamage(Enemy, damage, OwnerPawn->GetController(), this, UDamageType::StaticClass());
 		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ASword::OnWeaponOverlapBegin - 유효하지 않은 적과 충돌"));
+		}
 	}
-
 }
 
 void ASword::Slash()

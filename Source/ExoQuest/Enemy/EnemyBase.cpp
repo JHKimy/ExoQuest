@@ -5,6 +5,7 @@
 #include "GameFramework/CharacterMovementComponent.h" // 움직임
 #include "Kismet/KismetSystemLibrary.h"		// 화면 텍스츠 출력 
 
+#include "PaperSpriteComponent.h"
 
 AEnemyBase::AEnemyBase()
 {
@@ -32,6 +33,33 @@ AEnemyBase::AEnemyBase()
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	USkeletalMeshComponent* localMesh = GetMesh();
+	// StaticLoadClass를 사용하여 애니메이션 블루프린트 클래스 로드
+	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
+		TEXT("/Game/BluePrint/Enemy/Enemy1/ABP_Enemy1.ABP_Enemy1_C"));
+	
+	if (AnimBP) {
+		UE_LOG(LogTemp, Warning, TEXT("load! BP!!!!!!"));
+	}
+
+	localMesh->SetAnimInstanceClass(AnimBP);
+
+
+
+
+
+
+
+
+	//enemyPosition->SetHiddenInGame(true);
+
+
+
+
+
+
+
 
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 
@@ -67,8 +95,8 @@ float AEnemyBase::TakeDamage(
 	health -= DamageAmount;
 
 	// 현재 체력 출력
-	FString HealthString = FString::Printf(TEXT("Current Health: %f"), health);
-	UKismetSystemLibrary::PrintString(GetWorld(), HealthString, true, false, FLinearColor::Blue, 2.f);
+	//FString HealthString = FString::Printf(TEXT("Current Health: %f"), health);
+	//UKismetSystemLibrary::PrintString(GetWorld(), HealthString, true, false, FLinearColor::Blue, 2.f);
 
 	// 체력이 0 이하가 되면 사망 처리
 	if (health <= 0.0f)
@@ -81,14 +109,14 @@ float AEnemyBase::TakeDamage(
 			fsmForDamage->enemy->GetCapsuleComponent()->
 				SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-			UKismetSystemLibrary::PrintString
-			(GetWorld(), TEXT("oops!!"), true, false, FLinearColor::Green, 2.f);
+			//UKismetSystemLibrary::PrintString
+			//(GetWorld(), TEXT("oops!!"), true, false, FLinearColor::Green, 2.f);
 		}
 		else
 		{
 			// FSM이 nullptr인 경우 에러 처리
-			UKismetSystemLibrary::PrintString
-			(GetWorld(), TEXT("NULL!!"), true, false, FLinearColor::Red, 2.f);
+			//UKismetSystemLibrary::PrintString
+			//(GetWorld(), TEXT("NULL!!"), true, false, FLinearColor::Red, 2.f);
 		}
 	}
 

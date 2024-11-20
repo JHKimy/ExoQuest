@@ -102,7 +102,6 @@ void ACharacterBase::BeginPlay()
 
 
 
-
 	USkeletalMeshComponent* localMesh = GetMesh();
 	// StaticLoadClass를 사용하여 애니메이션 블루프린트 클래스 로드
 	AnimBP = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
@@ -170,28 +169,29 @@ void ACharacterBase::Tick(float DeltaTime)
 		}
 	}
 
-	UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 2.0f);
+	// 화면 출력
+	//UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 2.0f);
 
-	FString PrimaryWeaponName;
-	switch (PrimaryWeapon)
-	{
-	case EWeaponType::Rifle:
-		PrimaryWeaponName = "Rifle";
-		break;
-	case EWeaponType::Shotgun:
-		PrimaryWeaponName = "Shotgun";
-		break;
-	case EWeaponType::RocketLauncher:
-		PrimaryWeaponName = "RocketLauncher";
-		break;
-	case EWeaponType::Sword:
-		PrimaryWeaponName = "Sword";
-		break;
-	default:
-		PrimaryWeaponName = "Unknown";
-		break;
-	}
-	UKismetSystemLibrary::PrintString(this, PrimaryWeaponName, true, true, FColor::Red, 2.0f);
+	//FString PrimaryWeaponName;
+	//switch (PrimaryWeapon)
+	//{
+	//case EWeaponType::Rifle:
+	//	PrimaryWeaponName = "Rifle";
+	//	break;
+	//case EWeaponType::Shotgun:
+	//	PrimaryWeaponName = "Shotgun";
+	//	break;
+	//case EWeaponType::RocketLauncher:
+	//	PrimaryWeaponName = "RocketLauncher";
+	//	break;
+	//case EWeaponType::Sword:
+	//	PrimaryWeaponName = "Sword";
+	//	break;
+	//default:
+	//	PrimaryWeaponName = "Unknown";
+	//	break;
+	//}
+	//UKismetSystemLibrary::PrintString(this, PrimaryWeaponName, true, true, FColor::Red, 2.0f);
 
 
 

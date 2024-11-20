@@ -9,6 +9,7 @@
 #include "Weapon/RocketLauncher.h"
 #include "Weapon/RocketProjectile.h"
 #include "Weapon/Sword.h"
+#include "Enemy1AnimInstance.h"
 
 
 UEnemyFSM::UEnemyFSM()
@@ -28,7 +29,8 @@ void UEnemyFSM::BeginPlay()
 
 	enemy = Cast<AEnemyBase>(GetOwner());
 
-	
+
+
 	// 데미지 초기화
 	//switch (target->PrimaryWeapon)
 	//{
@@ -62,6 +64,24 @@ void UEnemyFSM::BeginPlay()
 void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	// Enemy의 애니메이션 인스턴스 가져오기
+	// 테스트 해보니 FSM이 EnemyBase의 생성자에서 호출되기 때문에
+	// FSM 클래스에서 anim을 BeginPlay보다 늦게 호출해줘야 함
+	// EnemyBase() -> EnemyFSM(),비긴플레이등
+	// -> EnemyBase의 비긴플레이에서 ABP 설정
+	// -> 그러니 EnemyFSM에선 비긴 플레이 다음걸로 가져와야함 
+	if (!anim)
+	{
+		if (enemy && enemy->GetMesh())
+		{
+			anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
+			if (anim)
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Successfully initialized anim in Tick"));
+			}
+		}
+	}
 
 	switch (EState)
 	{
@@ -105,6 +125,8 @@ void UEnemyFSM::IdleState()
 		currentTime = 0;
 	}
 
+	// 애니메이션 인스턴스와 동기화
+	anim->animState = EState;
 }
 
 void UEnemyFSM::MoveState()
@@ -122,6 +144,16 @@ void UEnemyFSM::MoveState()
 	if (dir.Size() < attackRange)
 	{
 		EState = EEnemyState::Attack;
+
+		// 애니메이션 인스턴스와 동기화
+		if (anim)
+		{
+			anim->animState = EState;
+		}
+		// 공격 애니메이션 활성화
+		anim->bAttackPlay = true;
+		// 공격 상태 전환 시 대기 시간 바로 끝나게
+		currentTime = attackDelayTime;
 	}
 }
 
@@ -133,17 +165,27 @@ void UEnemyFSM::AttackState()
 	if (currentTime > attackDelayTime)
 	{
 		currentTime = 0;
+
+		// 공격가능 움직임
+		anim->bAttackPlay = true;
+
 	}
 
 	// 적과 플레이어 거리
 	float distance = FVector::Distance(target->GetActorLocation(),
 		enemy->GetActorLocation());
 
-	if (distance > attackRange)
+	if (!anim->bAttackPlay && distance > attackRange)
 	{
 		EState = EEnemyState::Move;
+		// 애니메이션 인스턴스와 동기화
+		anim->animState = EState;
 	}
-
+	//else if (distance < attackRange) 
+	//{
+	// EState = EEnemyState::Attack;
+	//	anim->bAttackPlay = true;
+	//}
 }
 
 void UEnemyFSM::DamageState()
@@ -155,6 +197,13 @@ void UEnemyFSM::DamageState()
 	{
 		EState = EEnemyState::Idle;
 		currentTime = 0;
+
+		// 애니메이션 인스턴스와 동기화
+		if (anim)
+		{
+			anim->animState = EState;
+		}
+
 	}
 
 }
@@ -210,6 +259,11 @@ void UEnemyFSM::OnDamageProcess()
 		EState = EEnemyState::Die;
 		enemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
+
+	// 애니메이션 인스턴스와 동기화
+	anim->animState = EState;
+
+
 }
 
 void UEnemyFSM::UpdateWeaponDamage()

@@ -20,7 +20,13 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 미니맵 표시 아이콘
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = MiniMap)
+	class UPaperSpriteComponent* enemyPosition;
 
+	// 애니메이션
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Animation)
+	UClass* AnimBP;
 
 
 

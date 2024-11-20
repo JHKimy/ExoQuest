@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "EnemyFSM.generated.h"
 
 
@@ -35,7 +36,7 @@ public:
 
 
 	// 상태 변수
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = FSM)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
 	EEnemyState EState = EEnemyState::Idle;
 
 
@@ -116,5 +117,9 @@ public:
 	// 무기 데미지 업데이트 함수
 	void UpdateWeaponDamage();
 
+	UPROPERTY(EditAnywhere, Category = Animation)
+	class UEnemy1AnimInstance* anim;
 
+	UPROPERTY(EditAnywhere, Category = Animation)
+	bool bAttackCircle = false;
 };

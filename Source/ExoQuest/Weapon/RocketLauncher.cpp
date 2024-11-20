@@ -67,7 +67,7 @@ void ARocketLauncher::Fire()
     
     bCanFire = false; // 발사 후 쿨타임 동안 발사 불가
 
-    UKismetSystemLibrary::PrintString(this, TEXT("Firing Rocket!"), true, true, FColor::Red, 2.0f);
+    //UKismetSystemLibrary::PrintString(this, TEXT("Firing Rocket!"), true, true, FColor::Red, 2.0f);
 
     if (RocketProjectileClass)
     {
@@ -79,16 +79,16 @@ void ARocketLauncher::Fire()
 
         if (Rocket)
         {
-            UKismetSystemLibrary::PrintString(this, TEXT("Rocket Spawned Successfully!"), true, true, FColor::Green, 2.0f);
+           // UKismetSystemLibrary::PrintString(this, TEXT("Rocket Spawned Successfully!"), true, true, FColor::Green, 2.0f);
         }
         else
         {
-            UKismetSystemLibrary::PrintString(this, TEXT("Rocket Spawn Failed!"), true, true, FColor::Red, 2.0f);
+            //UKismetSystemLibrary::PrintString(this, TEXT("Rocket Spawn Failed!"), true, true, FColor::Red, 2.0f);
         }
     }
     else
     {
-        UKismetSystemLibrary::PrintString(this, TEXT("Projectile Class Not Set"), true, true, FColor::Red, 2.0f);
+        //UKismetSystemLibrary::PrintString(this, TEXT("Projectile Class Not Set"), true, true, FColor::Red, 2.0f);
     }
 
     GetWorldTimerManager().SetTimer(

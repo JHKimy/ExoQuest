@@ -60,7 +60,7 @@ public:
 	// SpringArm
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* springArmComp;
-
+	
 	// Camera
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class UCameraComponent* tpsCamComp;

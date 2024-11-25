@@ -240,6 +240,8 @@ public:
 	UPROPERTY(EditAnywhere, Category = Damage)
 	class UEnemyFSM* enemyFSM;
 
+	UPROPERTY(EditAnywhere, Category = Damage)
+	class AEnemyBase* enemy;
 
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
 	class ARifle* playerRifle;
@@ -253,4 +255,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Weapon)
 	class ASword* playerSword;
 
+	// 맵 이동 시 인스턴스
+	UFUNCTION()
+	void SaveStateBeforeLevelChange();
+
+	// 인스턴스 다시 입히기
+	UFUNCTION()
+	void RestoreStateAfterLevelChange();
 };

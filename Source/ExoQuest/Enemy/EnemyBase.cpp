@@ -45,13 +45,23 @@ void AEnemyBase::BeginPlay()
 
 	localMesh->SetAnimInstanceClass(AnimBP);
 
+	if (enemyPosition) {
+		enemyPosition->bVisibleInSceneCaptureOnly = true;
+	}
+	//enemyPosition->bRenderCustomDepth = true;
+
+
+	// 메인 카메라에서 PaperSprite 숨기기
+	//enemyPosition->SetVisibility(false);
+
+	// 미니맵 카메라에서 PaperSprite 보이게 하기
+	//enemyPosition->SetVisibility(true);
 
 
 
 
-
-
-
+	// 미니맵 카메라에서 PaperSprite 보이게 하기
+	//enemyPosition->SetVisibility(true);
 	//enemyPosition->SetHiddenInGame(true);
 
 

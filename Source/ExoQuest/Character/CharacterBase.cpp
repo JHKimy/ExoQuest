@@ -24,6 +24,7 @@
 #include <Blueprint/UserWidget.h>	// 위젯
 #include "Enemy/EnemyFSM.h"
 #include <Kismet/GameplayStatics.h>
+#include "Enemy/EnemyBase.h"
 
 #include "Kismet/KismetSystemLibrary.h" // PrintString 함수 사용을 위해 포함
 
@@ -33,6 +34,9 @@
 #include "Animation/AnimInstance.h"	// 애니메이션인스턴스
 
 #include "PaperSpriteComponent.h"
+
+#include "Map/EQGameInstance.h"	// 맵 이동 인스턴스
+
 
 ACharacterBase::ACharacterBase()
 {
@@ -95,10 +99,16 @@ void ACharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
+	RestoreStateAfterLevelChange();  // 레벨 시작 시 상태 복원
+
 	//EQPlayerController = Cast<AEQPlayerController>(GetController());
 
-	EQCharacterState = ECharacterState::NoWeaponMode;
-	ChangeState();
+	// 상태가 복원되지 않았다면 기본 상태로 설정
+	if (EQCharacterState == ECharacterState::NoWeaponMode && EquippedWeapons.Num() == 0)
+	{
+		EQCharacterState = ECharacterState::NoWeaponMode;
+	}	ChangeState();
+
 
 
 
@@ -112,14 +122,37 @@ void ACharacterBase::BeginPlay()
 
 
 
+
 	// EnemyFSM 컴포넌트를 가져와 초기화
 	enemyFSM = Cast<UEnemyFSM>(UGameplayStatics::GetActorOfClass(GetWorld(), UEnemyFSM::StaticClass()));
 
 
 
-
-
-
+	//// AEnemyBase 객체를 가져오기
+	//enemy = Cast<AEnemyBase>(UGameplayStatics::GetActorOfClass(GetWorld(), AEnemyBase::StaticClass()));
+	//if (enemy)
+	//{
+	//	// UEnemyFSM 컴포넌트를 가져오기
+	//	enemyFSM = enemy->FindComponentByClass<UEnemyFSM>();
+	//	if (enemyFSM)
+	//	{
+	//		// enemyFSM 초기화 관련 작업
+	//		UE_LOG(LogTemp, Warning, TEXT("Enemy FSM Found!"));
+	//	}
+	//	// PaperSprite 숨기기
+	//	if (enemy->enemyPosition)
+	//	{
+	//		enemy->enemyPosition->SetVisibility(false);
+	//	}
+	//	else
+	//	{
+	//		UE_LOG(LogTemp, Warning, TEXT("enemyPosition is null!"));
+	//	}
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Enemy not found!"));
+	//}
 
 
 	///////////////////////////////////////////////////
@@ -330,18 +363,6 @@ void ACharacterBase::CheckEquipWeapon()
 
 void ACharacterBase::ChangeState()
 {
-
-	// 애니메이션 블루프린트에 현재 상태 전달
-	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-	{
-		UEQAnimInstance* EQAnimInstance = Cast<UEQAnimInstance>(AnimInstance);
-		if (EQAnimInstance)
-		{	
-			// 애니메이션 상태 변수
-			EQAnimInstance->SetCharacterState(EQCharacterState);
-		}
-	}
-
 	switch (EQCharacterState)
 	{
 	case ECharacterState::NoWeaponMode:
@@ -355,29 +376,8 @@ void ACharacterBase::ChangeState()
 		break;
 
 	case ECharacterState::RifleMode:
-		springArmComp->TargetArmLength = 200;
-		springArmComp->SocketOffset.Z = 200;
-		springArmComp->SocketOffset.Y = 70;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-		bUseControllerRotationYaw = true;
-		break;
-
 	case ECharacterState::ShotgunMode:
-		springArmComp->TargetArmLength = 200;
-		springArmComp->SocketOffset.Z = 200;
-		springArmComp->SocketOffset.Y = 70;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-		bUseControllerRotationYaw = true;
-		break;
-
 	case ECharacterState::RocketLauncherMode:
-		springArmComp->TargetArmLength = 200;
-		springArmComp->SocketOffset.Z = 200;
-		springArmComp->SocketOffset.Y = 70;
-		GetCharacterMovement()->bOrientRotationToMovement = false;
-		bUseControllerRotationYaw = true;
-		break;
-
 	case ECharacterState::SwordMode:
 		springArmComp->TargetArmLength = 200;
 		springArmComp->SocketOffset.Z = 200;
@@ -390,11 +390,25 @@ void ACharacterBase::ChangeState()
 		break;
 	}
 
+	// 애니메이션 블루프린트에 현재 상태 전달
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		UEQAnimInstance* EQAnimInstance = Cast<UEQAnimInstance>(AnimInstance);
+		if (EQAnimInstance)
+		{
+			// 애니메이션 상태 변수
+			EQAnimInstance->SetCharacterState(EQCharacterState);
+		}
+	}
+
+
 	if (GetVelocity().Size() >= 800.f)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 		bUseControllerRotationYaw = false;
 	}
+
+
 
 	//// 만약 달리고 있다면
 	//if (GetVelocity().Size() >= 800.f) {
@@ -738,4 +752,64 @@ void ACharacterBase::ZoomOut()
 	//springArmComp->TargetArmLength = 200;
 	//springArmComp->SocketOffset.Z = 200;
 	springArmComp->SocketOffset.Y = 70;
+}
+
+void ACharacterBase::SaveStateBeforeLevelChange()
+{
+	UEQGameInstance* MyGameInstance = Cast<UEQGameInstance>(GetGameInstance());
+
+	if (MyGameInstance)
+	{
+		MyGameInstance->SavedEquippedWeapons = EquippedWeapons;  // 현재 무기 상태 저장
+	
+		// PrimaryWeapon 복원
+		if (!EquippedWeapons.IsEmpty())
+		{
+			MyGameInstance->SavedPrimaryWeapon = PrimaryWeapon;  // 첫 번째 무기를 주무기로 설정
+		}
+
+		// 캐릭터 상태 복원 및 애니메이션 동기화
+		 MyGameInstance->SavedState = EQCharacterState;
+
+		//// 체력 및 스태미나 저장
+		MyGameInstance->SavedHealth = health;
+		MyGameInstance->SavedStamina = stamina;
+	}
+}
+
+void ACharacterBase::RestoreStateAfterLevelChange()
+{
+	UEQGameInstance* MyGameInstance = Cast<UEQGameInstance>(GetGameInstance());
+
+	if (MyGameInstance)
+	{
+		// 저장된 무기 상태 복원
+		EquippedWeapons = MyGameInstance->SavedEquippedWeapons;
+
+		// PrimaryWeapon 복원
+		if (!EquippedWeapons.IsEmpty())
+		{
+			PrimaryWeapon = MyGameInstance->SavedPrimaryWeapon;  // 첫 번째 무기를 주무기로 설정
+		}
+
+		// 무기 부착 로직 - CheckEquipWeapon 호출로 재활용
+		CheckEquipWeapon();
+
+		// 캐릭터 상태 복원
+		EQCharacterState = MyGameInstance->SavedState;
+		ChangeState();  // 캐릭터 상태에 따라 로직 업데이트
+
+		// 체력, 스태미나 등 추가 상태 복원 (필요 시)
+		health = MyGameInstance->SavedHealth;
+		stamina = MyGameInstance->SavedStamina;
+	}
+
+	if (springArmComp)
+	{
+		// 스프링암 설정 복원
+		springArmComp->bUsePawnControlRotation = true;  // 컨트롤러 회전을 따라감
+		//springArmComp->bInheritPitch = true;           // 상하 회전 허용
+		//springArmComp->bInheritYaw = true;             // 좌우 회전 허용
+	}
+
 }

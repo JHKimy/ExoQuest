@@ -83,8 +83,6 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 		Destroy();
 
 
-
-
 		switch (WeaponType)
 		{
 		case EWeaponTypeForEquip::Rifle:

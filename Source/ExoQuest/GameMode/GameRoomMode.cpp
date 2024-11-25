@@ -10,4 +10,6 @@ AGameRoomMode::AGameRoomMode()
 	// BP가 제일 마지막 쯤에 생성 되기 때문
 	// DefaultPawnClass = ACharacterBase::StaticClass();
 	// PlayerControllerClass = AEQPlayerController::StaticClass();
+
+	bUseSeamlessTravel = true; // Seamless Travel 활성화
 }

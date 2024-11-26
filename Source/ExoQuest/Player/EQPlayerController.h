@@ -72,4 +72,8 @@ protected:
 	// 대검 공격
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
 	TObjectPtr<UInputAction> IA_SwordAttack;
+
+	// 수류탄 투척
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
+	TObjectPtr<UInputAction> IA_ThrowGrenade;
 };

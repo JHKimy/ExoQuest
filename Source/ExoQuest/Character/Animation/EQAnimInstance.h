@@ -1,9 +1,8 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Animation/AnimNotifies/AnimNotify.h"	// 노티파이
 #include "EQAnimInstance.generated.h"
 
 //// 캐릭터 상태
@@ -58,5 +57,9 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Character State")
 	void SetCharacterState(ECharacterState NewState);
 
+
+
+	UFUNCTION()
+	void AnimNotify_EndThrow();
 
 };

@@ -109,6 +109,13 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 			EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Started, myCharacter, &ACharacterBase::ZoomIn);
 			EnhancedInputComponent->BindAction(IA_Zoom, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ZoomOut);
 		}
+
+		if (IA_ThrowGrenade)
+		{
+			EnhancedInputComponent->BindAction(IA_ThrowGrenade, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::ThrowGrenade);
+		}
+
+
 	}
 }
 

@@ -262,4 +262,17 @@ public:
 	// 인스턴스 다시 입히기
 	UFUNCTION()
 	void RestoreStateAfterLevelChange();
+
+
+	// 수류탄 투척
+	UFUNCTION()
+	void ThrowGrenade();
+
+	// 대검 콤보 공격 몽타주
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = Grenade)
+	class UAnimMontage* ThrowGrenadeMontage;
+
+	// 애니메이션 몽타주 노티파이
+	UFUNCTION()
+	void ThrowEnd();
 };

@@ -37,6 +37,9 @@
 
 #include "Map/EQGameInstance.h"	// 맵 이동 인스턴스
 
+#include "Animation/AnimNotifies/AnimNotify.h" // Notify 관련 처리
+
+
 
 ACharacterBase::ACharacterBase()
 {
@@ -178,53 +181,53 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 
-	FString WeaponsList = "Equipped Weapons : ";
+	//FString WeaponsList = "Equipped Weapons : ";
 
-	for (EWeaponType WeaponType : EquippedWeapons)
-	{
-		switch (WeaponType)
-		{
-		case EWeaponType::Rifle:
-			WeaponsList += "Rifle / ";
-			break;
-		case EWeaponType::Shotgun:
-			WeaponsList += "Shotgun / ";
-			break;
-		case EWeaponType::RocketLauncher:
-			WeaponsList += "RocketLauncher / ";
-			break;
-		case EWeaponType::Sword:
-			WeaponsList += "Sword / ";
-			break;
-		default:
-			WeaponsList += "Unknown / ";
-			break;
-		}
-	}
+	//for (EWeaponType WeaponType : EquippedWeapons)
+	//{
+	//	switch (WeaponType)
+	//	{
+	//	case EWeaponType::Rifle:
+	//		WeaponsList += "Rifle / ";
+	//		break;
+	//	case EWeaponType::Shotgun:
+	//		WeaponsList += "Shotgun / ";
+	//		break;
+	//	case EWeaponType::RocketLauncher:
+	//		WeaponsList += "RocketLauncher / ";
+	//		break;
+	//	case EWeaponType::Sword:
+	//		WeaponsList += "Sword / ";
+	//		break;
+	//	default:
+	//		WeaponsList += "Unknown / ";
+	//		break;
+	//	}
+	//}
 
-	// 화면 출력
+	//// 화면 출력
 	//UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 2.0f);
 
-	//FString PrimaryWeaponName;
-	//switch (PrimaryWeapon)
-	//{
-	//case EWeaponType::Rifle:
-	//	PrimaryWeaponName = "Rifle";
-	//	break;
-	//case EWeaponType::Shotgun:
-	//	PrimaryWeaponName = "Shotgun";
-	//	break;
-	//case EWeaponType::RocketLauncher:
-	//	PrimaryWeaponName = "RocketLauncher";
-	//	break;
-	//case EWeaponType::Sword:
-	//	PrimaryWeaponName = "Sword";
-	//	break;
-	//default:
-	//	PrimaryWeaponName = "Unknown";
-	//	break;
-	//}
-	//UKismetSystemLibrary::PrintString(this, PrimaryWeaponName, true, true, FColor::Red, 2.0f);
+	FString PrimaryWeaponName;
+	switch (PrimaryWeapon)
+	{
+	case EWeaponType::Rifle:
+		PrimaryWeaponName = "Rifle";
+		break;
+	case EWeaponType::Shotgun:
+		PrimaryWeaponName = "Shotgun";
+		break;
+	case EWeaponType::RocketLauncher:
+		PrimaryWeaponName = "RocketLauncher";
+		break;
+	case EWeaponType::Sword:
+		PrimaryWeaponName = "Sword";
+		break;
+	default:
+		PrimaryWeaponName = "Unknown";
+		break;
+	}
+	// UKismetSystemLibrary::PrintString(this, PrimaryWeaponName, true, true, FColor::Red, 2.0f);
 
 
 
@@ -268,6 +271,15 @@ void ACharacterBase::CheckEquipWeapon()
 		}
 	}
 
+	// 기존 무기 초기화
+	//if (playerRifle) playerRifle->Destroy();
+	//if (playerShotgun) playerShotgun->Destroy();
+	//if (playerRocketLauncher) playerRocketLauncher->Destroy();
+	//if (playerSword) playerSword->Destroy();
+
+
+
+
 
 
 
@@ -281,67 +293,38 @@ void ACharacterBase::CheckEquipWeapon()
 		switch (WeaponType)
 		{
 		case EWeaponType::Rifle:
-			if (playerRifle) continue; // 이미 획득한 무기는 중복 생성 방지
-			// 다른 무기가 있는 경우 등에 부착
-			SocketName = (EquippedWeapons.Contains(EWeaponType::Shotgun) ||
-				EquippedWeapons.Contains(EWeaponType::RocketLauncher) ||
-				EquippedWeapons.Contains(EWeaponType::Sword))
-				? FName(TEXT("RifleBack"))
-				: FName(TEXT("Rifle"));
-
+			if (playerRifle) continue;
 			playerRifle = GetWorld()->SpawnActor<ARifle>();
 			WeaponActor = playerRifle;
-			EQCharacterState = PrimaryWeapon == EWeaponType::Rifle ? ECharacterState::RifleMode : EQCharacterState;
-			
+			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Rifle")) : FName(TEXT("RifleBack"));
+			EQCharacterState = (PrimaryWeapon == EWeaponType::Rifle) ? ECharacterState::RifleMode : EQCharacterState;
 			break;
 
 
 
 		case EWeaponType::Shotgun:
 			if (playerShotgun) continue;
-			// 다른 무기가 있는 경우 등에 부착
-			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
-				EquippedWeapons.Contains(EWeaponType::RocketLauncher) ||
-				EquippedWeapons.Contains(EWeaponType::Sword))
-				? FName(TEXT("ShotgunBack"))
-				: FName(TEXT("Shotgun"));
-
 			playerShotgun = GetWorld()->SpawnActor<AShotgun>();
 			WeaponActor = playerShotgun;
-			EQCharacterState = PrimaryWeapon == EWeaponType::Shotgun ? ECharacterState::ShotgunMode : EQCharacterState;
-			
+			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Shotgun")) : FName(TEXT("ShotgunBack"));
+			EQCharacterState = (PrimaryWeapon == EWeaponType::Shotgun) ? ECharacterState::ShotgunMode : EQCharacterState;
 			break;
-
 
 
 		case EWeaponType::RocketLauncher:
 			if (playerRocketLauncher) continue;
-			// 다른 무기가 있는 경우 등에 부착
-			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
-				EquippedWeapons.Contains(EWeaponType::Shotgun) ||
-				EquippedWeapons.Contains(EWeaponType::Sword))
-				? FName(TEXT("RocketLauncherBack"))
-				: FName(TEXT("RocketLauncher"));
-
 			playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
 			WeaponActor = playerRocketLauncher;
-			EQCharacterState = PrimaryWeapon == EWeaponType::RocketLauncher ? ECharacterState::RocketLauncherMode : EQCharacterState;
-
+			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("RocketLauncher")) : FName(TEXT("RocketLauncherBack"));
+			EQCharacterState = (PrimaryWeapon == EWeaponType::RocketLauncher) ? ECharacterState::RocketLauncherMode : EQCharacterState;
 			break;
 
 		case EWeaponType::Sword:
 			if (playerSword) continue;
-			// 다른 무기가 있는 경우 등에 부착
-			SocketName = (EquippedWeapons.Contains(EWeaponType::Rifle) ||
-				EquippedWeapons.Contains(EWeaponType::Shotgun) ||
-				EquippedWeapons.Contains(EWeaponType::RocketLauncher))
-				? FName(TEXT("SwordBack"))
-				: FName(TEXT("Sword"));
-
 			playerSword = GetWorld()->SpawnActor<ASword>();
 			WeaponActor = playerSword;
-			EQCharacterState = PrimaryWeapon == EWeaponType::Sword ? ECharacterState::SwordMode : EQCharacterState;
-
+			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Sword")) : FName(TEXT("SwordBack"));
+			EQCharacterState = (PrimaryWeapon == EWeaponType::Sword) ? ECharacterState::SwordMode : EQCharacterState;
 			break;
 
 
@@ -731,7 +714,6 @@ void ACharacterBase::SwordAttack()
 	}
 }
 
-
 void ACharacterBase::ZoomIn()
 {
 	if (bmouseMoveMode) return;
@@ -812,4 +794,134 @@ void ACharacterBase::RestoreStateAfterLevelChange()
 		//springArmComp->bInheritYaw = true;             // 좌우 회전 허용
 	}
 
+
+
+
+
+
+
+
+	//FName SocketName;
+	//AActor* WeaponActor = nullptr;
+
+
+	//switch (PrimaryWeapon)
+	//{
+
+	//case EWeaponType::Rifle:
+
+	//	SocketName = FName(TEXT("Rifle"));
+
+	//	playerRifle = GetWorld()->SpawnActor<ARifle>();
+	//	WeaponActor = playerRifle;
+	//	EQCharacterState = PrimaryWeapon == EWeaponType::Rifle ? ECharacterState::RifleMode : EQCharacterState;
+
+	//	break;
+	//case EWeaponType::Shotgun:
+	//	break;
+	//case EWeaponType::RocketLauncher:
+	//	break;
+	//case EWeaponType::Sword:
+
+	//	SocketName = FName(TEXT("Sword"));
+
+	//	playerSword = GetWorld()->SpawnActor<ASword>();
+	//	WeaponActor = playerSword;
+	//	EQCharacterState = PrimaryWeapon == EWeaponType::Sword ? ECharacterState::SwordMode : EQCharacterState;
+
+	//	break;
+	//default:
+	//	break;
+
+
+	//}
+
+	//if (WeaponActor)
+	//{
+	//	WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+	//	// 데미지 시스템때문에 주인 정해줘야함
+	//	WeaponActor->SetOwner(this);  // 'this'는 무기의 소유자가 될 액터
+
+	//}
+
+}
+
+void ACharacterBase::ThrowGrenade()
+{
+	if (bIsDashing || bIsRunning) return;
+
+	//playerSword->Slash();
+
+	
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		AnimInstance->Montage_Play(ThrowGrenadeMontage);
+	
+
+		// 무기를 임시로 왼손 소켓으로 이동
+		FName RifleSocket = FName(TEXT("Rifle"));
+		FName ShotgunSocket = FName(TEXT("Shotgun"));
+		FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
+		FName SwordSocket = FName(TEXT("Sword"));
+		
+		FName LeftHandSocket = FName(TEXT("WeaponLeft"));
+
+		// 오른손 소켓에 부착된 액터 가져오기
+		AActor* attachedActor = nullptr;
+
+
+		for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
+		{
+			if (ChildComp && ChildComp->GetAttachSocketName() == RifleSocket)
+			{
+				attachedActor = Cast<AActor>(ChildComp->GetOwner());
+				break;
+			}
+		}
+
+		if (attachedActor)
+		{
+			// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
+			attachedActor->AttachToComponent(
+				GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				LeftHandSocket
+			);
+		}
+	}
+}
+
+void ACharacterBase::ThrowEnd()
+{
+	// 무기를 다시 오른손으로 이동
+	FName RifleSocket = FName(TEXT("Rifle"));
+	FName ShotgunSocket = FName(TEXT("Shotgun"));
+	FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
+	FName SwordSocket = FName(TEXT("Sword"));
+
+	FName LeftHandSocket = FName(TEXT("WeaponLeft"));
+
+	AActor* attachedActor = nullptr;
+
+	// 왼손 소켓에 붙어 있는 무기를 찾기
+	for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
+	{
+		if (ChildComp && ChildComp->GetAttachSocketName() == LeftHandSocket)
+		{
+			attachedActor = Cast<AActor>(ChildComp->GetOwner());
+			break;
+		}
+	}
+
+	if (attachedActor)
+	{
+		// 무기를 오른손 소켓으로 다시 이동
+		attachedActor->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			RifleSocket
+		);
+	}
 }

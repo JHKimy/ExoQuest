@@ -1,6 +1,7 @@
 #include "Character/Animation/EQAnimInstance.h"
 #include "Character/CharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Animation/AnimNotifies/AnimNotify.h"
 
 void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -58,9 +59,48 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		break;
 	}
 
+
 }
 
 void UEQAnimInstance::SetCharacterState(ECharacterState NewState)
 {
 	CharacterState = NewState;
+}
+
+
+void UEQAnimInstance::AnimNotify_EndThrow()
+{
+	UE_LOG(LogTemp, Warning, TEXT("EndThrow Notify Triggered"));
+
+	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
+
+	// 무기를 다시 오른손 소켓으로 이동
+	FName RifleSocket = FName(TEXT("WeaponLeft"));
+	//FName ShotgunSocket = FName(TEXT("Shotgun"));
+	//FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
+	//FName SwordSocket = FName(TEXT("Sword"));
+
+	FName RightHandSocket = FName(TEXT("Rifle"));
+
+	// 오른손 소켓에 부착된 액터 가져오기
+	AActor* attachedActor = nullptr;
+
+	for (USceneComponent* ChildComp : AnimCharacter->GetMesh()->GetAttachChildren())
+	{
+		if (ChildComp && ChildComp->GetAttachSocketName() == RifleSocket)
+		{
+			attachedActor = Cast<AActor>(ChildComp->GetOwner());
+			break;
+		}
+	}
+
+	if (attachedActor)
+	{
+		// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
+		attachedActor->AttachToComponent(
+			AnimCharacter->GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			RightHandSocket
+		);
+	}
 }

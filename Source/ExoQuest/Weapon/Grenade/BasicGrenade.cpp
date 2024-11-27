@@ -22,7 +22,9 @@ ABasicGrenade::ABasicGrenade()
 	collisionComponent->SetCollisionProfileName(TEXT("Projectile"));
 	collisionComponent->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics); // 충돌 활성화
 	collisionComponent->SetCollisionResponseToAllChannels(ECR_Block);
+	
 	collisionComponent->SetSimulatePhysics(true);
+
 	collisionComponent->SetNotifyRigidBodyCollision(true);
 	collisionComponent->SetGenerateOverlapEvents(true);
 	RootComponent = collisionComponent;
@@ -41,8 +43,8 @@ ABasicGrenade::ABasicGrenade()
 	meshComponent->SetupAttachment(RootComponent);
 
 	// 이동 컴포넌트 추가
-	movementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
-	movementComponent->SetUpdatedComponent(collisionComponent);
+	//movementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
+	//movementComponent->SetUpdatedComponent(collisionComponent);
 
 	
 }
@@ -82,7 +84,7 @@ const FHitResult& Hit)
 		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionEffect, GetActorLocation());
 	}
 	// 디버그 드로잉으로 충돌 확인
-	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
+	// DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
 
-	Destroy();
+	// Destroy();
 }

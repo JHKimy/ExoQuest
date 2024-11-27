@@ -36,8 +36,6 @@ void AEQPlayerController::BeginPlay()
 	// 바인딩 BeginPlay 뒤에 호출
 	SetupInputBindings(MyControlledCharacter);
 
-
-
 }
 
 void AEQPlayerController::Tick(float DeltaTime)

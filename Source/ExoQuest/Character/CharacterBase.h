@@ -291,13 +291,21 @@ public:
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Grenade)
 	class ABasicGrenade* playerBasicGrenade;
 
-	// Grenade Launch Position
-	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Grenade)
-	class UChildActorComponent* grenadePos;
+	//// Grenade Launch Position
+	//UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Grenade)
+	//class UChildActorComponent* grenadePos;
 
-	// 던질 수류탄 클래스
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GrenadeSort)
-	TSubclassOf<class ABasicGrenade> GrenadeClass; // Spawn Grenade
+	//// 던질 수류탄 클래스
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	//TSubclassOf<class ABasicGrenade> GrenadeClass; // Spawn Grenade
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	FTimerHandle GrenadeCooldownTimer; // 수류탄 쿨타임 타이머
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	bool bCanThrowGrenade = true;     // 수류탄 던질 수 있는 상태
 
+	// 쿨타임 해제 함수
+	UFUNCTION()
+	void ResetGrenadeCooldown();
 };

@@ -2,6 +2,10 @@
 #include "Character/CharacterBase.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Animation/AnimNotifies/AnimNotify.h"
+#include "Weapon/Rifle.h"
+#include "Weapon/Shotgun.h"
+#include "Weapon/RocketLauncher.h"
+#include "Weapon/Sword.h"
 
 void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -70,37 +74,56 @@ void UEQAnimInstance::SetCharacterState(ECharacterState NewState)
 
 void UEQAnimInstance::AnimNotify_EndThrow()
 {
-	UE_LOG(LogTemp, Warning, TEXT("EndThrow Notify Triggered"));
-
 	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
 
 	// 무기를 다시 오른손 소켓으로 이동
-	FName RifleSocket = FName(TEXT("WeaponLeft"));
-	//FName ShotgunSocket = FName(TEXT("Shotgun"));
-	//FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
-	//FName SwordSocket = FName(TEXT("Sword"));
+	FName LeftHandSocket = FName(TEXT("WeaponLeft"));
+	FName LeftSwordSocket = FName(TEXT("SwordLeft"));
+	
 
-	FName RightHandSocket = FName(TEXT("Rifle"));
+	FName RifleSocket = FName(TEXT("Rifle"));
+	FName ShotgunSocket = FName(TEXT("Shotgun"));
+	FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
+	FName SwordSocket = FName(TEXT("Sword"));
+
 
 	// 오른손 소켓에 부착된 액터 가져오기
 	AActor* attachedActor = nullptr;
 
 	for (USceneComponent* ChildComp : AnimCharacter->GetMesh()->GetAttachChildren())
 	{
-		if (ChildComp && ChildComp->GetAttachSocketName() == RifleSocket)
+		if (ChildComp) 
 		{
-			attachedActor = Cast<AActor>(ChildComp->GetOwner());
-			break;
+			if (ChildComp->GetAttachSocketName() == LeftHandSocket 
+				|| ChildComp->GetAttachSocketName() == LeftSwordSocket)
+			{
+				attachedActor = Cast<AActor>(ChildComp->GetOwner());
+				
+				break;
+			}
 		}
 	}
 
 	if (attachedActor)
 	{
-		// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
-		attachedActor->AttachToComponent(
-			AnimCharacter->GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-			RightHandSocket
-		);
+		// 무기 타입과 소켓 이름을 매핑
+		TMap<UClass*, FName> WeaponSocketMap;
+		WeaponSocketMap.Add(ARifle::StaticClass(), RifleSocket);
+		WeaponSocketMap.Add(AShotgun::StaticClass(), ShotgunSocket);
+		WeaponSocketMap.Add(ARocketLauncher::StaticClass(), RocketLauncherSocket);
+		WeaponSocketMap.Add(ASword::StaticClass(), SwordSocket);
+
+		// 무기 타입에 맞는 소켓 이름 가져오기
+		UClass* WeaponClass = attachedActor->GetClass();
+
+		if (FName* TargetSocket = WeaponSocketMap.Find(WeaponClass))
+		{
+			// 부착
+			attachedActor->AttachToComponent(
+				AnimCharacter->GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				*TargetSocket
+			);
+		}
 	}
 }

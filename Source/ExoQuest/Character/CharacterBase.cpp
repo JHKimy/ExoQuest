@@ -39,6 +39,10 @@
 
 #include "Animation/AnimNotifies/AnimNotify.h" // Notify 관련 처리
 
+#include "Weapon/Grenade/BasicGrenade.h"
+
+#include "Components/ChildActorComponent.h"
+
 
 
 ACharacterBase::ACharacterBase()
@@ -87,6 +91,13 @@ ACharacterBase::ACharacterBase()
 	miniMapCam->OrthoWidth = 1024.f;
 
 	//characterPositionArrow->OwnerNosee
+
+	// grenadePos 생성
+	grenadePos = CreateDefaultSubobject<UChildActorComponent>(TEXT("Grenade Launch Position"));
+	// 캐릭터의 Mesh에 부착
+	grenadePos->SetupAttachment(GetMesh(), FName(TEXT("Grenade"))); // 소켓 이름 Grenade 확인 필요
+	
+
 
 
 	bmouseMoveMode = true;
@@ -337,7 +348,7 @@ void ACharacterBase::CheckEquipWeapon()
 			WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
 			// 데미지 시스템때문에 주인 정해줘야함
 			WeaponActor->SetOwner(this);  // 'this'는 무기의 소유자가 될 액터
-			
+
 		}
 	}
 
@@ -490,7 +501,7 @@ void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 
 	// 입력된 값에서 X, Y 값을 추출
 	FVector2D MovementVector = InputValue.Get<FVector2D>();
-	float ValueX = - MovementVector.X; // ?
+	float ValueX = -MovementVector.X; // ?
 	float ValueY = MovementVector.Y;
 
 	EQPlayerController->AddYawInput(ValueX);
@@ -511,7 +522,7 @@ void ACharacterBase::RunStart()
 	if (EquippedWeapons.Num() == 0) return;
 
 	GetCharacterMovement()->MaxWalkSpeed = 1000.f;
-	
+
 	bIsRunning = true;
 }
 
@@ -594,7 +605,7 @@ void ACharacterBase::WeaponAttack()
 {
 	// 대쉬나 달리기 중일 때는 발사하지 않음
 	// 콤보 공격을 위한 공격가능 변수
-	if (bIsDashing || bIsRunning ) return;
+	if (bIsDashing || bIsRunning) return;
 
 	switch (PrimaryWeapon)
 	{
@@ -614,8 +625,8 @@ void ACharacterBase::WeaponAttack()
 		playerRocketLauncher->Fire();
 		break;
 
-	case EWeaponType::Sword: 
-		{
+	case EWeaponType::Sword:
+	{
 		//playerSword->Slash();
 		//
 		//// 섹션
@@ -648,11 +659,11 @@ void ACharacterBase::WeaponAttack()
 		//		GetWorld()->GetTimerManager().ClearTimer(ComboResetTimerHandle);
 		//		// 타이머 초기화 (두 번째 공격이 성공적으로 연결되었기 때문에 초기화)
 		//	}
-			
-			
+
+
 		// }
 		break;
-		}
+	}
 
 	default:
 		break;
@@ -672,7 +683,7 @@ void ACharacterBase::HandleStamina(float DeltaTime)
 	}
 	else if (!bIsRunning && stamina < maxStamina) // 달리기 멈췄을 때 서서히 회복
 	{
-		stamina += staminaDrainRate * 0.5f * DeltaTime; 
+		stamina += staminaDrainRate * 0.5f * DeltaTime;
 		if (stamina > maxStamina)
 		{
 			stamina = maxStamina;
@@ -743,7 +754,7 @@ void ACharacterBase::SaveStateBeforeLevelChange()
 	if (MyGameInstance)
 	{
 		MyGameInstance->SavedEquippedWeapons = EquippedWeapons;  // 현재 무기 상태 저장
-	
+
 		// PrimaryWeapon 복원
 		if (!EquippedWeapons.IsEmpty())
 		{
@@ -751,7 +762,7 @@ void ACharacterBase::SaveStateBeforeLevelChange()
 		}
 
 		// 캐릭터 상태 복원 및 애니메이션 동기화
-		 MyGameInstance->SavedState = EQCharacterState;
+		MyGameInstance->SavedState = EQCharacterState;
 
 		//// 체력 및 스태미나 저장
 		MyGameInstance->SavedHealth = health;
@@ -850,78 +861,70 @@ void ACharacterBase::ThrowGrenade()
 {
 	if (bIsDashing || bIsRunning) return;
 
-	//playerSword->Slash();
 
-	
+
+
+	// Grenade Spawn Location
+	FVector LaunchLocation = grenadePos->GetComponentLocation();
+	FRotator LaunchRotation = grenadePos->GetComponentRotation();
+
+	// Spawn Grenade
+	ABasicGrenade* SpawnedGrenade = GetWorld()->SpawnActor<ABasicGrenade>(
+		GrenadeClass,
+		LaunchLocation,
+		LaunchRotation
+	);
+
+	if (SpawnedGrenade)
+	{
+		SpawnedGrenade->SetOwner(this); // 소유자 설정
+	}
+
+
+
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
 	if (AnimInstance && ThrowGrenadeMontage)
 	{
 		AnimInstance->Montage_Play(ThrowGrenadeMontage);
-	
-
-		// 무기를 임시로 왼손 소켓으로 이동
-		FName RifleSocket = FName(TEXT("Rifle"));
-		FName ShotgunSocket = FName(TEXT("Shotgun"));
-		FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
-		FName SwordSocket = FName(TEXT("Sword"));
-		
-		FName LeftHandSocket = FName(TEXT("WeaponLeft"));
 
 		// 오른손 소켓에 부착된 액터 가져오기
 		AActor* attachedActor = nullptr;
 
-
 		for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
 		{
-			if (ChildComp && ChildComp->GetAttachSocketName() == RifleSocket)
+			if (ChildComp)
 			{
-				attachedActor = Cast<AActor>(ChildComp->GetOwner());
-				break;
+				auto cg = ChildComp->GetAttachSocketName();
+
+				if (cg ==RifleSocket || cg == ShotgunSocket || cg == RocketLauncherSocket || cg == SwordSocket)
+				{
+					attachedActor = Cast<AActor>(ChildComp->GetOwner());
+					break;
+				}
 			}
 		}
 
 		if (attachedActor)
 		{
-			// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
-			attachedActor->AttachToComponent(
-				GetMesh(),
-				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-				LeftHandSocket
-			);
+			// 루트 컴포넌트를 가져옴
+
+			if (attachedActor->IsA(ASword::StaticClass()))
+			{
+				attachedActor->AttachToComponent(
+					GetMesh(),
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+					LeftSwordSocket);
+			}
+			else
+			{
+				// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
+				attachedActor->AttachToComponent(
+					GetMesh(),
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+					LeftHandSocket
+				);
+			}
 		}
-	}
-}
-
-void ACharacterBase::ThrowEnd()
-{
-	// 무기를 다시 오른손으로 이동
-	FName RifleSocket = FName(TEXT("Rifle"));
-	FName ShotgunSocket = FName(TEXT("Shotgun"));
-	FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
-	FName SwordSocket = FName(TEXT("Sword"));
-
-	FName LeftHandSocket = FName(TEXT("WeaponLeft"));
-
-	AActor* attachedActor = nullptr;
-
-	// 왼손 소켓에 붙어 있는 무기를 찾기
-	for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
-	{
-		if (ChildComp && ChildComp->GetAttachSocketName() == LeftHandSocket)
-		{
-			attachedActor = Cast<AActor>(ChildComp->GetOwner());
-			break;
-		}
-	}
-
-	if (attachedActor)
-	{
-		// 무기를 오른손 소켓으로 다시 이동
-		attachedActor->AttachToComponent(
-			GetMesh(),
-			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-			RifleSocket
-		);
 	}
 }

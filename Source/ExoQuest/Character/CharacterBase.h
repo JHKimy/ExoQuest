@@ -272,7 +272,32 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = Grenade)
 	class UAnimMontage* ThrowGrenadeMontage;
 
-	// 애니메이션 몽타주 노티파이
-	UFUNCTION()
-	void ThrowEnd();
+	//// 애니메이션 몽타주 노티파이
+	//UFUNCTION()
+	//void ThrowEnd();
+
+
+	FName RifleSocket = FName(TEXT("Rifle"));
+	FName ShotgunSocket = FName(TEXT("Shotgun"));
+	FName RocketLauncherSocket = FName(TEXT("RocketLauncher"));
+	FName SwordSocket = FName(TEXT("Sword"));
+
+	FName LeftHandSocket = FName(TEXT("WeaponLeft"));
+	FName LeftSwordSocket = FName(TEXT("SwordLeft"));
+
+	
+
+
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Grenade)
+	class ABasicGrenade* playerBasicGrenade;
+
+	// Grenade Launch Position
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Grenade)
+	class UChildActorComponent* grenadePos;
+
+	// 던질 수류탄 클래스
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = GrenadeSort)
+	TSubclassOf<class ABasicGrenade> GrenadeClass; // Spawn Grenade
+
+
 };

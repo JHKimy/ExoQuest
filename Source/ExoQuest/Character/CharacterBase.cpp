@@ -47,6 +47,8 @@
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
 
+#include "Components/ArrowComponent.h"
+
 
 ACharacterBase::ACharacterBase()
 {
@@ -93,6 +95,11 @@ ACharacterBase::ACharacterBase()
 	miniMapCam->ProjectionType = ECameraProjectionMode::Orthographic;
 	miniMapCam->OrthoWidth = 1024.f;
 
+
+	GrenadeLaunchPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("Grenade"));
+	GrenadeLaunchPosition->SetupAttachment(GetCapsuleComponent());
+	GrenadeLaunchPosition->SetRelativeLocation(FVector(60.f, 0.f, 60.f));
+
 	//characterPositionArrow->OwnerNosee
 
 	// grenadePos 생성
@@ -110,6 +117,14 @@ ACharacterBase::ACharacterBase()
 	maxStamina = 100.f;
 	stamina = 100.f;
 	staminaDrainRate = 15.0f; // 초당 감소하는 값
+
+
+
+
+
+
+	// 수류탄
+	GrenadeLaunchPower = 1000.f;
 }
 
 void ACharacterBase::BeginPlay()
@@ -174,6 +189,17 @@ void ACharacterBase::BeginPlay()
 
 	///////////////////////////////////////////////////
 	currentCombo = 0;
+
+
+
+
+
+
+	
+	//// 수류탄 
+	//// 던질 방향과 속도 계산
+	//GrenadeLaunchVelocity = /*GrenadeLaunchPosition->*/
+	//GetActorForwardVector() * GrenadeLaunchPower;
 }
 
 void ACharacterBase::Tick(float DeltaTime)
@@ -248,6 +274,27 @@ void ACharacterBase::Tick(float DeltaTime)
 
 	// 스태미나 관리 함수 호출
 	HandleStamina(DeltaTime);
+
+
+
+
+
+
+
+
+
+	// 전방벡터
+	FVector GrenadeForwardVector = FRotationMatrix(GetControlRotation()).GetUnitAxis(EAxis::X);
+
+	GrenadeForwardVector.Z = 0;
+
+	GrenadeForwardVector.Normalize();
+
+
+	//FRotator ControlRotation = GetControlRotation();
+	//FVector ForwardVector = FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::X);
+
+	GrenadeLaunchVelocity = GrenadeForwardVector * GrenadeLaunchPower;
 
 
 
@@ -886,8 +933,17 @@ void ACharacterBase::ThrowGrenade()
 	//********************
 	playerBasicGrenade->GetMesh()->SetSimulatePhysics(false);
 	playerBasicGrenade->collisionComponent->SetSimulatePhysics(false);
+	playerBasicGrenade->collisionComponent->SetGenerateOverlapEvents(true);
 
-	playerBasicGrenade->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName(TEXT("Grenade")));
+
+
+
+
+
+
+	playerBasicGrenade->AttachToComponent(GetMesh(), 
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale, 
+		FName(TEXT("Grenade")));
 	
 	playerBasicGrenade->SetOwner(this);
 

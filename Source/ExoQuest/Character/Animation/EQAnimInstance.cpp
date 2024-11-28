@@ -6,6 +6,10 @@
 #include "Weapon/Shotgun.h"
 #include "Weapon/RocketLauncher.h"
 #include "Weapon/Sword.h"
+#include "Weapon/Grenade/BasicGrenade.h"
+#include "Components/SphereComponent.h"
+#include <Camera/CameraComponent.h>
+
 
 void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
@@ -62,6 +66,8 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	case ECharacterState::SwordMode:
 		break;
 	}
+
+
 
 
 }
@@ -126,4 +132,40 @@ void UEQAnimInstance::AnimNotify_EndThrow()
 			);
 		}
 	}
+}
+
+void UEQAnimInstance::AnimNotify_Throw()
+{
+	// 특정 소켓에서 부착된 액터 가져오기
+	TArray<USceneComponent*> AttachedComponents = AnimCharacter->GetMesh()->GetAttachChildren();
+
+	for (USceneComponent* Component : AttachedComponents) 
+	{
+		if (Component->GetAttachSocketName() == TEXT("Grenade"))
+		{
+			AActor* AttachedActor = Component->GetOwner();
+			EquippedGrenade = Cast<ABasicGrenade>(AttachedActor);
+			break;
+		}
+	}
+	
+
+
+
+	// 수류탄의 예상 궤적 표시
+	EquippedGrenade->PredictGrenadePath(AnimCharacter->GrenadeLaunchVelocity);
+
+	// 소유자와의 충돌 무시 설정
+	EquippedGrenade->collisionComponent->IgnoreActorWhenMoving(AnimCharacter, true);
+
+	// 수류탄 소켓에서 분리
+	EquippedGrenade->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+	EquippedGrenade->collisionComponent->SetSimulatePhysics(true);
+	
+	
+	// 실제로 던지기
+	EquippedGrenade->collisionComponent
+		->AddImpulse(AnimCharacter->GrenadeLaunchVelocity, NAME_None, true);
+
 }

@@ -10,7 +10,8 @@
 
 
 #include "Enemy/EnemyFSM.h" // 데미지 처리
-
+#include "UObject/ConstructorHelpers.h"
+#include "Particles/ParticleSystem.h"
 
 ABasicGrenade::ABasicGrenade()
 {
@@ -46,19 +47,27 @@ ABasicGrenade::ABasicGrenade()
 	//movementComponent = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovementComponent"));
 	//movementComponent->SetUpdatedComponent(collisionComponent);
 
-	
+	static ConstructorHelpers::FObjectFinder<UParticleSystem> ExplosionEffectAsset(TEXT("/Game/Asset/Effect/P_GrenadeExplosion.P_GrenadeExplosion"));
+	if (ExplosionEffectAsset.Succeeded())
+	{
+		explosionEffect = ExplosionEffectAsset.Object;
+	}
 }
 
 void ABasicGrenade::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	collisionComponent->BodyInstance.SetMassOverride(1.0f); // 수류탄의 질량 설정 (예: 1kg)
 }
 
 void ABasicGrenade::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	// 던지기 속도가 설정되었을 경우 예상 경로 업데이트
+	//PredictGrenadePath(LaunchVelocity);
+	
+	//PredictGrenadePath();
 }
 
 void ABasicGrenade::OnHit
@@ -78,13 +87,53 @@ const FHitResult& Hit)
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Grenade Hit!"));
 	}
 
-	// 폭발 효과 표시
-	if (explosionEffect)
-	{
-		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionEffect, GetActorLocation());
-	}
 	// 디버그 드로잉으로 충돌 확인
-	// DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
+	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
 
-	// Destroy();
+	
+
+	//// 폭발 효과 표시
+	//if (explosionEffect)
+	//{
+	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionEffect, GetActorLocation());
+	//}
+	//
+	//
+	//
+	//
+	//Destroy();
+}
+
+void ABasicGrenade::PredictGrenadePath(FVector LaunchVelocity, float MaxSimTime)
+{
+	// 결과를 저장할 구조체
+	FPredictProjectilePathResult PredictResult;
+
+	// 경로 계산 요청 파라미터
+	FPredictProjectilePathParams Params;
+	Params.StartLocation = GetActorLocation(); // 현재 수류탄의 위치
+	Params.LaunchVelocity = LaunchVelocity;   // 던질 때의 속도
+	Params.ProjectileRadius = ProjectileRadius;
+	Params.SimFrequency = SimFrequency;
+	Params.MaxSimTime = MaxSimTime;
+	Params.OverrideGravityZ = GravityZ;
+	Params.TraceChannel = TraceChannel;
+	Params.bTraceWithCollision = true;        // 충돌 확인
+
+
+	// 경로 예측
+	if (UGameplayStatics::PredictProjectilePath(GetWorld(), Params, PredictResult))
+	{
+		// 경로 점들 시각화
+		for (const FPredictProjectilePathPointData& PointData : PredictResult.PathData)
+		{
+			DrawDebugSphere(GetWorld(), PointData.Location, 5.0f, 12, FColor::Green, false, 1.0f);
+		}
+
+		// 충돌 지점 시각화
+		if (PredictResult.HitResult.IsValidBlockingHit())
+		{
+			DrawDebugSphere(GetWorld(), PredictResult.HitResult.Location, 10.0f, 12, FColor::Red, false, 1.0f);
+		}
+	}
 }

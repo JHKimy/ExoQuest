@@ -62,4 +62,11 @@ public:
 	UFUNCTION()
 	void AnimNotify_EndThrow();
 
+
+	UFUNCTION()
+	void AnimNotify_Throw();
+
+	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grenade")
+	class ABasicGrenade* EquippedGrenade;
+
 };

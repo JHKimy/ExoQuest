@@ -43,4 +43,31 @@ public:
 	// 메쉬 접근 함수
 	UFUNCTION()
 	UStaticMeshComponent* GetMesh() const { return meshComponent; }
+
+	// 예상 경로 함수
+	UFUNCTION()
+	void PredictGrenadePath(FVector LaunchVelocity, float MaxSimTime = 5.f);
+
+
+
+
+
+	// 수류탄의 물리적 반경
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grenade", meta = (AllowPrivateAccess = "true"))
+	float ProjectileRadius = 10.0f;
+
+	// 중력 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grenade", meta = (AllowPrivateAccess = "true"))
+	float GravityZ = -9.8f;
+
+	// 시뮬레이션 주기
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grenade", meta = (AllowPrivateAccess = "true"))
+	float SimFrequency = 15.0f;
+
+	// 예상 경로 충돌 채널
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Grenade", meta = (AllowPrivateAccess = "true"))
+	TEnumAsByte<ECollisionChannel> TraceChannel = ECC_Visibility;
+
+//protected:
+//	FVector LaunchVelocity;
 };

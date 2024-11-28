@@ -308,4 +308,17 @@ public:
 	// 쿨타임 해제 함수
 	UFUNCTION()
 	void ResetGrenadeCooldown();
+
+	// 수류탄 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	FVector GrenadeLaunchVelocity;
+
+	// 수류탄 파워
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	float GrenadeLaunchPower;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
+	class UArrowComponent* GrenadeLaunchPosition;
+
 };

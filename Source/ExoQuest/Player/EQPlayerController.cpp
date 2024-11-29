@@ -113,7 +113,15 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 			EnhancedInputComponent->BindAction(IA_ThrowGrenade, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::ThrowGrenade);
 		}
 
+		if (IA_1)
+		{
+			EnhancedInputComponent->BindAction(IA_1, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ChangeWeapon);
+		}
 
+		if (IA_2)
+		{
+			EnhancedInputComponent->BindAction(IA_2, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::ChangeWeapon);
+		}
 	}
 }
 

@@ -78,7 +78,8 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 {
 	ACharacterBase* EquipCharacter = Cast<ACharacterBase>(OtherActor);
 	
-	if (EquipCharacter)
+	// ÃÖ´ë 2°³ È¹µæ °¡´É
+	if (EquipCharacter->EquippedWeapons.Num() < 2)
 	{
 		Destroy();
 

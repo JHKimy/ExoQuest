@@ -153,7 +153,7 @@ void UEQAnimInstance::AnimNotify_Throw()
 
 
 	// 수류탄의 예상 궤적 표시
-	EquippedGrenade->PredictGrenadePath(AnimCharacter->GrenadeLaunchVelocity);
+	// EquippedGrenade->PredictGrenadePath(AnimCharacter->GrenadeLaunchVelocity);
 
 	// 소유자와의 충돌 무시 설정
 	EquippedGrenade->collisionComponent->IgnoreActorWhenMoving(AnimCharacter, true);
@@ -163,9 +163,14 @@ void UEQAnimInstance::AnimNotify_Throw()
 
 	EquippedGrenade->collisionComponent->SetSimulatePhysics(true);
 	
+
+	// 초기 발사 속도 설정 (포물선 효과를 위한 Z축 속도 추가)
+	FVector LaunchVelocity = AnimCharacter->GrenadeLaunchVelocity;
+	LaunchVelocity.Z += 500.0f; // Z축 방향 속도 추가
 	
 	// 실제로 던지기
 	EquippedGrenade->collisionComponent
-		->AddImpulse(AnimCharacter->GrenadeLaunchVelocity, NAME_None, true);
+		->AddImpulse(LaunchVelocity, NAME_None, true);
+	// 필요시 붙은 객체 지우고 다시 스폰 해서 프로젝타일로 던지는 방식
 
 }

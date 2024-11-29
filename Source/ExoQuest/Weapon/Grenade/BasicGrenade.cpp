@@ -67,7 +67,10 @@ void ABasicGrenade::Tick(float DeltaTime)
 	// 던지기 속도가 설정되었을 경우 예상 경로 업데이트
 	//PredictGrenadePath(LaunchVelocity);
 	
-	//PredictGrenadePath();
+	//// 월드에서 플레이어 캐릭터를 가져오기
+	//ACharacterBase* tempCharacter = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	//
+	//PredictGrenadePath(tempCharacter->GrenadeLaunchVelocity);
 }
 
 void ABasicGrenade::OnHit
@@ -87,21 +90,31 @@ const FHitResult& Hit)
 		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Grenade Hit!"));
 	}
 
-	// 디버그 드로잉으로 충돌 확인
-	DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
+	// 지연 작업을 위한 FLatentActionInfo 설정
+	FLatentActionInfo LatentInfo;
+	LatentInfo.CallbackTarget = this; // 지연이 완료되면 호출할 객체
+	LatentInfo.ExecutionFunction = FName(TEXT("Explosion")); // 실행할 함수 이름
+	LatentInfo.Linkage = 0; // 연결 ID (주로 0 사용)
+	LatentInfo.UUID = __LINE__; // 고유 ID (주로 코드 라인 사용)
 
-	
+	//// 디버그 드로잉으로 충돌 확인
+	//DrawDebugSphere(GetWorld(), Hit.ImpactPoint, 25.0f, 12, FColor::Red, false, 1.0f);
 
-	//// 폭발 효과 표시
-	//if (explosionEffect)
-	//{
-	//	UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionEffect, GetActorLocation());
-	//}
-	//
-	//
-	//
-	//
-	//Destroy();
+	UKismetSystemLibrary::Delay(this, 3.f, LatentInfo);
+
+
+
+}
+
+void ABasicGrenade::Explosion()
+{
+	// 폭발 효과 표시
+	if (explosionEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), explosionEffect, GetActorLocation());
+	}
+
+	Destroy();
 }
 
 void ABasicGrenade::PredictGrenadePath(FVector LaunchVelocity, float MaxSimTime)

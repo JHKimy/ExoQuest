@@ -34,6 +34,14 @@ enum class ECharacterState : uint8
 	SwordMode
 };
 
+UENUM(BlueprintType)
+enum class EGrenadeType : uint8
+{
+	BasicGrenade,
+	SolidGrenade,
+	LandMine
+};
+
 
 UCLASS()
 class EXOQUEST_API ACharacterBase : public ACharacter
@@ -321,4 +329,24 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Grenade)
 	class UArrowComponent* GrenadeLaunchPosition;
 
+
+
+
+
+
+	UFUNCTION()
+	void ChangeWeapon();
+
+	// 특정 소켓에 부착된 액터를 가져오는 함수
+	UFUNCTION()
+	AActor* GetAttachedActorAtSocket(FName SocketName);
+
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Weapon)
+	//bool bFullWepaonEquipped;
+
+
+	// 얻은 자원 개수
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Starflux)
+	int StarfluxNum{};
 };

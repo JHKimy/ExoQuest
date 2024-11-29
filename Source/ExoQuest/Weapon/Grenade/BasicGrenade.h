@@ -40,6 +40,11 @@ public:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
+	UFUNCTION()
+	void Explosion();
+
+	FTimerHandle TimerHandle_Destroy;
+
 	// 메쉬 접근 함수
 	UFUNCTION()
 	UStaticMeshComponent* GetMesh() const { return meshComponent; }

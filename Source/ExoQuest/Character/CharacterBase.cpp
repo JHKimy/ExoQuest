@@ -119,10 +119,6 @@ ACharacterBase::ACharacterBase()
 	staminaDrainRate = 15.0f; // 초당 감소하는 값
 
 
-
-
-
-
 	// 수류탄
 	GrenadeLaunchPower = 1000.f;
 }
@@ -196,15 +192,13 @@ void ACharacterBase::BeginPlay()
 
 
 	
-	//// 수류탄 
-	//// 던질 방향과 속도 계산
-	//GrenadeLaunchVelocity = /*GrenadeLaunchPosition->*/
-	//GetActorForwardVector() * GrenadeLaunchPower;
 }
 
 void ACharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+
 
 	// 무기 확인과 상태 업데이트가 필요할 때만 실행
 	if (EquippedWeapons.Num() > 0)
@@ -294,8 +288,11 @@ void ACharacterBase::Tick(float DeltaTime)
 	//FRotator ControlRotation = GetControlRotation();
 	//FVector ForwardVector = FRotationMatrix(ControlRotation).GetUnitAxis(EAxis::X);
 
-	GrenadeLaunchVelocity = GrenadeForwardVector * GrenadeLaunchPower;
-
+	//GrenadeLaunchVelocity = GrenadeForwardVector * GrenadeLaunchPower;
+	GrenadeLaunchVelocity = GrenadeLaunchPosition->GetForwardVector() * GrenadeLaunchPower;
+	// 10도 회전 추가 (Z축 기준)
+	FRotator RotationOffset = FRotator(0.0f, -10.0f, 0.0f); // Yaw에 -10도를 추가
+	GrenadeLaunchVelocity = RotationOffset.RotateVector(GrenadeLaunchVelocity);
 
 
 
@@ -316,89 +313,84 @@ void ACharacterBase::CheckEquipWeapon()
 	PrimaryWeapon = EquippedWeapons[0];
 	bmouseMoveMode = false;
 
-	if (enemyFSM)
-	{
-		enemyFSM->UpdateWeaponDamage();
-	}
 
-	// 조준 UI 크로스 헤어 인스턴스 생성
-	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
-	if (PlayerController && !crosshairUI)
 	{
-		crosshairUI = CreateWidget<UUserWidget>(PlayerController, crosshairUIFactory);
-		if (crosshairUI)
+
+		if (enemyFSM)
 		{
-			crosshairUI->AddToViewport();
+			enemyFSM->UpdateWeaponDamage();
+		}
+
+		// 조준 UI 크로스 헤어 인스턴스 생성
+		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+		if (PlayerController && !crosshairUI)
+		{
+			crosshairUI = CreateWidget<UUserWidget>(PlayerController, crosshairUIFactory);
+			if (crosshairUI)
+			{
+				crosshairUI->AddToViewport();
+			}
 		}
 	}
 
-	// 기존 무기 초기화
-	//if (playerRifle) playerRifle->Destroy();
-	//if (playerShotgun) playerShotgun->Destroy();
-	//if (playerRocketLauncher) playerRocketLauncher->Destroy();
-	//if (playerSword) playerSword->Destroy();
+	if (EquippedWeapons.Num()<=2) {
 
 
-
-
-
-
-
-
-	// WeaponForEquip으로 획득한 무기 확인
-	for (EWeaponType WeaponType : EquippedWeapons)
-	{
-		FName SocketName;
-		AActor* WeaponActor = nullptr;
-
-		switch (WeaponType)
+		// WeaponForEquip으로 획득한 무기 확인
+		for (EWeaponType WeaponType : EquippedWeapons)
 		{
-		case EWeaponType::Rifle:
-			if (playerRifle) continue;
-			playerRifle = GetWorld()->SpawnActor<ARifle>();
-			WeaponActor = playerRifle;
-			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Rifle")) : FName(TEXT("RifleBack"));
-			EQCharacterState = (PrimaryWeapon == EWeaponType::Rifle) ? ECharacterState::RifleMode : EQCharacterState;
-			break;
+			FName SocketName;
+			AActor* WeaponActor = nullptr;
+
+			switch (WeaponType)
+			{
+			case EWeaponType::Rifle:
+				if (playerRifle) continue;
+				playerRifle = GetWorld()->SpawnActor<ARifle>();
+				WeaponActor = playerRifle;
+				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Rifle")) : FName(TEXT("RifleBack"));
+				EQCharacterState = (PrimaryWeapon == EWeaponType::Rifle) ? ECharacterState::RifleMode : EQCharacterState;
+				break;
 
 
 
-		case EWeaponType::Shotgun:
-			if (playerShotgun) continue;
-			playerShotgun = GetWorld()->SpawnActor<AShotgun>();
-			WeaponActor = playerShotgun;
-			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Shotgun")) : FName(TEXT("ShotgunBack"));
-			EQCharacterState = (PrimaryWeapon == EWeaponType::Shotgun) ? ECharacterState::ShotgunMode : EQCharacterState;
-			break;
+			case EWeaponType::Shotgun:
+				if (playerShotgun) continue;
+				playerShotgun = GetWorld()->SpawnActor<AShotgun>();
+				WeaponActor = playerShotgun;
+				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Shotgun")) : FName(TEXT("ShotgunBack"));
+				EQCharacterState = (PrimaryWeapon == EWeaponType::Shotgun) ? ECharacterState::ShotgunMode : EQCharacterState;
+				break;
 
 
-		case EWeaponType::RocketLauncher:
-			if (playerRocketLauncher) continue;
-			playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
-			WeaponActor = playerRocketLauncher;
-			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("RocketLauncher")) : FName(TEXT("RocketLauncherBack"));
-			EQCharacterState = (PrimaryWeapon == EWeaponType::RocketLauncher) ? ECharacterState::RocketLauncherMode : EQCharacterState;
-			break;
+			case EWeaponType::RocketLauncher:
+				if (playerRocketLauncher) continue;
+				playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
+				WeaponActor = playerRocketLauncher;
+				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("RocketLauncher")) : FName(TEXT("RocketLauncherBack"));
+				EQCharacterState = (PrimaryWeapon == EWeaponType::RocketLauncher) ? ECharacterState::RocketLauncherMode : EQCharacterState;
+				break;
 
-		case EWeaponType::Sword:
-			if (playerSword) continue;
-			playerSword = GetWorld()->SpawnActor<ASword>();
-			WeaponActor = playerSword;
-			SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Sword")) : FName(TEXT("SwordBack"));
-			EQCharacterState = (PrimaryWeapon == EWeaponType::Sword) ? ECharacterState::SwordMode : EQCharacterState;
-			break;
+			case EWeaponType::Sword:
+				if (playerSword) continue;
+				playerSword = GetWorld()->SpawnActor<ASword>();
+				WeaponActor = playerSword;
+				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Sword")) : FName(TEXT("SwordBack"));
+				EQCharacterState = (PrimaryWeapon == EWeaponType::Sword) ? ECharacterState::SwordMode : EQCharacterState;
+				break;
 
 
-		default:
-			break;
-		}
+			default:
+				break;
+			}
 
-		if (WeaponActor)
-		{
-			WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
-			// 데미지 시스템때문에 주인 정해줘야함
-			WeaponActor->SetOwner(this);  // 'this'는 무기의 소유자가 될 액터
+			if (WeaponActor)
+			{
+				WeaponActor->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, SocketName);
+				// 데미지 시스템때문에 주인 정해줘야함
+				WeaponActor->SetOwner(this);  // 'this'는 무기의 소유자가 될 액터
 
+			}
 		}
 	}
 
@@ -1006,4 +998,121 @@ void ACharacterBase::ThrowGrenade()
 void ACharacterBase::ResetGrenadeCooldown()
 {
 	bCanThrowGrenade = true; // 수류탄 던질 수 있는 상태로 전환
+}
+
+void ACharacterBase::ChangeWeapon()
+{
+	// 배열이 두 개의 무기를 가지고 있는지 확인
+	if (EquippedWeapons.Num() < 2)
+	{
+		return; // 무기가 두 개 미만이면 함수 종료
+	}
+	
+	// 주무기가 있으면
+	if (EquippedWeapons[0] != EWeaponType::None) 
+	{
+		AActor* HandAttachedWeapon = nullptr;
+		FName BackSocketName;
+
+		if (PrimaryWeapon == EWeaponType::Rifle)
+		{
+			BackSocketName = FName(TEXT("RifleBack"));
+			HandAttachedWeapon = GetAttachedActorAtSocket(FName(TEXT("Rifle")));
+		}
+		else if (PrimaryWeapon == EWeaponType::Shotgun)
+		{
+			BackSocketName = FName(TEXT("ShotgunBack"));
+			HandAttachedWeapon = GetAttachedActorAtSocket(FName(TEXT("Shotgun")));
+		}
+		else if (PrimaryWeapon == EWeaponType::RocketLauncher)
+		{
+			BackSocketName = FName(TEXT("RocketLauncherBack"));
+			HandAttachedWeapon = GetAttachedActorAtSocket(FName(TEXT("RocketLauncher")));
+
+		}
+		else if (PrimaryWeapon == EWeaponType::Sword)
+		{
+			BackSocketName = FName(TEXT("SwordBack"));
+			HandAttachedWeapon = GetAttachedActorAtSocket(FName(TEXT("Sword")));
+
+		}
+
+		HandAttachedWeapon->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			BackSocketName
+		);
+
+	}
+	// 보조 무기를 손에 부착
+	if (EquippedWeapons[1] != EWeaponType::None)
+	{
+		AActor* BackAttachWeapon = nullptr;
+		FName HandSocketName;
+
+		if (EquippedWeapons[1] == EWeaponType::Rifle)
+		{
+			BackAttachWeapon = GetAttachedActorAtSocket(FName(TEXT("RifleBack")));
+
+			HandSocketName = FName(TEXT("Rifle")); // 보조 무기가 Shotgun이라고 가정
+		}
+		else if (EquippedWeapons[1] == EWeaponType::Shotgun)
+		{
+			BackAttachWeapon = GetAttachedActorAtSocket(FName(TEXT("ShotgunBack")));
+
+			HandSocketName = FName(TEXT("Shotgun")); // 보조 무기가 Shotgun이라고 가정
+		}
+		else if (EquippedWeapons[1] == EWeaponType::RocketLauncher)
+		{
+			BackAttachWeapon = GetAttachedActorAtSocket(FName(TEXT("RocketLauncherBack")));
+
+			HandSocketName = FName(TEXT("RocketLauncher")); // 보조 무기가 Shotgun이라고 가정
+		}
+		else if (EquippedWeapons[1] == EWeaponType::Sword)
+		{
+			BackAttachWeapon = GetAttachedActorAtSocket(FName(TEXT("SwordBack")));
+
+			HandSocketName = FName(TEXT("Sword")); // 보조 무기가 Shotgun이라고 가정
+		}
+
+		BackAttachWeapon->AttachToComponent(
+			GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			HandSocketName
+		);
+	}
+
+	// 배열의 0번째와 1번째 요소 교환
+	Swap(EquippedWeapons[0], EquippedWeapons[1]);
+
+	// 주 무기를 업데이트
+	PrimaryWeapon = EquippedWeapons[0];
+}
+
+AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
+{
+	// 캐릭터의 SkeletalMeshComponent를 가져오기
+	USkeletalMeshComponent* SkeletalMesh = GetMesh();
+	
+	if (!SkeletalMesh)
+	{
+		return nullptr;
+	}
+
+	// 부착된 모든 컴포넌트를 가져옵니다.
+	const TArray<USceneComponent*>& AttachedComponents = SkeletalMesh->GetAttachChildren();
+
+	for (USceneComponent* Component : AttachedComponents)
+	{
+		// 부착된 컴포넌트의 소켓 이름을 확인
+		if (Component && Component->GetAttachSocketName() == SocketName)
+		{
+			// 해당 컴포넌트의 소유자(부착된 액터)를 반환
+			return Component->GetOwner();
+		}
+	}
+
+	// 소켓에 부착된 액터가 없으면 nullptr 반환
+	return nullptr;
+
 }

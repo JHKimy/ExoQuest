@@ -4,6 +4,7 @@
 #include "Enemy/EnemyFSM.h"	// AI
 #include "GameFramework/CharacterMovementComponent.h" // 움직임
 #include "Kismet/KismetSystemLibrary.h"		// 화면 텍스츠 출력 
+#include "Item/Starflux.h"
 
 #include "PaperSpriteComponent.h"
 

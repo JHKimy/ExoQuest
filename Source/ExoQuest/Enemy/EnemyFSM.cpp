@@ -10,6 +10,7 @@
 #include "Weapon/RocketProjectile.h"
 #include "Weapon/Sword.h"
 #include "Enemy1AnimInstance.h"
+#include "Item/Starflux.h"
 
 
 UEnemyFSM::UEnemyFSM()
@@ -99,6 +100,7 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 		break;
 	case EEnemyState::Die:
 		DieState();
+
 		break;
 	}
 
@@ -219,6 +221,13 @@ void UEnemyFSM::DieState()
 	if (P.Z < -200.f)
 	{
 		enemy->Destroy();
+	}
+	if (!bSpawnStarflux) {
+		bSpawnStarflux = true;
+		GetWorld()->SpawnActor<AStarflux>
+			(AStarflux::StaticClass(),
+				enemy->GetActorLocation(),
+				enemy->GetActorRotation());
 	}
 
 }

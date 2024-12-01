@@ -122,4 +122,8 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	bool bAttackCircle = false;
+
+	UPROPERTY(EditAnywhere, Category = Animation)
+	bool bSpawnStarflux = false;
+
 };

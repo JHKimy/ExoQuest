@@ -12,6 +12,7 @@ class EXOQUEST_API AEnemyBase : public ACharacter
 public:
 	AEnemyBase();
 
+
 protected:
 	virtual void BeginPlay() override;
 

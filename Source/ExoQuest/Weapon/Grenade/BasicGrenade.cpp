@@ -85,11 +85,6 @@ const FHitResult& Hit)
 		return;
 	}
 
-	if (GEngine)
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Grenade Hit!"));
-	}
-
 	// 지연 작업을 위한 FLatentActionInfo 설정
 	FLatentActionInfo LatentInfo;
 	LatentInfo.CallbackTarget = this; // 지연이 완료되면 호출할 객체

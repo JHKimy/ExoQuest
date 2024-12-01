@@ -122,6 +122,11 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		{
 			EnhancedInputComponent->BindAction(IA_2, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::ChangeWeapon);
 		}
+
+		if (IA_Inventory)
+		{
+			EnhancedInputComponent->BindAction(IA_Inventory, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ToggleInventory);
+		}
 	}
 }
 

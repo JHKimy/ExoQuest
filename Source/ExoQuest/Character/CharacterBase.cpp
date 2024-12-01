@@ -49,6 +49,11 @@
 
 #include "Components/ArrowComponent.h"
 
+#include "Item/Starflux.h"
+
+#include "Blueprint/UserWidget.h"
+#include "UI/InventoryUI.h"
+
 
 ACharacterBase::ACharacterBase()
 {
@@ -185,6 +190,30 @@ void ACharacterBase::BeginPlay()
 
 	///////////////////////////////////////////////////
 	currentCombo = 0;
+
+
+
+
+
+
+
+
+
+
+
+
+	if (InventoryWidget)
+	{
+		InventoryUI = CreateWidget<UInventoryUI>(GetWorld()->GetFirstPlayerController(), InventoryWidget);
+		if (InventoryUI)
+		{
+			InventoryUI->AddToViewport();
+			InventoryUI->SetVisibility(ESlateVisibility::Hidden); // 초기에는 숨김
+		}
+	}
+
+
+
 
 
 
@@ -1115,4 +1144,20 @@ AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
 	// 소켓에 부착된 액터가 없으면 nullptr 반환
 	return nullptr;
 
+}
+
+void ACharacterBase::ToggleInventory()
+{
+	if (InventoryUI)
+	{
+		if (bIsInventoryOpen) 
+		{
+			InventoryUI->SetVisibility(ESlateVisibility::Hidden);
+		}
+		else
+		{
+			InventoryUI->SetVisibility(ESlateVisibility::Visible);
+		}
+		bIsInventoryOpen = !bIsInventoryOpen;
+	}
 }

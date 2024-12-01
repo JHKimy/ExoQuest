@@ -3,7 +3,6 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include <InputAction.h> // 인풋 액션
-
 #include "CharacterBase.generated.h"
 //#include <string>
 
@@ -41,6 +40,8 @@ enum class EGrenadeType : uint8
 	SolidGrenade,
 	LandMine
 };
+
+
 
 
 UCLASS()
@@ -349,4 +350,27 @@ public:
 	// 얻은 자원 개수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Starflux)
 	int StarfluxNum{};
+
+
+
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
+	TSubclassOf<class UInventoryUI> InventoryWidget;
+
+	UPROPERTY()
+	UInventoryUI* InventoryUI;
+
+	// 인벤토리 창 열림 상태
+	bool bIsInventoryOpen = false;
+
+	// 입력 함수
+	void ToggleInventory();
+
+
+
+
+
+
 };

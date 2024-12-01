@@ -84,4 +84,9 @@ protected:
 	// 수류탄 변동
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
 	TObjectPtr<UInputAction> IA_2;
+
+	// 인벤토리 창
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
+	TObjectPtr<UInputAction> IA_Inventory;
+
 };

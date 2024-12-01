@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Starflux.generated.h"
 
-UCLASS()
+UCLASS(Blueprintable)
 class EXOQUEST_API AStarflux : public AActor
 {
 	GENERATED_BODY()
@@ -45,10 +45,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MeshComp)
 	class UStaticMeshComponent* meshComp;
 
+
+
 	// 적 처치 후 생성 효과
 	UFUNCTION()
-	void PopAndFloating();
+	void Pop(float DeltaTime);
 
+
+	UFUNCTION()
+	void Floating(float DeltaTime);
+
+
+
+	
+	
 	// 충돌
 	UFUNCTION()
 	void OnBeginOverlap
@@ -59,4 +69,16 @@ public:
 		bool bFormSweep,
 		const FHitResult& SweepResult);
 
+
+
+protected:
+	// 애니메이션 진행 시간
+	float ElapsedTime;
+
+	// 팝업 효과 타이머 핸들
+	bool bIsPopping;
+
+
+	FVector StartBelowLocation;
 };
+

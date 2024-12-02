@@ -53,7 +53,7 @@
 
 #include "Blueprint/UserWidget.h"
 #include "UI/InventoryUI.h"
-
+#include "UI/InventoryComponent.h"
 
 ACharacterBase::ACharacterBase()
 {
@@ -112,7 +112,6 @@ ACharacterBase::ACharacterBase()
 	// 캐릭터의 Mesh에 부착
 	// grenadePos->SetupAttachment(GetMesh(), FName(TEXT("Grenade"))); // 소켓 이름 Grenade 확인 필요
 	
-
 
 
 	bmouseMoveMode = true;
@@ -202,15 +201,7 @@ void ACharacterBase::BeginPlay()
 
 
 
-	if (InventoryWidget)
-	{
-		InventoryUI = CreateWidget<UInventoryUI>(GetWorld()->GetFirstPlayerController(), InventoryWidget);
-		if (InventoryUI)
-		{
-			InventoryUI->AddToViewport();
-			InventoryUI->SetVisibility(ESlateVisibility::Hidden); // 초기에는 숨김
-		}
-	}
+
 
 
 
@@ -1148,16 +1139,22 @@ AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
 
 void ACharacterBase::ToggleInventory()
 {
-	if (InventoryUI)
+	// InventoryUI가 초기화되지 않았다면 생성
+	if (!InventoryUI)
 	{
-		if (bIsInventoryOpen) 
-		{
-			InventoryUI->SetVisibility(ESlateVisibility::Hidden);
-		}
-		else
-		{
-			InventoryUI->SetVisibility(ESlateVisibility::Visible);
-		}
-		bIsInventoryOpen = !bIsInventoryOpen;
+		InventoryUI = CreateWidget<UInventoryUI>(GetWorld()->GetFirstPlayerController(), InventoryUIClass);
+
 	}
+
+	// 인벤토리 UI 표시/숨김 처리
+	if (bIsInventoryOpen)
+	{
+		InventoryUI->RemoveFromViewport();
+	}
+	else
+	{
+		InventoryUI->AddToViewport();
+	}
+
+	bIsInventoryOpen = !bIsInventoryOpen;
 }

@@ -80,5 +80,19 @@ protected:
 
 
 	FVector StartBelowLocation;
+
+
+
+
+
+
+public:
+	// 아이템 이미지 (블루프린트에서 설정 가능)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	UTexture2D* ItemImage;
+
+	// 아이템 이름
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	FString ItemName;
 };
 

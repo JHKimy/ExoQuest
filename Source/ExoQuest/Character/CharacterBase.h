@@ -356,9 +356,11 @@ public:
 
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory)
-	TSubclassOf<class UInventoryUI> InventoryWidget;
+	// 인벤토리 UI 클래스
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TSubclassOf<class UInventoryUI> InventoryUIClass;
 
+	// 실제 인벤토리 UI 인스턴스
 	UPROPERTY()
 	UInventoryUI* InventoryUI;
 

@@ -5,6 +5,9 @@
 #include "Components/StaticMeshComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Character/CharacterBase.h"
+#include "Item/ItemDataBase.h"
+#include "UI/InventoryUI.h"
+#include <Kismet/GameplayStatics.h>
 
 
 
@@ -40,6 +43,11 @@ AStarflux::AStarflux()
 	RotationSpeed = 1.f;
 
 
+
+
+	// 기본 값 설정
+	ItemName = TEXT("StarFlux");
+	ItemImage = nullptr; // 블루프린트에서 설정 가능
 }
 
 void AStarflux::BeginPlay()
@@ -118,14 +126,48 @@ void AStarflux::Floating(float DeltaTime)
 
 void AStarflux::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFormSweep, const FHitResult& SweepResult)
 {
-	ACharacterBase* EquippedCharacter = Cast<ACharacterBase>(OtherActor);
-
-	if (EquippedCharacter) 
+	// 캐릭터가 Overlap에 들어왔는지 확인
+	if (Cast<ACharacterBase>(OtherActor))
 	{
-		Destroy();
+		// 데이터베이스에 접근
+		const UItemDataBase* ConstGlobalItemDataBase = GetDefault<UItemDataBase>();
+
+		if (ConstGlobalItemDataBase)
+		{
+			// const_cast로 const 제거
+			UItemDataBase* GlobalItemDataBase = const_cast<UItemDataBase*>(ConstGlobalItemDataBase);
+
+			// 데이터베이스에 아이템 추가
+			GlobalItemDataBase->AddItem(ItemName, ItemImage, nullptr, 1);
+
+			// UI 접근
+			UInventoryUI* InventoryUI = Cast<UInventoryUI>(UGameplayStatics::GetActorOfClass(GetWorld(), UInventoryUI::StaticClass()));
+			if (InventoryUI)
+			{
+				// 데이터베이스 아이템을 UI 아이템으로 변환
+				TArray<FInventorySlotData> UIItems;
+				for (const FItem& Item : GlobalItemDataBase->Items)
+				{
+					FInventorySlotData UIItem;
+					UIItem.ItemName = Item.Name;
+					UIItem.ItemImage = Item.Image;
+					UIItem.ItemQuantity = Item.Num;
+					UIItems.Add(UIItem);
+				}
+
+				// UI 업데이트
+				InventoryUI->UpdateInventory(UIItems);
+			}
+
+			// 아이템을 맵에서 제거
+			Destroy();
+
+			// 디버그 로그
+			UE_LOG(LogTemp, Warning, TEXT("Item added to global database and UI updated: %s"), *ItemName);
+		}
+		else
+		{
+			UE_LOG(LogTemp, Error, TEXT("Failed to access global item database."));
+		}
 	}
-
-	UE_LOG(LogTemp, Warning, TEXT("dlfsjkfjlei jlsfnk0"));
-
-	// 여기에 캐릭터 인벤토리 연동
 }

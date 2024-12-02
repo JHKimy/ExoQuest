@@ -4,6 +4,8 @@
 #include "Engine/DataAsset.h"
 #include "ItemDataBase.generated.h"
 
+
+// 아이템 구조체
 USTRUCT(BlueprintType)
 struct FItem
 {
@@ -11,19 +13,19 @@ struct FItem
 
 	// 아이템 이름
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FString ItemName;
+	FString Name;
 
 	// 아이템 아이콘
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	UTexture2D* ItemIcon;
+	UTexture2D* Image;
 
 	// 아이템 클래스
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	TSubclassOf<AActor> ItemClass;
+	AActor* Class;
 
 	// 아이템 설명
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	FString Description;
+	int32 Num;
 };
 
 
@@ -38,4 +40,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	TArray<FItem> Items;
 
+	// 아이템 추가
+	void AddItem(
+		const FString& ItemName,
+		UTexture2D* ItemImage,
+		AActor* ItemClass,
+		int32 Quantity);
+
+	// 아이템 사용
+	bool UseItem(const FString& ItemName);
 };

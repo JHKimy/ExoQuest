@@ -55,6 +55,8 @@
 #include "UI/InventoryUI.h"
 #include "UI/InventoryComponent.h"
 
+#include "Item/ItemDataBase.h"
+
 ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -125,6 +127,20 @@ ACharacterBase::ACharacterBase()
 
 	// 수류탄
 	GrenadeLaunchPower = 1000.f;
+
+
+
+
+
+
+
+
+
+
+
+
+	// 데이터베이스 생성
+	ItemDataBase = CreateDefaultSubobject<UItemDataBase>(TEXT("ItemDataBase"));
 }
 
 void ACharacterBase::BeginPlay()
@@ -196,8 +212,7 @@ void ACharacterBase::BeginPlay()
 
 
 
-
-
+	ItemDataBase = NewObject<UItemDataBase>(this);
 
 
 
@@ -1139,6 +1154,9 @@ AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
 
 void ACharacterBase::ToggleInventory()
 {
+
+	APlayerController*playerController = GetWorld()->GetFirstPlayerController();
+
 	// InventoryUI가 초기화되지 않았다면 생성
 	if (!InventoryUI)
 	{
@@ -1150,10 +1168,12 @@ void ACharacterBase::ToggleInventory()
 	if (bIsInventoryOpen)
 	{
 		InventoryUI->RemoveFromViewport();
+		playerController->bShowMouseCursor = true;
 	}
 	else
 	{
 		InventoryUI->AddToViewport();
+		playerController->bShowMouseCursor = true;
 	}
 
 	bIsInventoryOpen = !bIsInventoryOpen;

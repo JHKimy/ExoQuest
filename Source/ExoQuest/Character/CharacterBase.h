@@ -371,7 +371,9 @@ public:
 	void ToggleInventory();
 
 
-
+	// 아이템 데이터베이스
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
+	TObjectPtr<class UItemDataBase> ItemDataBase;
 
 
 

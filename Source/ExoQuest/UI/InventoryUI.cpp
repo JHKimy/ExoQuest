@@ -5,19 +5,37 @@
 #include "Components/TextBlock.h" //  텍스트 표시를 위한 헤더
 #include "Components/Image.h"     //  이미지 표시를 위한 헤더
 #include "Item/ItemDataBase.h"         // UItemDataBase 클래스 포함
-#include "Components/GridSlot.h"
+#include "UI/InventorySlot.h"
+#include "Character/CharacterBase.h"
+#include "Kismet/GameplayStatics.h"
 
 void UInventoryUI::NativeConstruct()
 {
     Super::NativeConstruct();
 
+    // 인벤토리 업데이트
+    UpdateInventory();
 }
 
 
 
 void UInventoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
-	//Super::NativeTick(MyGeometry, InDeltaTime);
+
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+    // UpdateInventory();
+
+    //if (!InventoryBox)
+    //{
+    //    UE_LOG(LogTemp, Error, TEXT("InventoryBox is not set or not bound!"));
+    //    return;
+    //}
+    //else {
+    //    UE_LOG(LogTemp, Error, TEXT("InventoryBox set"));
+
+    //}
+
 
  //   // 인벤토리 안에 아이템이 들어 있으면 수량 늘리기
  //   for (FItem& Item : ItemDataBase->Items)
@@ -34,39 +52,33 @@ void UInventoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 
 
-void UInventoryUI::UpdateInventory(const TArray<FInventorySlotData>& InventoryData)
+void UInventoryUI::UpdateInventory()
 {
-    //if (!GridPanel || !InventorySlotClass) return;
+    // Wrap Box 초기화 (기존 슬롯 제거)
+    InventoryBox->ClearChildren();
 
-    //// GridPanel의 기존 슬롯 제거
-    //GridPanel->ClearChildren();
+    ACharacterBase* Character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-    //// 슬롯 개수 계산
-    //int32 TotalSlots = Rows * Columns;
+    // ItemDataBase의 Items 배열을 순회하며 슬롯 추가
+    for (const FItem& Item : Character->ItemDataBase->Items)
+    {
+        // Wrap Box에 아이템 추가
+        AddSlot(Item.Name, Item.Image, Item.Num);
+    }
+}
 
-    //// InventoryData에 따라 슬롯 추가
-    //for (int32 i = 0; i < TotalSlots; i++)
-    //{
-    //    // 슬롯 위젯 생성
-    //    UInventorySlot* NewSlot = CreateWidget<UInventorySlot>(this, InventorySlotClass);
-    //    if (NewSlot)
-    //    {
-    //        // 슬롯 데이터를 설정
-    //        if (i < InventoryData.Num())
-    //        {
-    //            NewSlot->ItemSlot = InventoryData[i];
-    //        }
+void UInventoryUI::AddSlot(FString ItemName, UTexture2D* ItemImage, int32 ItemQuantity)
+{
+    // 슬롯 위젯 생성
+    UInventorySlot* NewSlot = CreateWidget<UInventorySlot>(GetWorld(), InventorySlotClass);
 
-    //        // GridPanel에 추가
-    //        GridPanel->AddChild(NewSlot);
+    if (NewSlot)
+    {
+        // 슬롯 초기화 (예: 아이템 이름, 이미지, 수량)
+        NewSlot->UpdateSlotData(ItemName, ItemImage, ItemQuantity);
 
-    //        // 슬롯의 행(Row)과 열(Column) 설정
-    //        UGridSlot* GridSlot = Cast<UGridSlot>(NewSlot->Slot);
-    //        if (GridSlot)
-    //        {
-    //            GridSlot->SetRow(i / Columns);
-    //            GridSlot->SetColumn(i % Columns);
-    //        }
-    //    }
-    //}
+        // 슬롯을 Wrap Box에 추가
+        InventoryBox->AddChild(NewSlot);
+        UE_LOG(LogTemp, Log, TEXT("Slot added to InventoryBox"));
+    }
 }

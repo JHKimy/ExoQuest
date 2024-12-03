@@ -2,7 +2,8 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI/InventorySlot.h" // UInventorySlot 및 FInventorySlotData 포함
+#include "UI/InventorySlot.h"
+#include "Components/WrapBox.h"
 #include "Components/GridPanel.h"
 #include "InventoryUI.generated.h"
 
@@ -22,19 +23,52 @@ public:
     //UPROPERTY(meta = (BindWidget))
     //UGridPanel* GridPanel;
 
-    // 슬롯 위젯 클래스
+    //// 슬롯 위젯 클래스
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    //TSubclassOf<UInventorySlot> InventorySlotClass;
+
+    //// 행(Row)과 열(Column) 개수
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    //int32 Rows = 4;
+
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+    //int32 Columns = 6;
+
+protected:
+    /** Wrap Box: 슬롯을 담는 컨테이너 */
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget))
+    TObjectPtr<UWrapBox> InventoryBox;
+
+
+    //UPROPERTY(meta = (BindWidget))
+    //TObjectPtr<class UButton>Login;
+    //if (Login)
+    //{
+    //    Login->OnClicked.AddDynamic(this, &ULogin::PressLogin);
+    //    Login->OnHovered.AddDynamic(this, &ULogin::HoverLog);
+    //}
+    // Login->OnClicked.AddDynamic(this, &ULogin::PressLogin);
+
+
+
+
+public:
+    //UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = InventorySlot)
+    //TObjectPtr<UInventorySlot>SlotUI;
+
+
+    /** 슬롯 위젯 클래스 (블루프린트 설정 가능) */
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
     TSubclassOf<UInventorySlot> InventorySlotClass;
 
-    // 행(Row)과 열(Column) 개수
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 Rows = 4;
-
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
-    int32 Columns = 6;
 
     // 인벤토리 데이터 업데이트 함수
     UFUNCTION(BlueprintCallable, Category = "Inventory")
-    void UpdateInventory(const TArray<FInventorySlotData>& InventoryData);
+    void UpdateInventory();
+
+
+    UFUNCTION(BlueprintCallable, Category = "Inventory")
+    void AddSlot(FString ItemName, UTexture2D* ItemImage, int32 ItemQuantity);
+
 
 };

@@ -6,6 +6,19 @@ void UItemDataBase::AddItem(
     AActor* ItemClass,
     int32 ItemNum)
 {
+
+    // Null üũ
+    if (!this)
+    {
+        UE_LOG(LogTemp, Error, TEXT("UItemDataBase is null!"));
+        return;
+    }
+
+    if (Items.Num() == 0)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("Items array is empty. Initializing."));
+    }
+
     for (FItem& Item : Items)
     {
         if (Item.Name == ItemName)

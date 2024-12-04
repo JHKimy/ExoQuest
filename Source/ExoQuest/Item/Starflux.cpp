@@ -47,7 +47,7 @@ AStarflux::AStarflux()
 
 	// 기본 값 설정
 	ItemName = TEXT("StarFlux");
-	ItemImage = nullptr; // 블루프린트에서 설정 가능
+	//ItemImage = nullptr; // 블루프린트에서 설정 가능
 	ItemNum = 1;
 }
 
@@ -131,7 +131,7 @@ void AStarflux::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 	if (ACharacterBase* EquippedCharacter = Cast<ACharacterBase>(OtherActor))
 	{
 		
-		EquippedCharacter->ItemDataBase->AddItem(ItemName, ItemImage, this, ItemNum);
+		EquippedCharacter->ItemDataBase->AddItem(ItemName, ItemNum);
 
 		EquippedCharacter->InventoryUI->UpdateInventory();
 

@@ -92,13 +92,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
 	FString ItemName;
 
-	// 아이템 이미지 (블루프린트에서 설정 가능)
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	UTexture2D* ItemImage;
+	//// 아이템 이미지 (블루프린트에서 설정 가능)
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	//UTexture2D* ItemImage;
 
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
-	AActor* ItemClass;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")
+	//AActor* ItemClass;
 
 	// 아이템 수
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Item")

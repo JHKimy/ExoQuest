@@ -1,23 +1,40 @@
 #include "Item/ItemDataBase.h"
 
-void UItemDataBase::AddItem(
-    const FString& ItemName,
-    UTexture2D* ItemImage,
-    AActor* ItemClass,
-    int32 ItemNum)
+
+
+
+
+UTexture2D* UItemDataBase::GetImageByName(const FString& ItemName) const
 {
+    // 이름을 기반으로 이미지 찾기
+    if (ItemImageMap.Contains(ItemName)) {
+        return *ItemImageMap.Find(ItemName);
+    }
+    return nullptr;
+}
 
+
+
+
+
+
+
+
+void UItemDataBase::AddItem(const FString& ItemName, int32 ItemNum)
+{
     // Null 체크
-    if (!this)
     {
-        UE_LOG(LogTemp, Error, TEXT("UItemDataBase is null!"));
-        return;
+        if (!this)
+        {
+            UE_LOG(LogTemp, Error, TEXT("UItemDataBase is null!"));
+            return;
+        }
+        if (Items.Num() == 0)
+        {
+            UE_LOG(LogTemp, Warning, TEXT("Items array is empty. Initializing."));
+        }
     }
 
-    if (Items.Num() == 0)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("Items array is empty. Initializing."));
-    }
 
     for (FItem& Item : Items)
     {
@@ -30,12 +47,19 @@ void UItemDataBase::AddItem(
 
     FItem NewItem;
     NewItem.Name = ItemName;
-    NewItem.Image = ItemImage;
-    NewItem.Class = ItemClass;
+    NewItem.Image = GetImageByName(ItemName);   // 이름 기반으로 이미지 자동 설정
     NewItem.Num = ItemNum;
 
     Items.Add(NewItem);
 }
+
+
+
+
+
+
+
+
 
 bool UItemDataBase::UseItem(const FString& ItemName)
 {
@@ -60,3 +84,5 @@ bool UItemDataBase::UseItem(const FString& ItemName)
 
     return false; // 아이템이 없거나 사용 불가
 }
+
+

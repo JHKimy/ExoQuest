@@ -17,40 +17,12 @@ void UInventoryUI::NativeConstruct()
     UpdateInventory();
 }
 
-
-
 void UInventoryUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
-    // UpdateInventory();
-
-    //if (!InventoryBox)
-    //{
-    //    UE_LOG(LogTemp, Error, TEXT("InventoryBox is not set or not bound!"));
-    //    return;
-    //}
-    //else {
-    //    UE_LOG(LogTemp, Error, TEXT("InventoryBox set"));
-
-    //}
-
-
- //   // 인벤토리 안에 아이템이 들어 있으면 수량 늘리기
- //   for (FItem& Item : ItemDataBase->Items)
- //   {
- //       if (Item. == "Starflux")
- //       {
- //           InventoryItemQuantity += InventoryItem.Quantity;
- //           return;
- //       }
- //   }
-
-    //UpdateInventory();
 }
-
-
 
 void UInventoryUI::UpdateInventory()
 {
@@ -63,11 +35,11 @@ void UInventoryUI::UpdateInventory()
     for (const FItem& Item : Character->ItemDataBase->Items)
     {
         // Wrap Box에 아이템 추가
-        AddSlot(Item.Name, Item.Image, Item.Num);
+        AddSlot(Item.Name, Item.Num);
     }
 }
 
-void UInventoryUI::AddSlot(FString ItemName, UTexture2D* ItemImage, int32 ItemQuantity)
+void UInventoryUI::AddSlot(FString ItemName, int32 ItemNum)
 {
     // 슬롯 위젯 생성
     UInventorySlot* NewSlot = CreateWidget<UInventorySlot>(GetWorld(), InventorySlotClass);
@@ -75,7 +47,7 @@ void UInventoryUI::AddSlot(FString ItemName, UTexture2D* ItemImage, int32 ItemQu
     if (NewSlot)
     {
         // 슬롯 초기화 (예: 아이템 이름, 이미지, 수량)
-        NewSlot->UpdateSlotData(ItemName, ItemImage, ItemQuantity);
+        NewSlot->UpdateSlotData(ItemName, ItemNum);
 
         // 슬롯을 Wrap Box에 추가
         InventoryBox->AddChild(NewSlot);

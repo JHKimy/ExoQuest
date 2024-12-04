@@ -223,7 +223,12 @@ void ACharacterBase::BeginPlay()
 
 
 
+	// InventoryUI가 초기화되지 않았다면 생성
+	if (!InventoryUI)
+	{
+		InventoryUI = CreateWidget<UInventoryUI>(GetWorld()->GetFirstPlayerController(), InventoryUIClass);
 
+	}
 
 
 	
@@ -347,8 +352,6 @@ void ACharacterBase::CheckEquipWeapon()
 	// 무기 하나라도 있으면 
 	PrimaryWeapon = EquippedWeapons[0];
 	bmouseMoveMode = false;
-
-
 	{
 
 		if (enemyFSM)
@@ -1157,12 +1160,7 @@ void ACharacterBase::ToggleInventory()
 
 	APlayerController*playerController = GetWorld()->GetFirstPlayerController();
 
-	// InventoryUI가 초기화되지 않았다면 생성
-	if (!InventoryUI)
-	{
-		InventoryUI = CreateWidget<UInventoryUI>(GetWorld()->GetFirstPlayerController(), InventoryUIClass);
 
-	}
 
 	// 인벤토리 UI 표시/숨김 처리
 	if (bIsInventoryOpen)

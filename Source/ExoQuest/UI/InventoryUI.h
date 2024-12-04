@@ -68,7 +68,7 @@ public:
 
 
     UFUNCTION(BlueprintCallable, Category = "Inventory")
-    void AddSlot(FString ItemName, UTexture2D* ItemImage, int32 ItemQuantity);
+    void AddSlot(FString ItemName, int32 ItemNum);
 
 
 };

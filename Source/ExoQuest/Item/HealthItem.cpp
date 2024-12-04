@@ -1,5 +1,7 @@
 #include "Item/HealthItem.h"
 #include "Character/CharacterBase.h"
+#include "Item/ItemDataBase.h"
+#include "UI/InventoryUI.h"
 #include "Components/CapsuleComponent.h"
 
 AHealthItem::AHealthItem()
@@ -32,7 +34,10 @@ AHealthItem::AHealthItem()
 	meshComp->SetCollisionProfileName(TEXT("NoCollision"));
 	meshComp->SetupAttachment(RootComponent);
 
-
+	// 기본 값 설정
+	ItemName = TEXT("Health Kit");
+	//ItemImage = nullptr; // 블루프린트에서 설정 가능
+	ItemNum = 1;
 }
 
 void AHealthItem::BeginPlay()
@@ -57,9 +62,12 @@ void AHealthItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 	{
 		tempCharacter->health += 10;  // 캐스팅이 성공했을 때만 health 접근
 		
+		tempCharacter->ItemDataBase->AddItem(ItemName, ItemNum);
+
+		tempCharacter->InventoryUI->UpdateInventory();
+
+		Destroy();
 	}
-	Destroy();
+
 	
 }
-
-

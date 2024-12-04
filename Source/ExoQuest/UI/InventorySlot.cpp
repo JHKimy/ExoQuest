@@ -6,7 +6,7 @@
 void UInventorySlot::UpdateSlotData(const FString& NewItemName, int32 NewItemNum)
 {
     
-    // 아이템 이름과 수량 설정
+    // 아이템 이름과 수량 설정5
     ItemName = NewItemName;
     ItemNum = NewItemNum;
 

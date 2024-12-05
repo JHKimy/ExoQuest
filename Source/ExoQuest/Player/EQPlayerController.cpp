@@ -42,13 +42,13 @@ void AEQPlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	// 무기 있으면 마우스 커서 지우기
-	if (MyControlledCharacter->EquippedWeapons.Num() > 0) {
-		bShowMouseCursor = false;
-	}
-	else {
-		bShowMouseCursor = true;
-	}
+	//// 무기 있으면 마우스 커서 지우기
+	//if (MyControlledCharacter->EquippedWeapons.Num() > 0) {
+	//	bShowMouseCursor = false;
+	//}
+	//else {
+	//	bShowMouseCursor = true;
+	//}
 
 }
 

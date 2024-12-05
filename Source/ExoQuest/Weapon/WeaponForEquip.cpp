@@ -15,6 +15,16 @@ AWeaponForEquip::AWeaponForEquip()
 	MeshComponent->SetupAttachment(BoxComponent);
 	MeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
+
+	// 충돌 설정
+	BoxComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	BoxComponent->SetCollisionObjectType(ECC_WorldDynamic); // 기본 WorldDynamic 사용
+	BoxComponent->SetCollisionResponseToAllChannels(ECR_Ignore); // 모든 채널 무시
+	BoxComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Pawn과 Overlap
+	// BoxComponent->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap); // WorldDynamic과 Overlap
+
+
+
 	// 충돌 연동
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AWeaponForEquip::OnBeginOverlap);
 

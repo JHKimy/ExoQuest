@@ -364,7 +364,9 @@ public:
 	UPROPERTY()
 	UInventoryUI* InventoryUI;
 
+public:
 	// 인벤토리 창 열림 상태
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	bool bIsInventoryOpen = false;
 
 	// 입력 함수
@@ -376,5 +378,13 @@ public:
 	TObjectPtr<class UItemDataBase> ItemDataBase;
 
 
+
+
+
+
+
+
+
+	bool bMouseCursorHidden = false; // 마우스 커서 숨김 상태를 추적
 
 };

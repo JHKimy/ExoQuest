@@ -76,13 +76,13 @@ ACharacterBase::ACharacterBase()
 	springArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArmComp"));
 	springArmComp->SetupAttachment(RootComponent);
 	springArmComp->SetRelativeLocation(FVector(0, 0, 30));
-	springArmComp->TargetArmLength = 400;
+	springArmComp->TargetArmLength = 600;
 	springArmComp->SocketOffset.Z = 400;
 
 	// 3-2. 카메라 컴포넌트 붙이기
 	tpsCamComp = CreateDefaultSubobject<UCameraComponent>(TEXT("TpsCamComp"));
 	tpsCamComp->SetupAttachment(springArmComp);
-	tpsCamComp->SetRelativeRotation(FRotator(-40, 0, 0));
+	tpsCamComp->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
 
 	// 미니맵
 	miniMapSpringArmComp = CreateDefaultSubobject<USpringArmComponent>(TEXT("MiniMapSpringArm"));
@@ -98,7 +98,7 @@ ACharacterBase::ACharacterBase()
 
 	miniMapCam = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("MiniMapCam"));
 	miniMapCam->SetupAttachment(miniMapSpringArmComp); // RootComponent와의 연결
-	miniMapCam->SetRelativeRotation(FRotator(-45.f, 0.f, 0.f));
+	miniMapCam->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
 	miniMapCam->ProjectionType = ECameraProjectionMode::Orthographic;
 	miniMapCam->OrthoWidth = 1024.f;
 
@@ -432,7 +432,15 @@ void ACharacterBase::CheckEquipWeapon()
 		}
 	}
 
+	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
+	
+	if (EquippedWeapons.Num() == 1 && !bMouseCursorHidden && PlayerController)
+	{
+		PlayerController->bShowMouseCursor = false;          // 마우스 커서 숨김
+		// PlayerController->SetInputMode(FInputModeGameOnly()); // 게임 모드로 전환
+		bMouseCursorHidden = true;                           // 마우스 커서 숨김 상태 저장
+	}
 }
 
 void ACharacterBase::ChangeState()
@@ -456,6 +464,7 @@ void ACharacterBase::ChangeState()
 		springArmComp->TargetArmLength = 200;
 		springArmComp->SocketOffset.Z = 200;
 		springArmComp->SocketOffset.Y = 70;
+		tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		bUseControllerRotationYaw = true;
 		break;
@@ -575,7 +584,7 @@ void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 {
 	// 무기가 없으면 무시
-	if (EquippedWeapons.Num() == 0) return;
+	if (EquippedWeapons.Num() == 0 || bIsInventoryOpen) return;
 
 	APlayerController* EQPlayerController = Cast<APlayerController>(GetController());
 
@@ -685,7 +694,7 @@ void ACharacterBase::WeaponAttack()
 {
 	// 대쉬나 달리기 중일 때는 발사하지 않음
 	// 콤보 공격을 위한 공격가능 변수
-	if (bIsDashing || bIsRunning) return;
+	if (bIsDashing || bIsRunning || bIsInventoryOpen) return;
 
 	switch (PrimaryWeapon)
 	{
@@ -774,7 +783,7 @@ void ACharacterBase::HandleStamina(float DeltaTime)
 
 void ACharacterBase::SwordAttack()
 {
-	if (bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;
+	if (bIsInventoryOpen || bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;
 
 	playerSword->Slash();
 
@@ -1166,7 +1175,7 @@ void ACharacterBase::ToggleInventory()
 	if (bIsInventoryOpen)
 	{
 		InventoryUI->RemoveFromViewport();
-		playerController->bShowMouseCursor = true;
+		playerController->bShowMouseCursor = false;
 	}
 	else
 	{

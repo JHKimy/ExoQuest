@@ -127,6 +127,11 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		{
 			EnhancedInputComponent->BindAction(IA_Inventory, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ToggleInventory);
 		}
+
+		if (IA_TeleportRoom)
+		{
+			EnhancedInputComponent->BindAction(IA_TeleportRoom, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::TeleportRoom);
+		}
 	}
 }
 

@@ -16,17 +16,5 @@ void UInventorySlot::UpdateSlotData(const FString& NewItemName, int32 NewItemNum
     if (ItemDataBase)
     {
         ItemImage = ItemDataBase->GetImageByName(ItemName);
-        if (ItemImage)
-        {
-            UE_LOG(LogTemp, Warning, TEXT("Image successfully loaded for %s"), *ItemName);
-        }
-        else
-        {
-            UE_LOG(LogTemp, Error, TEXT("Image not found for %s"), *ItemName);
-        }
     }
-    else
-    {
-        UE_LOG(LogTemp, Error, TEXT("ItemDataBase is null."));
-    }    
 }

@@ -24,15 +24,17 @@ APowerPlant::APowerPlant()
 	CollisionSphere->SetCollisionResponseToAllChannels(ECR_Ignore); // 모든 채널 무시
 	CollisionSphere->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap); // Pawn과 Overlap
 
-	// ** 충돌 연동
-	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &APowerPlant::OnBeginOverlap);
-	CollisionSphere->OnComponentEndOverlap.AddDynamic(this, &APowerPlant::OnEndOverlap);
 }
 
 // Called when the game starts or when spawned
 void APowerPlant::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// ** 충돌 연동
+	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &APowerPlant::OnBeginOverlap);
+	CollisionSphere->OnComponentEndOverlap.AddDynamic(this, &APowerPlant::OnEndOverlap);
+
 
 	PlayerController = GetWorld()->GetFirstPlayerController();
 	UI = CreateWidget<UUserWidget>(PlayerController, UIClass);
@@ -56,7 +58,7 @@ void APowerPlant::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 			UI->AddToViewport();
 			
 			PlayerController->bShowMouseCursor = true;
-			PlayerCharacter->bIsInventoryOpen = true;
+			//PlayerCharacter->bIsInventoryOpen = false;
 
 			UE_LOG(LogTemp, Warning, TEXT("UI added to viewport."));
 		}
@@ -75,19 +77,11 @@ void APowerPlant::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 {
 	if (OtherActor && OtherActor->IsA(ACharacterBase::StaticClass()))
 	{
-		if (UI && UI->IsInViewport())
+		if (PlayerCharacter && OtherActor == PlayerCharacter && UI && UI->IsInViewport())
 		{
-			// UI를 뷰포트에서 제거
 			UI->RemoveFromParent();
-			PlayerController->bShowMouseCursor = false;
-			PlayerCharacter->bIsInventoryOpen = false;
-
-
+			PlayerController->bShowMouseCursor = false; // 마우스 커서 비활성화
 			UE_LOG(LogTemp, Warning, TEXT("UI removed from viewport."));
-		}
-		else
-		{
-			UE_LOG(LogTemp, Warning, TEXT("UI is not in viewport or UI is null."));
 		}
 	}
 }

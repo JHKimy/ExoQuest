@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
 #include "Character/CharacterBase.h"
+#include "Item/ItemDataBase.h"  // FItem 정의 포함
 #include "EQGameInstance.generated.h"
 
 /**
@@ -31,5 +32,13 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	float SavedStamina;
+	
+	// 아이템 데이터베이스에 저장된 아이템 목록
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Inventory")
+	TArray<FItem> SavedItems;  // FItem 배열로 아이템 저장
+
+	//// 기존 캐릭터 상태 변수들
+	//UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = "Inventory")
+	//TArray<UInventorySlot> SavedSlots;  // 슬롯 데이터 저장
 
 };

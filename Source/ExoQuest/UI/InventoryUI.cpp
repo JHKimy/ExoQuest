@@ -51,6 +51,5 @@ void UInventoryUI::AddSlot(FString ItemName, int32 ItemNum)
 
         // 슬롯을 Wrap Box에 추가
         InventoryBox->AddChild(NewSlot);
-        UE_LOG(LogTemp, Log, TEXT("Slot added to InventoryBox"));
     }
 }

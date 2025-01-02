@@ -365,7 +365,7 @@ public:
 	UInventoryUI* InventoryUI;
 
 public:
-	// 인벤토리 창 열림 상태
+	// 인벤토리 창 열림 상태s
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	bool bIsInventoryOpen = false;
 
@@ -374,11 +374,11 @@ public:
 
 
 	// 아이템 데이터베이스
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Inventory")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TObjectPtr<class UItemDataBase> ItemDataBase;
 
-
-
+	UFUNCTION()
+	void TeleportRoom();
 
 
 
@@ -386,5 +386,13 @@ public:
 
 
 	bool bMouseCursorHidden = false; // 마우스 커서 숨김 상태를 추적
-
+	
+	
+	
+	
+	
+	
+	
+	// 인벤토리를 화면에 출력하는 함수
+	void PrintInventory();
 };

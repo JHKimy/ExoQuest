@@ -89,4 +89,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
 	TObjectPtr<UInputAction> IA_Inventory;
 
+	// ±Õ»Ø
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "IA")
+	TObjectPtr<UInputAction> IA_TeleportRoom;
+
 };

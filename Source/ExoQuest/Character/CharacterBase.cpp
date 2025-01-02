@@ -212,7 +212,11 @@ void ACharacterBase::BeginPlay()
 
 
 
-	ItemDataBase = NewObject<UItemDataBase>(this);
+	// ItemDataBase가 nullptr이면 초기화
+	if (!ItemDataBase)
+	{
+		ItemDataBase = NewObject<UItemDataBase>(this);
+	}
 
 
 
@@ -248,7 +252,6 @@ void ACharacterBase::Tick(float DeltaTime)
 		// 무기에 따른 설정 변경
 		ChangeState();
 	}
-
 
 
 
@@ -335,6 +338,14 @@ void ACharacterBase::Tick(float DeltaTime)
 	GrenadeLaunchVelocity = RotationOffset.RotateVector(GrenadeLaunchVelocity);
 
 
+
+
+
+
+
+
+
+	//PrintInventory();
 
 }
 
@@ -856,6 +867,11 @@ void ACharacterBase::SaveStateBeforeLevelChange()
 		//// 체력 및 스태미나 저장
 		MyGameInstance->SavedHealth = health;
 		MyGameInstance->SavedStamina = stamina;
+
+
+		// 아이템 데이터 저장
+		MyGameInstance->SavedItems = ItemDataBase->Items;
+		//MyGameInstance->SavedSlots.Add(SlotData);
 	}
 }
 
@@ -884,6 +900,19 @@ void ACharacterBase::RestoreStateAfterLevelChange()
 		// 체력, 스태미나 등 추가 상태 복원 (필요 시)
 		health = MyGameInstance->SavedHealth;
 		stamina = MyGameInstance->SavedStamina;
+
+
+		// 아이템 데이터 복원
+		if (ItemDataBase)
+		{
+			ItemDataBase->Items = MyGameInstance->SavedItems;
+		}
+
+		// UI 업데이트
+		if (InventoryUI)
+		{
+			InventoryUI->UpdateInventory();
+		}
 	}
 
 	if (springArmComp)
@@ -1184,4 +1213,32 @@ void ACharacterBase::ToggleInventory()
 	}
 
 	bIsInventoryOpen = !bIsInventoryOpen;
+}
+
+void ACharacterBase::TeleportRoom()
+{
+	// 맵 전환 전 캐릭터 상태 저장
+	SaveStateBeforeLevelChange();
+
+	// 맵 전환 (게임 룸으로)
+	if (GetWorld())
+	{
+		GetWorld()->ServerTravel(TEXT("/Game/Maps/GameRoom?listen"), true);
+	}
+}
+
+void ACharacterBase::PrintInventory()
+{
+	if (!ItemDataBase) return; // 데이터베이스가 없으면 함수 종료
+
+	FString InventoryString = "get ITEM : :\n";
+
+	// 아이템 데이터베이스를 순회하며 정보 추가
+	for (const FItem& Item : ItemDataBase->Items)
+	{
+		InventoryString += FString::Printf(TEXT("%s: %d\n"), *Item.Name, Item.Num);
+	}
+
+	// 화면에 출력
+	UKismetSystemLibrary::PrintString(this, InventoryString, true, true, FColor::Green, 5.0f);
 }

@@ -60,6 +60,15 @@ void APowerPlant::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
 			PlayerController->bShowMouseCursor = true;
 			//PlayerCharacter->bIsInventoryOpen = false;
 
+			// 캐릭터 입력 중 회전 및 무기 발사 차단
+			if (PlayerCharacter)
+			{
+				//PlayerCharacter->SetInputRestrictions(true); // 사용자 정의 함수 호출
+				PlayerCharacter->bIsInventoryOpen = true; // 사용자 정의 함수 호출
+
+			}
+
+
 			UE_LOG(LogTemp, Warning, TEXT("UI added to viewport."));
 		}
 		else
@@ -81,7 +90,44 @@ void APowerPlant::OnEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 		{
 			UI->RemoveFromParent();
 			PlayerController->bShowMouseCursor = false; // 마우스 커서 비활성화
+			if (PlayerCharacter)
+			{
+				PlayerCharacter->bIsInventoryOpen = false; // 사용자 정의 함수 호출
+			}
+
 			UE_LOG(LogTemp, Warning, TEXT("UI removed from viewport."));
 		}
+	}
+}
+
+void APowerPlant::SpawnItemByIndex(int32 ItemIndex)
+{
+	if (ItemIndex < 0 || ItemIndex >= ItemClasses.Num())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Invalid item index: %d"), ItemIndex);
+		return;
+	}
+
+	// 스폰할 아이템 클래스
+	TSubclassOf<AActor> ItemClass = ItemClasses[ItemIndex];
+	if (!ItemClass)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Item class at index %d is null"), ItemIndex);
+		return;
+	}
+
+	// 스폰 위치 설정 (PowerPlant 위에 생성)
+	FVector SpawnLocation = GetActorLocation() + FVector(0, 0, 50);
+	FRotator SpawnRotation = FRotator::ZeroRotator;
+
+	// 아이템 스폰
+	AActor* SpawnedItem = GetWorld()->SpawnActor<AActor>(ItemClass, SpawnLocation, SpawnRotation);
+	if (SpawnedItem)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Successfully spawned item at index: %d"), ItemIndex);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Failed to spawn item at index: %d"), ItemIndex);
 	}
 }

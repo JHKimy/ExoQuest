@@ -14,9 +14,19 @@ UTexture2D* UItemDataBase::GetImageByName(const FString& ItemName) const
 }
 
 
+FItem UItemDataBase::FindItem(const FString& ItemName) const
+{
+    for (const FItem& Item : Items)
+    {
+        if (Item.Name == ItemName)
+        {
+            return Item; // 값 반환
+        }
+    }
 
-
-
+    // 아이템이 없을 경우 기본값 반환
+    return FItem();
+}
 
 
 

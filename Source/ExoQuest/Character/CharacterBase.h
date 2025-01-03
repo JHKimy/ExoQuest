@@ -395,4 +395,9 @@ public:
 	
 	// 인벤토리를 화면에 출력하는 함수
 	void PrintInventory();
+
+	public:
+		// 회전 및 무기 발사 제한 함수
+		void SetInputRestrictions(bool bRestrict);
+
 };

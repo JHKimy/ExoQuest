@@ -36,7 +36,20 @@ public:
 		const FHitResult& SweepResult);
 
 
+protected:
+	// 초기 위치
+	FVector InitialLocation;
 
+	// 타겟 위치
+	FVector TargetLocation;
+
+	// 이동 속도
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float RiseSpeed = 10.0f;
+
+	// 높이
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation")
+	float RiseHeight = 200.0f;
 
 
 

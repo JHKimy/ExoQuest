@@ -27,7 +27,6 @@ public:
 
 
 
-
 	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "StaticMesh")
 	TObjectPtr<class UStaticMeshComponent> StaticMeshInstance;
 
@@ -60,10 +59,24 @@ public:
 		UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex);
 
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "Inventory")
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "UI")
 	TSubclassOf<class UUserWidget> UIClass;
 
 	// 실제 인벤토리 UI 인스턴스
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "Inventory")
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = "UI")
 	class UUserWidget* UI;
+	
+
+
+
+
+
+
+	// 아이템 스폰 함수
+	UFUNCTION()
+	void SpawnItemByIndex(int32 ItemIndex);
+
+	// 블루프린트에서 설정 가능한 아이템 클래스 배열
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Items")
+	TArray<TSubclassOf<AActor>> ItemClasses;
 };

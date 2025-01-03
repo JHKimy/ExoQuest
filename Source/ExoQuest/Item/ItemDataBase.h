@@ -49,10 +49,8 @@ public:
 	UTexture2D* GetImageByName(const FString& ItemName) const;
 
 
-
-
-
-
+	UFUNCTION(BlueprintCallable, Category = "Item")
+	FItem FindItem(const FString& ItemName) const;
 
 
 

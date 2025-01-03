@@ -1242,3 +1242,19 @@ void ACharacterBase::PrintInventory()
 	// 화면에 출력
 	UKismetSystemLibrary::PrintString(this, InventoryString, true, true, FColor::Green, 5.0f);
 }
+
+void ACharacterBase::SetInputRestrictions(bool bRestrict)
+{
+	// 무기 발사 제한
+	bIsInventoryOpen = !bRestrict;
+
+	// 필요한 경우 추가 입력 제한 처리 가능
+	if (bRestrict)
+	{
+		UE_LOG(LogTemp, Log, TEXT("Character input restricted."));
+	}
+	else
+	{
+		UE_LOG(LogTemp, Log, TEXT("Character input restored."));
+	}
+}

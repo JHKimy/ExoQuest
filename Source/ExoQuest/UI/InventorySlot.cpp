@@ -1,20 +1,77 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
-
 #include "UI/InventorySlot.h"
+#include "Components/Button.h"
+#include "UI/InventoryUI.h"
+
+void UInventorySlot::NativeConstruct()
+{
+    Super::NativeConstruct();
+
+    // 월드에서 캐릭터를 검색
+    character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
+    if (SlotButton)
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Button Bound"));
+        SlotButton->OnClicked.AddDynamic(this, &UInventorySlot::OnSlotClicked);
+    }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("SlotButton is null!"));
+    }
+}
 
 void UInventorySlot::UpdateSlotData(const FString& NewItemName, int32 NewItemNum)
 {
-    
-    // 아이템 이름과 수량 설정5
     ItemName = NewItemName;
     ItemNum = NewItemNum;
 
-    // 데이터베이스에서 이미지를 가져옴
-    // 블루 프린트에서 이미지 설정을 하기 때문에
-    // 설정 된 아이템 데이터 베이스의 블루 프린트 클래스를 가져와서 사용해야 함
     if (ItemDataBase)
     {
         ItemImage = ItemDataBase->GetImageByName(ItemName);
     }
+    else
+    {
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("ItemDataBase is null!"));
+    }
+}
+
+void UInventorySlot::OnSlotClicked()
+{
+    if (ItemName == "Medical Kit")
+    {
+        if (ItemDataBase && ItemDataBase->UseItem(ItemName))
+        {
+            if (character)
+            {
+                // 체력 회복
+                character->health += 10;
+                if (character->health > character->maxHealth)
+                {
+                    character->health = character->maxHealth;
+                }
+
+                // 디버그 메시지
+                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Health increased by 10!"));
+
+                // 인벤토리 업데이트
+                if (character->InventoryUI)
+                {
+                    character->InventoryUI->UpdateInventory();
+                }
+                else
+                {
+                    GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("InventoryUI is null!"));
+                }
+            }
+            else
+            {
+                GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("CharacterInstance is null!"));
+            }
+        }
+        else
+        {
+            GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Failed to use item from ItemDataBase!"));
+        }
+    }
+
 }

@@ -365,7 +365,7 @@ public:
 	UInventoryUI* InventoryUI;
 
 public:
-	// 인벤토리 창 열림 상태s
+	// 인벤토리 창 열림 상태
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	bool bIsInventoryOpen = false;
 

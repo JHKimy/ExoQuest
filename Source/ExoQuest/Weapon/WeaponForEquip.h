@@ -74,4 +74,5 @@ public:
 		bool bFormSweep,
 		const FHitResult& SweepResult);
 
+	void ShowWeapon();
 };

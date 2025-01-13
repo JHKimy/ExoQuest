@@ -3,8 +3,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include <InputAction.h> // 인풋 액션
+
+#include "Kismet/KismetSystemLibrary.h"
+
+
+
+
 #include "CharacterBase.generated.h"
 //#include <string>
+
 
 //class ARifle;
 //class Shotgun;
@@ -399,5 +406,50 @@ public:
 	public:
 		// 회전 및 무기 발사 제한 함수
 		void SetInputRestrictions(bool bRestrict);
+
+
+
+
+		void DropWeapon();
+
+		bool isFirstSpawn ;
+
+		void PrintEquippedWeapons()
+		{
+			// 현재 장착된 무기가 없으면 안내 메시지 출력
+			if (EquippedWeapons.IsEmpty())
+			{
+				UKismetSystemLibrary::PrintString(this, TEXT("No weapons equipped."), true, true, FColor::Red, 5.0f);
+				return;
+			}
+
+			// 무기 목록을 출력하기 위한 문자열 생성
+			FString WeaponsList = TEXT("Equipped Weapons: ");
+
+			for (EWeaponType WeaponType : EquippedWeapons)
+			{
+				switch (WeaponType)
+				{
+				case EWeaponType::Rifle:
+					WeaponsList += TEXT("Rifle ");
+					break;
+				case EWeaponType::Shotgun:
+					WeaponsList += TEXT("Shotgun ");
+					break;
+				case EWeaponType::RocketLauncher:
+					WeaponsList += TEXT("RocketLauncher ");
+					break;
+				case EWeaponType::Sword:
+					WeaponsList += TEXT("Sword ");
+					break;
+				default:
+					WeaponsList += TEXT("Unknown ");
+					break;
+				}
+			}
+
+			// 화면에 출력
+			UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 5.0f);
+		}
 
 };

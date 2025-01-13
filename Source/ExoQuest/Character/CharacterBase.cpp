@@ -57,6 +57,9 @@
 
 #include "Item/ItemDataBase.h"
 
+#include "Weapon/WeaponForEquip.h"
+
+
 ACharacterBase::ACharacterBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -207,8 +210,18 @@ void ACharacterBase::BeginPlay()
 	currentCombo = 0;
 
 
+	springArmComp->TargetArmLength = 600;
+	springArmComp->SocketOffset.Z = 400;
+	springArmComp->SocketOffset.Y = 10;
 
-
+	tpsCamComp->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	// 캐릭터와 컨트롤러의 회전 따로
+	bUseControllerRotationYaw = false;
+	// 이동 방향으로 캐릭터만 회전
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// 스프링팔이 그만큼 상쇄해줌
+	springArmComp->bUsePawnControlRotation = true;
+	isFirstSpawn = true;
 
 
 
@@ -254,7 +267,8 @@ void ACharacterBase::Tick(float DeltaTime)
 	}
 
 
-
+	// 현재 무기 상태를 출력
+	PrintEquippedWeapons();
 
 
 
@@ -459,13 +473,27 @@ void ACharacterBase::ChangeState()
 	switch (EQCharacterState)
 	{
 	case ECharacterState::NoWeaponMode:
+		if (isFirstSpawn) {
 
-		// 캐릭터와 컨트롤러의 회전 따로
-		bUseControllerRotationYaw = false;
-		// 이동 방향으로 캐릭터만 회전
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		// 스프링팔이 그만큼 상쇄해줌
-		springArmComp->bUsePawnControlRotation = true;
+			springArmComp->TargetArmLength = 600;
+			springArmComp->SocketOffset.Z = 400;
+			// 캐릭터와 컨트롤러의 회전 따로
+			bUseControllerRotationYaw = false;
+			// 이동 방향으로 캐릭터만 회전
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			// 스프링팔이 그만큼 상쇄해줌
+			springArmComp->bUsePawnControlRotation = true;
+		}
+		else if (!isFirstSpawn) {
+			springArmComp->TargetArmLength = 200;
+			springArmComp->SocketOffset.Z = 200;
+			springArmComp->SocketOffset.Y = 70;
+			tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
+			GetCharacterMovement()->bOrientRotationToMovement = true;
+			springArmComp->bUsePawnControlRotation = true;
+
+			bUseControllerRotationYaw = false;
+		}
 		break;
 
 	case ECharacterState::RifleMode:
@@ -478,6 +506,7 @@ void ACharacterBase::ChangeState()
 		tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		bUseControllerRotationYaw = true;
+		isFirstSpawn = false;
 		break;
 
 	default:
@@ -522,7 +551,7 @@ void ACharacterBase::ChangeState()
 void ACharacterBase::MouseClickMove()
 {
 	// 무기 획득하면 무시
-	if (EquippedWeapons.Num() > 0) return;
+	if (EquippedWeapons.Num() > 0 && !isFirstSpawn) return;
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
@@ -562,7 +591,7 @@ void ACharacterBase::MouseClickMove()
 void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 {
 	// 무기가 없으면 무시
-	if (EquippedWeapons.Num() == 0) return;
+	if (EquippedWeapons.Num() == 0 && isFirstSpawn) return;
 
 
 	// 입력된 값에서 X, Y 값을 추출
@@ -595,7 +624,9 @@ void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 {
 	// 무기가 없으면 무시
-	if (EquippedWeapons.Num() == 0 || bIsInventoryOpen) return;
+	if (EquippedWeapons.Num() == 0&& isFirstSpawn  ) return;
+	if (bIsInventoryOpen) return;
+
 
 	APlayerController* EQPlayerController = Cast<APlayerController>(GetController());
 
@@ -1258,3 +1289,116 @@ void ACharacterBase::SetInputRestrictions(bool bRestrict)
 		UE_LOG(LogTemp, Log, TEXT("Character input restored."));
 	}
 }
+
+void ACharacterBase::DropWeapon()
+{
+	// 현재 장착된 무기가 없으면 함수 종료
+	if (EquippedWeapons.IsEmpty())
+	{
+		return;
+	}
+
+	// 주 무기(PrimaryWeapon)를 제거
+	EWeaponType WeaponToDrop = PrimaryWeapon;
+
+	// 주 무기에 해당하는 액터 찾기
+	AActor* WeaponActor = nullptr;
+
+	switch (WeaponToDrop)
+	{
+	case EWeaponType::Rifle:
+		WeaponActor = playerRifle;
+		playerRifle = nullptr; // 삭제 후 참조 제거
+		break;
+	case EWeaponType::Shotgun:
+		WeaponActor = playerShotgun;
+		playerShotgun = nullptr; // 삭제 후 참조 제거
+		break;
+	case EWeaponType::RocketLauncher:
+		WeaponActor = playerRocketLauncher;
+		playerRocketLauncher = nullptr; // 삭제 후 참조 제거
+		break;
+	case EWeaponType::Sword:
+		WeaponActor = playerSword;
+		playerSword = nullptr; // 삭제 후 참조 제거
+		break;
+	default:
+		break;
+	}
+
+	// 무기 액터가 존재하면 처리
+	if (WeaponActor)
+	{
+		// 월드에 무기 드롭 (Socket에서 분리)
+		WeaponActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		WeaponActor->SetActorEnableCollision(true); // 충돌 활성화
+		WeaponActor->SetOwner(nullptr); // 소유권 제거
+		WeaponActor->Destroy(); // 무기 제거
+	}
+
+	// EquippedWeapons 배열에서 제거
+	EquippedWeapons.Remove(WeaponToDrop);
+
+	// 서브 무기를 주 무기로 업데이트
+	if (!EquippedWeapons.IsEmpty())
+	{
+		PrimaryWeapon = EquippedWeapons[0];
+
+		// 서브 무기를 손에 부착
+		FName HandSocketName;
+		AActor* SubWeaponActor = nullptr;
+
+		switch (PrimaryWeapon)
+		{
+		case EWeaponType::Rifle:
+			SubWeaponActor = playerRifle;
+			HandSocketName = FName(TEXT("Rifle"));
+			break;
+		case EWeaponType::Shotgun:
+			SubWeaponActor = playerShotgun;
+			HandSocketName = FName(TEXT("Shotgun"));
+			break;
+		case EWeaponType::RocketLauncher:
+			SubWeaponActor = playerRocketLauncher;
+			HandSocketName = FName(TEXT("RocketLauncher"));
+			break;
+		case EWeaponType::Sword:
+			SubWeaponActor = playerSword;
+			HandSocketName = FName(TEXT("Sword"));
+			break;
+		default:
+			break;
+		}
+
+		if (SubWeaponActor)
+		{
+			SubWeaponActor->AttachToComponent(GetMesh(),
+				FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+				HandSocketName);
+		}
+	}
+	else
+	{
+		// 모든 무기를 버렸을 경우 상태를 업데이트
+		PrimaryWeapon = EWeaponType::None;
+		EQCharacterState = ECharacterState::NoWeaponMode;
+	}
+
+	// 무기 상태에 따라 설정 변경
+	ChangeState();
+
+	TArray<AActor*> FoundWeapons;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWeaponForEquip::StaticClass(), FoundWeapons);
+
+	for (AActor* Actor : FoundWeapons)
+	{
+		AWeaponForEquip* Weapon = Cast<AWeaponForEquip>(Actor);
+
+		if (Weapon && Weapon->IsHidden()) // Hidden 상태인 무기만 가져오기
+		{
+			Weapon->ShowWeapon();
+			break; // 첫 번째 Hidden 무기에서 루프 종료
+		}
+	}
+}
+

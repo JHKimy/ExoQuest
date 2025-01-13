@@ -118,7 +118,7 @@ void AHealthItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActo
     // 캐스팅 성공 여부 확인
     if (tempCharacter)
     {
-        tempCharacter->health += 10;  // 캐스팅이 성공했을 때만 health 접근
+        // tempCharacter->health += 10;  // 캐스팅이 성공했을 때만 health 접근
 
         tempCharacter->ItemDataBase->AddItem(ItemName, ItemNum);
 

@@ -91,8 +91,10 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 	// 최대 2개 획득 가능
 	if (EquipCharacter->EquippedWeapons.Num() < 2)
 	{
-		Destroy();
 
+		//Destroy();
+		  // 무기 숨김 처리
+		SetActorHiddenInGame(true);
 
 		switch (WeaponType)
 		{
@@ -116,5 +118,13 @@ void AWeaponForEquip::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, A
 			break;
 		}
 	}
+	
 }
-
+void AWeaponForEquip::ShowWeapon()
+{
+	//if (WeaponType == this->WeaponType)
+	//{
+		// 무기 타입이 일치하면 무기를 다시 활성화
+		SetActorHiddenInGame(false);
+	//}
+}

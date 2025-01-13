@@ -132,6 +132,11 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		{
 			EnhancedInputComponent->BindAction(IA_TeleportRoom, ETriggerEvent::Triggered, myCharacter, &ACharacterBase::TeleportRoom);
 		}
+
+		if (IA_WeaponDrop)
+		{
+			EnhancedInputComponent->BindAction(IA_WeaponDrop, ETriggerEvent::Completed, myCharacter, &ACharacterBase::DropWeapon);
+		}
 	}
 }
 

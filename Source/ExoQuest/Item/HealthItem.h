@@ -76,7 +76,7 @@ private:
     void CheckForNearbyCharacters();
 
     UFUNCTION()
-    void AbsorbToCharacter();
+    void AbsorbToCharacter(float DeltaTime);
 
     UFUNCTION()
     void OnBeginOverlap(

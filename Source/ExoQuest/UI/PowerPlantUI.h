@@ -15,8 +15,7 @@ class EXOQUEST_API UPowerPlantUI : public UUserWidget
 
 protected:
 	virtual void NativeConstruct() override;
-	//virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
-
+	//virtual void NativeDestruct() override;
 public:
 	// DataBase ÂüÁ¶
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "PowerPlant")

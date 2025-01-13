@@ -69,14 +69,7 @@ void AHealthItem::Tick(float DeltaTime)
 
     if (HasReachedTarget && IsCharacterNearby && character)
     {
-        FVector CharacterLocation = character->GetActorLocation();
-        FVector NewLocation = FMath::VInterpTo(CurrentLocation, CharacterLocation, DeltaTime, MoveToCharacterSpeed);
-        SetActorLocation(NewLocation);
-
-        if (FVector::Dist(NewLocation, CharacterLocation) < 50.0f)
-        {
-            AbsorbToCharacter();
-        }
+        AbsorbToCharacter(DeltaTime);
     }
 }
 
@@ -107,13 +100,14 @@ void AHealthItem::CheckForNearbyCharacters()
     }
 }
 
-void AHealthItem::AbsorbToCharacter()
+void AHealthItem::AbsorbToCharacter(float DeltaTime)
 {
-    if (character)
-    {
-        character->health += 10;
-        Destroy();
-    }
+    FVector CurrentLocation = GetActorLocation();
+
+    FVector CharacterLocation = character->GetActorLocation();
+    FVector NewLocation = FMath::VInterpTo(CurrentLocation, CharacterLocation, DeltaTime, MoveToCharacterSpeed);
+    SetActorLocation(NewLocation);
+
 }
 
 void AHealthItem::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFormSweep, const FHitResult& SweepResult)

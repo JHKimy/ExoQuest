@@ -17,10 +17,9 @@ AStarflux::AStarflux()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	// 캡슐, 메쉬설정
 	capsuleComp = CreateDefaultSubobject<UCapsuleComponent>(TEXT("Capsule Collision"));
 	RootComponent = capsuleComp;
-
-
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("MeshComp"));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> tempMesh(TEXT("/Script/Engine.StaticMesh'/Game/Asset/Item/Starflux/SM_Starflux.SM_Starflux'"));
 	if (tempMesh.Succeeded())
@@ -31,36 +30,53 @@ AStarflux::AStarflux()
 	meshComp->SetupAttachment(RootComponent);
 	meshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-
-
-
 	// 충돌 연동
 	capsuleComp->OnComponentBeginOverlap.AddDynamic(this, &AStarflux::OnBeginOverlap);
-
-
-
+	
+	// floating 관련 변수
 	Amplitude = 15.f;
 	RotationSpeed = 1.f;
+	// 팝업 애니메이션 시작
+	ElapsedTime = 0.f; // 애니메이션 진행 시간 초기화
+	bIsPopping = true; // 팝업 상태 활성화
 
 
-
-
-	// 기본 값 설정
+	// ItemDataBase 변수 설정
 	ItemName = TEXT("StarFlux");
-	//ItemImage = nullptr; // 블루프린트에서 설정 가능
 	ItemNum = 1;
+
+	//character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+
 }
 
 void AStarflux::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+
+	// 캐릭터 초기화
+	character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!character)
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("NODetected")));
+	}
+	else
+	{
+		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Detected Character")));
+	}
+
+	// 
 	StartPos = GetActorLocation();
 
-	
-	// 팝업 애니메이션 시작
-	ElapsedTime = 0.f; // 애니메이션 진행 시간 초기화
-	bIsPopping = true; // 팝업 상태 활성화
+
+
+	GetWorldTimerManager().SetTimer(
+		DistanceCheckTimerHandle,
+		this,
+		&AStarflux::CheckForNearbyCharacters,
+		CheckInterval,
+		true
+	);
 
 }
 
@@ -68,16 +84,38 @@ void AStarflux::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (bIsPopping)
+	switch (CurrentState)
 	{
-		Pop(DeltaTime); // 팝업 애니메이션
-	}
-	else
-	{
-		Floating(DeltaTime); // 부유 효과
-	}
-}
+	case EStarfluxState::Pop:
+		Pop(DeltaTime);
+		break;
 
+	case EStarfluxState::Floating:
+		Floating(DeltaTime);
+		break;
+
+	case EStarfluxState::Absorbing:
+		AbsorbToCharacter(DeltaTime);
+		break;
+
+	default:
+		break;
+	}
+
+
+	//// 캐릭터와의 거리로 근처 여부 판단
+	//if (NearbyCharacter && bCanAbsorb)
+	//{
+		//float Distance = FVector::Dist(GetActorLocation(), NearbyCharacter->GetActorLocation());
+		//IsCharacterNearby = (Distance < 200.f); // 200.f는 근처 거리 기준
+
+		//if (IsCharacterNearby)
+		//{
+		//	AbsorbToCharacter(DeltaTime);
+		//}
+	//}
+	
+}
 
 void AStarflux::Pop(float DeltaTime)
 {
@@ -104,13 +142,11 @@ void AStarflux::Pop(float DeltaTime)
 	CurrentLocation.Z = FMath::Lerp(StartBelowLocation.Z, StartPos.Z, EasedAlpha);
 	SetActorLocation(CurrentLocation);
 
-	// 팝업 애니메이션 종료 조건
 	if (ElapsedTime >= PopDuration)
 	{
-		bIsPopping = false; // 팝업 종료
-		ElapsedTime = 0.f;  // 시간 초기화
-		// 부유 애니메이션의 시작점을 현재 위치로 설정
-		StartPos = CurrentLocation - 10.f; // 부유 효과와 매끄럽게 연결
+		CurrentState = EStarfluxState::Floating; // 상태 전환
+		ElapsedTime = 0.f;
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Popup Complete, Floating Start"));
 	}
 }
 
@@ -123,6 +159,14 @@ void AStarflux::Floating(float DeltaTime)
 
 	SetActorLocation(NewLocation);
 	AddActorLocalRotation(FRotator(0, RotationSpeed, 0));
+
+	// 3초 후 흡수 상태로 전환
+	TimeSinceStart += DeltaTime;
+	if (TimeSinceStart >= 3.0f)
+	{
+		CurrentState = EStarfluxState::Absorbing; // 상태 전환
+		GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, TEXT("Ready to Absorb!"));
+	}
 }
 
 void AStarflux::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFormSweep, const FHitResult& SweepResult)
@@ -135,14 +179,67 @@ void AStarflux::OnBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor*
 
 		EquippedCharacter->InventoryUI->UpdateInventory();
 
-		//// UI 업데이트 트리거
-		//UInventoryUI* InventoryUI = Cast<UInventoryUI>(UGameplayStatics::GetPlayerController(GetWorld(), 0)->GetHUD());
-		//if (InventoryUI)
-		//{
-		//	InventoryUI->UpdateInventory();
-		//}
-
 		// 아이템을 맵에서 제거
 		Destroy();
 	}
+}
+
+
+void AStarflux::CheckForNearbyCharacters()
+{
+	TArray<AActor*> FoundActors;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACharacterBase::StaticClass(), FoundActors);
+
+	IsCharacterNearby = false;
+	character = nullptr;
+
+	FVector CurrentLocation = GetActorLocation();
+	float ClosestDistance = MAX_FLT;
+
+	for (AActor* Actor : FoundActors)
+	{
+		ACharacterBase* DetectedCharacter = Cast<ACharacterBase>(Actor);
+		if (DetectedCharacter)
+		{
+			float Distance = FVector::Dist(CurrentLocation, DetectedCharacter->GetActorLocation());
+			if (Distance < 100.0f && Distance < ClosestDistance)
+			{
+				IsCharacterNearby = true;
+				character = DetectedCharacter;
+				ClosestDistance = Distance;
+			}
+		}
+	}
+
+}
+
+
+void AStarflux::AbsorbToCharacter(float DeltaTime)
+{
+	AddActorLocalRotation(FRotator(0, RotationSpeed, 0));
+
+
+	if (!character)
+	{
+		character = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+		if (!character)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Red, TEXT("No Character Found"));
+			return;
+		}
+	}
+
+	// 캐릭터와의 거리 계산
+	float DistanceToCharacter = FVector::Dist(GetActorLocation(), character->GetActorLocation());
+
+	// 일정 거리 이내에 있을 때만 흡수 실행
+	if (DistanceToCharacter < AbsorptionDistance) {
+
+		FVector CurrentLocation = GetActorLocation();
+
+		FVector CharacterLocation = character->GetActorLocation();
+		FVector NewLocation = FMath::VInterpTo(CurrentLocation, CharacterLocation, DeltaTime, MoveToCharacterSpeed);
+		SetActorLocation(NewLocation);
+	}
+	
 }

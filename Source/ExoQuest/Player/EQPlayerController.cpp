@@ -17,7 +17,9 @@ void AEQPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	// 마우스 커서 보이게
-	bShowMouseCursor = true;
+	if (MyControlledCharacter->isFirstSpawn) {
+		bShowMouseCursor = true;
+	}
 
 	// IMC 연동
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem

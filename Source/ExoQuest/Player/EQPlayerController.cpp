@@ -16,8 +16,17 @@ void AEQPlayerController::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 현재 컨트롤 중인 캐릭터 초기화
+	MyControlledCharacter = Cast<ACharacterBase>(GetCharacter());
+	if (!MyControlledCharacter)
+	{
+		UE_LOG(LogTemp, Error, TEXT("MyControlledCharacter is null in BeginPlay!"));
+		return;
+	}
+
 	// 마우스 커서 보이게
-	if (MyControlledCharacter->isFirstSpawn) {
+	if (MyControlledCharacter->isFirstSpawn)
+	{
 		bShowMouseCursor = true;
 	}
 

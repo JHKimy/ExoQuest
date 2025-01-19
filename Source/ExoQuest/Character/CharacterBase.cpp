@@ -272,7 +272,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 
-	//FString WeaponsList = "Equipped Weapons : ";
+	// FString WeaponsList = "Equipped Weapons : ";
 
 	//for (EWeaponType WeaponType : EquippedWeapons)
 	//{
@@ -298,6 +298,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 	//// 화면 출력
 	//UKismetSystemLibrary::PrintString(this, WeaponsList, true, true, FColor::Green, 2.0f);
+
 
 	FString PrimaryWeaponName;
 	switch (PrimaryWeapon)
@@ -353,7 +354,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 
-
+	PrintCharacterState();
 
 
 
@@ -1192,8 +1193,37 @@ void ACharacterBase::ChangeWeapon()
 	// 배열의 0번째와 1번째 요소 교환
 	Swap(EquippedWeapons[0], EquippedWeapons[1]);
 
+
+
 	// 주 무기를 업데이트
 	PrimaryWeapon = EquippedWeapons[0];
+
+	//CheckEquipWeapon();
+
+	//ChangeState();
+
+
+	if (PrimaryWeapon == EWeaponType::Rifle)
+	{
+		EQCharacterState = ECharacterState::RifleMode;
+	}
+	if (PrimaryWeapon == EWeaponType::Shotgun)
+	{
+		EQCharacterState = ECharacterState::ShotgunMode;
+	}
+	if (PrimaryWeapon == EWeaponType::RocketLauncher)
+	{
+		EQCharacterState = ECharacterState::RocketLauncherMode;
+	}
+	if (PrimaryWeapon == EWeaponType::Sword)
+	{
+		EQCharacterState = ECharacterState::SwordMode;
+	}
+
+
+
+	// 애니메이션 상태 변수
+	
 }
 
 AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
@@ -1258,21 +1288,7 @@ void ACharacterBase::TeleportRoom()
 	}
 }
 
-void ACharacterBase::PrintInventory()
-{
-	if (!ItemDataBase) return; // 데이터베이스가 없으면 함수 종료
 
-	FString InventoryString = "get ITEM : :\n";
-
-	// 아이템 데이터베이스를 순회하며 정보 추가
-	for (const FItem& Item : ItemDataBase->Items)
-	{
-		InventoryString += FString::Printf(TEXT("%s: %d\n"), *Item.Name, Item.Num);
-	}
-
-	// 화면에 출력
-	UKismetSystemLibrary::PrintString(this, InventoryString, true, true, FColor::Green, 5.0f);
-}
 
 void ACharacterBase::SetInputRestrictions(bool bRestrict)
 {
@@ -1331,7 +1347,7 @@ void ACharacterBase::DropWeapon()
 	{
 		// 월드에 무기 드롭 (Socket에서 분리)
 		WeaponActor->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-		WeaponActor->SetActorEnableCollision(true); // 충돌 활성화
+		//WeaponActor->SetActorEnableCollision(true); // 충돌 활성화
 		WeaponActor->SetOwner(nullptr); // 소유권 제거
 		WeaponActor->Destroy(); // 무기 제거
 	}
@@ -1385,7 +1401,27 @@ void ACharacterBase::DropWeapon()
 	}
 
 	// 무기 상태에 따라 설정 변경
+	
 	ChangeState();
+
+	if (PrimaryWeapon == EWeaponType::Rifle)
+	{
+		EQCharacterState = ECharacterState::RifleMode;
+	}
+	if (PrimaryWeapon == EWeaponType::Shotgun)
+	{
+		EQCharacterState = ECharacterState::ShotgunMode;
+	}
+	if (PrimaryWeapon == EWeaponType::RocketLauncher)
+	{
+		EQCharacterState = ECharacterState::RocketLauncherMode;
+	}
+	if (PrimaryWeapon == EWeaponType::Sword)
+	{
+		EQCharacterState = ECharacterState::SwordMode;
+	}
+
+
 
 	TArray<AActor*> FoundWeapons;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AWeaponForEquip::StaticClass(), FoundWeapons);

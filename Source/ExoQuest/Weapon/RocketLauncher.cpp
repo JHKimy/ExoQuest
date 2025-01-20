@@ -135,7 +135,7 @@ void ARocketLauncher::ShowProjectilePrediction()
         PredictParams.ProjectileRadius = 15.0f; // 발사체 크기와 일치하도록 설정
         PredictParams.MaxSimTime = 5.0f; // 시뮬레이션 시간 (초)
 
-        PredictParams.OverrideGravityZ = GetWorld()->GetGravityZ();
+        PredictParams.OverrideGravityZ = GetWorld()->GetGravityZ()*2;
 
         
         PredictParams.SimFrequency = 15.0f;

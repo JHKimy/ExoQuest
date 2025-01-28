@@ -33,7 +33,7 @@ private:
     float RiseSpeed = 10.0f;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
-    float RiseHeight = 200.0f;
+    float RiseHeight;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animation", meta = (AllowPrivateAccess = "true"))
     float MoveToCharacterSpeed = 5.0f;

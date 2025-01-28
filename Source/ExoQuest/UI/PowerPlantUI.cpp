@@ -59,12 +59,12 @@ void UPowerPlantUI::OnMedicalKitButtonClicked()
 
 void UPowerPlantUI::OnTimeFluxGearButtonClicked()
 {
-	OnButtonClicked(GhostGearButton);
+	OnButtonClicked(TimeFluxGearButton);
 }
 
 void UPowerPlantUI::OnGhostGearButtonClicked()
 {
-	OnButtonClicked(TimeFluxGearButton);
+	OnButtonClicked(GhostGearButton);
 }
 
 

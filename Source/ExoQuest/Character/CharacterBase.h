@@ -184,6 +184,23 @@ public:
 	void ZoomOut();
 
 
+//=====================================================================================
+// 스킬
+//=====================================================================================
+
+	// 고스트 모드 활성화
+	UFUNCTION(BlueprintCallable,				Category = "Skill")
+	void ActivateGhostMode(float Duration);
+
+	// 고스트 모드 비활성화
+	UFUNCTION(BlueprintCallable,				Category = "Skill")
+	void DeactivateGhostMode();
+
+	// 콤보 리셋 타이머
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+	FTimerHandle GhostTimerHandle;
+
+	
 
 //=====================================================================================
 // UI & 아이템

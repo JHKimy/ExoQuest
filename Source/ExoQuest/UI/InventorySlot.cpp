@@ -74,4 +74,22 @@ void UInventorySlot::OnSlotClicked()
         }
     }
 
+
+    if (ItemName == "GhostGear")
+    {
+        if (ItemDataBase && ItemDataBase->UseItem(ItemName))
+        {
+            if (character)
+            {
+                character->ActivateGhostMode(5.f);
+
+                // 인벤토리 업데이트
+                if (character->InventoryUI)
+                {
+                    character->InventoryUI->UpdateInventory();
+                }
+            }
+        }
+    }
+
 }

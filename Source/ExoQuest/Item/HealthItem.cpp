@@ -38,6 +38,9 @@ void AHealthItem::BeginPlay()
     Super::BeginPlay();
 
     InitialLocation = GetActorLocation();
+    
+    RiseHeight = InitialLocation.Z + 250.f;
+
     TargetLocation = InitialLocation + FVector(0, 0, RiseHeight);
 
     SetActorLocation(InitialLocation - FVector(0, 0, RiseHeight));

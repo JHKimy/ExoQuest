@@ -268,7 +268,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 	// 현재 무기 상태를 출력
-	PrintEquippedWeapons();
+	// PrintEquippedWeapons();
 
 
 
@@ -354,7 +354,7 @@ void ACharacterBase::Tick(float DeltaTime)
 
 
 
-	PrintCharacterState();
+	//PrintCharacterState();
 
 
 
@@ -877,6 +877,35 @@ void ACharacterBase::ZoomOut()
 	//springArmComp->TargetArmLength = 200;
 	//springArmComp->SocketOffset.Z = 200;
 	springArmComp->SocketOffset.Y = 70;
+}
+
+void ACharacterBase::ActivateGhostMode(float Duration)
+{
+	// 충돌 채널 무시
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
+	//// 현재 장착한 무기 처리
+	//if (CurrentWeapon)
+	//{
+	//	CurrentWeapon->SetActorEnableCollision(false);
+	//}
+
+	// 타이머로 일정 시간 후 고스트 상태 해제
+	GetWorldTimerManager().SetTimer(GhostTimerHandle, this, &ACharacterBase::DeactivateGhostMode, Duration, false);
+}
+
+void ACharacterBase::DeactivateGhostMode()
+{
+	// 충돌 채널 원래대로 복구
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	//// 현재 장착한 무기 처리
+	//if (CurrentWeapon)
+	//{
+	//	CurrentWeapon->SetActorEnableCollision(true);
+	//}
 }
 
 void ACharacterBase::SaveStateBeforeLevelChange()

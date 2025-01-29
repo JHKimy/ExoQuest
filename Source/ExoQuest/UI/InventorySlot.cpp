@@ -92,4 +92,24 @@ void UInventorySlot::OnSlotClicked()
         }
     }
 
+    if (ItemName == "TimeFluxGear")
+    {
+        if (ItemDataBase && ItemDataBase->UseItem(ItemName))
+        {
+            if (character)
+            {
+                // 시간 되돌리기 활성화
+                character->ActivateTimeRewind(5.f);
+
+
+                // 인벤토리 업데이트
+                if (character->InventoryUI)
+                {
+                    character->InventoryUI->UpdateInventory();
+                }
+            }
+        }
+    }
 }
+
+

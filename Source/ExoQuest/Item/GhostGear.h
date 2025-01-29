@@ -26,7 +26,7 @@ public:
 
 
     // ======================================
-   // ÄÄÆ÷³ÍÆ®
+    // ÄÄÆ÷³ÍÆ®
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Mesh", meta = (AllowPrivateAccess = "true"))
     class UStaticMeshComponent* meshComp;
 

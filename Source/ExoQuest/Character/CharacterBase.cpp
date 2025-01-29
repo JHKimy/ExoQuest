@@ -28,6 +28,8 @@
 
 #include "Kismet/KismetSystemLibrary.h" // PrintString 함수 사용을 위해 포함
 
+//#include "Components/SkeletalMeshComponent.h"
+
 //#include "GameFramework/PlayerController.h"	// 컨트롤러
 
 #include "Animation/AnimMontage.h"	// 몽타주
@@ -248,6 +250,9 @@ void ACharacterBase::BeginPlay()
 	}
 
 
+
+	//// 1초 간격으로 위치 기록
+	//GetWorldTimerManager().SetTimer(LocationRecordTimerHandle, this, &ACharacterBase::RecordLocation, 1.0f, true);
 	
 }
 
@@ -362,6 +367,16 @@ void ACharacterBase::Tick(float DeltaTime)
 
 	//PrintInventory();
 
+
+	//// 현재 위치와 회전 기록
+	//FTimeRecord NewRecord(GetActorLocation(), GetActorRotation(), GetWorld()->GetTimeSeconds());
+	//TimeRecords.Add(NewRecord);
+
+	//// 오래된 기록 제거
+	//while (TimeRecords.Num() > 0 && GetWorld()->GetTimeSeconds() - TimeRecords[0].Timestamp > MaxRecordTime)
+	//{
+	//	TimeRecords.RemoveAt(0);
+	//}
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -885,6 +900,12 @@ void ACharacterBase::ActivateGhostMode(float Duration)
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 
+	// 지면 충돌만 활성화 (ECC_WorldStatic은 지면 채널로 가정)
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldStatic, ECollisionResponse::ECR_Block);
+
+	// 현재 캐릭터 메시에 투명도를 적용
+	SetCharacterTransparency(0.7f); // 투명도 30% (0.0 = 완전 투명, 1.0 = 완전 불투명)
 	//// 현재 장착한 무기 처리
 	//if (CurrentWeapon)
 	//{
@@ -901,11 +922,82 @@ void ACharacterBase::DeactivateGhostMode()
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 
+	SetCharacterTransparency(0.f);
 	//// 현재 장착한 무기 처리
 	//if (CurrentWeapon)
 	//{
 	//	CurrentWeapon->SetActorEnableCollision(true);
 	//}
+}
+
+void ACharacterBase::SetCharacterTransparency(float transparency)
+{
+	// 캐릭터의 메시에 접근
+	USkeletalMeshComponent* tempMesh = GetMesh();
+	if (!tempMesh) return;
+
+	// 메시에 할당된 머티리얼 가져오기 (혹 여러개일 수 도 있음)
+	int32 MaterialCount = tempMesh->GetNumMaterials();
+	for (int32 i = 0; i < MaterialCount; i++)
+	{
+		UMaterialInstanceDynamic* DynamicMaterial = tempMesh->CreateDynamicMaterialInstance(i);
+		if (DynamicMaterial)
+		{
+			// 머티리얼의 Opacity 값 설정 (머티리얼에 Opacity 파라미터가 있어야 함)
+			DynamicMaterial->SetScalarParameterValue(TEXT("Transparency"), transparency);
+		}
+	}
+}
+
+void ACharacterBase::ActivateTimeRewind(float duration)
+{
+	//// 디버그 메시지
+	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Time Rewind Activated!"));
+
+	//if (TimeRecords.Num() == 0) return;
+
+	//// 되돌리기 타이머 설정 (1초마다 호출)
+	//GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 1.0f, true);
+
+	//// 되돌리기 종료 시간을 설정
+	//RewindEndTime = GetWorld()->GetTimeSeconds() + duration;
+}
+
+void ACharacterBase::RewindStep()
+{
+	//// 시간 초과 시 되돌리기 종료
+	//if (TimeRecords.Num() == 0 || GetWorld()->GetTimeSeconds() >= RewindEndTime)
+	//{
+	//	// 타이머 정지
+	//	GetWorldTimerManager().ClearTimer(RewindTimerHandle);
+	//	return;
+	//}
+
+	//// 가장 최근 기록으로 이동
+	//FTimeRecord LastRecord = TimeRecords.Pop();
+	//SetActorLocation(LastRecord.Location);
+	//SetActorRotation(LastRecord.Rotation);
+
+	//// 디버그 메시지
+	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Rewind Step Executed!"));
+	//FString::Printf(TEXT("Rewind Step: Location: %s, Rotation: %s"),
+	//	*LastRecord.Location.ToString(), *LastRecord.Rotation.ToString());
+}
+
+void ACharacterBase::RecordLocation()
+{
+	// 현재 위치와 회전 기록
+	//FTimeRecord NewRecord(GetActorLocation(), GetActorRotation(), GetWorld()->GetTimeSeconds());
+	//TimeRecords.Add(NewRecord);
+
+	//// 오래된 기록 제거
+	//while (TimeRecords.Num() > 0 && GetWorld()->GetTimeSeconds() - TimeRecords[0].Timestamp > MaxRecordTime)
+	//{
+	//	TimeRecords.RemoveAt(0);
+	//}
+
+	//// 디버그 메시지
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Location recorded!"));
 }
 
 void ACharacterBase::SaveStateBeforeLevelChange()

@@ -48,6 +48,30 @@ enum class EGrenadeType : uint8
 };
 
 
+// 위치 기록을 위한 구조체
+USTRUCT(BlueprintType)
+struct FTimeRecord
+{
+	GENERATED_BODY()
+
+	FVector Location;
+	FRotator Rotation;
+	float Timestamp;
+
+	FTimeRecord() 
+		: Location(FVector::ZeroVector), 
+		Rotation(FRotator::ZeroRotator), 
+		Timestamp(0.0f) {}
+
+	FTimeRecord
+	(const FVector& InLocation, 
+		const FRotator& InRotation, 
+		float InTimestamp)
+		: Location(InLocation), 
+		Rotation(InRotation), 
+		Timestamp(InTimestamp) {}
+};
+
 class UItemDataBase;
 
 
@@ -189,18 +213,55 @@ public:
 //=====================================================================================
 
 	// 고스트 모드 활성화
-	UFUNCTION(BlueprintCallable,				Category = "Skill")
+	UFUNCTION(BlueprintCallable,				Category = "SkillGhost")
 	void ActivateGhostMode(float Duration);
 
 	// 고스트 모드 비활성화
-	UFUNCTION(BlueprintCallable,				Category = "Skill")
+	UFUNCTION(BlueprintCallable,				Category = "SkillGhost")
 	void DeactivateGhostMode();
 
 	// 콤보 리셋 타이머
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Skill")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillGhost")
 	FTimerHandle GhostTimerHandle;
 
+	UFUNCTION(BlueprintCallable,				Category = "SkillGhost")
+	void SetCharacterTransparency(float transparency);
+
+
+
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "SkillTime")
+	void ActivateTimeRewind(float duration);
+
+	UFUNCTION(BlueprintCallable, Category = "SkillTime")
+	void RewindStep();
+
+	// 시간 되돌리기 관련 데이터
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	TArray<FTimeRecord> TimeRecords; // 위치 기록 배열
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	FTimerHandle RewindTimerHandle;  // 시간 되돌리기 타이머
+	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	float RewindEndTime;             // 되돌리기 종료 시간
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	float MaxRecordTime = 5.0f;      // 최대 기록 시간 (초 단위)
+
+
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	FTimerHandle LocationRecordTimerHandle;
+
+	UFUNCTION(BlueprintCallable, Category = "SkillTime")
+	void RecordLocation();
+
 
 //=====================================================================================
 // UI & 아이템

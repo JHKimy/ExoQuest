@@ -377,6 +377,41 @@ void ACharacterBase::Tick(float DeltaTime)
 	//{
 	//	TimeRecords.RemoveAt(0);
 	//}
+
+// 현재 시간 기록
+
+ // 현재 시간
+	float CurrentTime = GetWorld()->GetTimeSeconds();
+
+	// 1초마다 저장하도록 설정
+	if (CurrentTime - LastSaveTime >= 1.f)
+	{
+		// 새로운 기록 추가
+		FTimeRecord NewRecord;
+		NewRecord.Location = GetActorLocation();
+		NewRecord.Rotation = GetActorRotation();
+		NewRecord.Timestamp = CurrentTime;
+
+		// 배열에 추가
+		TimeRecords.Add(NewRecord);
+
+		// 위치를 화면에 출력
+		FString LocationString = FString::Printf(TEXT("Location: X=%.2f, Y=%.2f, Z=%.2f"),
+			NewRecord.Location.X,
+			NewRecord.Location.Y,
+			NewRecord.Location.Z);
+
+		UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green, 2.0f);
+
+		// 마지막 저장 시간 업데이트
+		LastSaveTime = CurrentTime;
+	}
+
+	// 5초 이상 지난 기록 삭제
+	while (TimeRecords.Num() > 0 && (CurrentTime - TimeRecords[0].Timestamp) > 5.0f)
+	{
+		TimeRecords.RemoveAt(0);
+	}
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -951,37 +986,55 @@ void ACharacterBase::SetCharacterTransparency(float transparency)
 
 void ACharacterBase::ActivateTimeRewind(float duration)
 {
-	//// 디버그 메시지
-	//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Time Rewind Activated!"));
+	if (TimeRecords.Num() == 0) return;
 
-	//if (TimeRecords.Num() == 0) return;
+	// 디버그 메시지 출력
+	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Time Rewind Activated!"));
 
-	//// 되돌리기 타이머 설정 (1초마다 호출)
-	//GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 1.0f, true);
+	// 되돌리기 타이머 설정 (0.02초마다 호출 -> 부드러운 움직임)
+	GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 0.01f, true);
 
-	//// 되돌리기 종료 시간을 설정
-	//RewindEndTime = GetWorld()->GetTimeSeconds() + duration;
+
+	// 되돌리기 시작 (목표 위치 설정)
+	if (TimeRecords.Num() > 1)
+	{
+		CurrentTargetIndex = TimeRecords.Num() - 1; // 마지막 인덱스부터 시작
+		PreviousPosition = GetActorLocation(); // 현재 위치 저장
+		NextPosition = TimeRecords[CurrentTargetIndex].Location; // 목표 위치 설정
+		LerpAlpha = 0.0f; // 보간 시작점
+	}
 }
 
 void ACharacterBase::RewindStep()
 {
-	//// 시간 초과 시 되돌리기 종료
-	//if (TimeRecords.Num() == 0 || GetWorld()->GetTimeSeconds() >= RewindEndTime)
-	//{
-	//	// 타이머 정지
-	//	GetWorldTimerManager().ClearTimer(RewindTimerHandle);
-	//	return;
-	//}
+	if (TimeRecords.Num() == 0 || CurrentTargetIndex < 0)
+	{
+		GetWorldTimerManager().ClearTimer(RewindTimerHandle);
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Time Rewind Finished!"));
+		return;
+	}
 
-	//// 가장 최근 기록으로 이동
-	//FTimeRecord LastRecord = TimeRecords.Pop();
-	//SetActorLocation(LastRecord.Location);
-	//SetActorRotation(LastRecord.Rotation);
+	// Lerp 보간 (자연스럽게 이동)
+	LerpAlpha += 0.05f; // 부드럽게 이동할 비율 증가
+	SetActorLocation(FMath::Lerp(PreviousPosition, NextPosition, LerpAlpha));
 
-	//// 디버그 메시지
-	//GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Blue, TEXT("Rewind Step Executed!"));
-	//FString::Printf(TEXT("Rewind Step: Location: %s, Rotation: %s"),
-	//	*LastRecord.Location.ToString(), *LastRecord.Rotation.ToString());
+	// 목표 위치에 거의 도달했으면 다음 타겟으로 이동
+	if (LerpAlpha >= 1.0f)
+	{
+		--CurrentTargetIndex;
+
+		if (CurrentTargetIndex >= 0)
+		{
+			PreviousPosition = NextPosition; // 현재 위치를 이전 위치로 변경
+			NextPosition = TimeRecords[CurrentTargetIndex].Location; // 다음 목표 위치
+			LerpAlpha = 0.0f; // 보간 초기화
+		}
+		else
+		{
+			GetWorldTimerManager().ClearTimer(RewindTimerHandle);
+			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Time Rewind Finished!"));
+		}
+	}
 }
 
 void ACharacterBase::RecordLocation()

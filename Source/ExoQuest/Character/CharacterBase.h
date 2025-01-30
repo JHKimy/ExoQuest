@@ -245,13 +245,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
 	FTimerHandle RewindTimerHandle;  // 시간 되돌리기 타이머
 	
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
-	float RewindEndTime;             // 되돌리기 종료 시간
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
-	float MaxRecordTime = 5.0f;      // 최대 기록 시간 (초 단위)
-
+	float LastSaveTime = 0.0f; // 마지막으로 저장한 시간
+	int CurrentTargetIndex = -1;
+	FVector PreviousPosition;
+	FVector NextPosition;
+	float LerpAlpha = 0.0f;
 
 
 

@@ -244,21 +244,23 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
 	FTimerHandle RewindTimerHandle;  // 시간 되돌리기 타이머
-	
-	float LastSaveTime = 0.0f; // 마지막으로 저장한 시간
-	int CurrentTargetIndex = -1;
-	FVector PreviousPosition;
-	FVector NextPosition;
-	float LerpAlpha = 0.0f;
-
-
+	//
+	//float LastSaveTime = 0.0f; // 마지막으로 저장한 시간
+	//int CurrentTargetIndex = -1;
+	//FVector PreviousPosition;
+	//FVector NextPosition;
+	//float LerpAlpha = 0.0f;
+	float LastSaveTime = 0.f;
+	float SaveInterval = 0.1f;
+	float MaxRecordTime = 5.f;
+	// 되돌리기 시간
+	float RewindDuration = 1.f;
+	float RewindElapsedTime = 0.f;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
 	FTimerHandle LocationRecordTimerHandle;
 
-	UFUNCTION(BlueprintCallable, Category = "SkillTime")
-	void RecordLocation();
 
 
 //=====================================================================================
@@ -373,16 +375,39 @@ public:
 
 	// 무기 객체
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<class ARifle> rifleBlueprint;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	class ARifle* playerRifle;
+	
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<class AShotgun> shotgunBlueprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	class AShotgun* playerShotgun;
 
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf<class ARocketLauncher> rocketLauncherBlueprint;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	class ARocketLauncher* playerRocketLauncher;
+	
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	TSubclassOf <class ASword> swordBlueprint;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	class ASword* playerSword;
+
+
+
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	class ABasicGrenade* playerBasicGrenade;

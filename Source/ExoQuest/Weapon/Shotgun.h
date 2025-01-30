@@ -64,4 +64,31 @@ private:
 	float FireRateDelay = 2.0f; // 발사 대기 시간 (초 단위)
 
 	void ResetFire(); // 발사 가능 상태로 리셋하는 함수
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void ApplyRecoil();
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void RecoverRecoil();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FTimerHandle RecoilRecoveryTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FRotator recoveryRotator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMin{ 3.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMax{ 5.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMin{ -0.3f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMax{ 0.3f };
+
+	class APlayerController* PlayerController;
 };

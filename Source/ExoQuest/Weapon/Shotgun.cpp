@@ -36,6 +36,9 @@ void AShotgun::BeginPlay()
 	Super::BeginPlay();
 
 	ownerCharacter = Cast<ACharacterBase>(UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass()));
+
+    PlayerController = GetWorld()->GetFirstPlayerController();
+
 }
 
 void AShotgun::Tick(float DeltaTime)
@@ -57,10 +60,9 @@ void AShotgun::Fire()
     // 카메라에서 목표지점 파악
     //==========================
     // 컨트롤러로부터 카메라의 위치와 회전 정보 가져오기
-    APlayerController* playerController = UGameplayStatics::GetPlayerController(this, 0);
     FVector CameraLocation;
     FRotator CameraRotation;
-    playerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
+    PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
 
     // 카메라 방향으로 라인 트레이스를 설정하여 첫 번째 목표 위치 계산
     FVector CameraForwardVector = CameraRotation.Vector();
@@ -129,6 +131,8 @@ void AShotgun::Fire()
             }
         }
     }
+
+    ApplyRecoil();
 }
 
 
@@ -136,4 +140,56 @@ void AShotgun::Fire()
 void AShotgun::ResetFire()
 {
     bCanFire = true;
+}
+
+void AShotgun::ApplyRecoil()
+{
+    recoveryRotator = PlayerController->GetControlRotation();
+
+    //  반동 크기 설정
+    float VerticalRecoil = FMath::RandRange(recoilVerticalMin, recoilVerticalMax);   // 위로 튀는 정도
+    float HorizontalRecoil = FMath::RandRange(recoilHorizontalMin, recoilHorizontalMax); // 좌우 흔들림
+
+    //  현재 시점에서 회전 적용
+    PlayerController->AddPitchInput(-VerticalRecoil);
+    PlayerController->AddYawInput(HorizontalRecoil);
+
+    // RecoverRecoil();
+
+    ////  반동 복구를 위한 타이머 설정
+    GetWorld()->GetTimerManager().SetTimer(RecoilRecoveryTimer, this, &AShotgun::RecoverRecoil, 0.01f, true);
+}
+
+void AShotgun::RecoverRecoil()
+{
+
+    float DeltaTime = GetWorld()->GetDeltaSeconds(); // 프레임별 DeltaTime 가져오기
+    float RecoverySpeed = 5.0f; // 반동 회복 속도 (커질수록 빨라짐)
+
+    // 현재 카메라 회전값 가져오기
+    FRotator CurrentRotation = PlayerController->GetControlRotation();
+
+    //  사용자의 입력 감지 (마우스 움직임 확인)
+    FVector2D MouseInput;
+    PlayerController->GetInputMouseDelta(MouseInput.X, MouseInput.Y);
+
+    // 사용자가 마우스를 움직이면 즉시 복구 중단
+    if (FMath::Abs(MouseInput.X) > 0.05f || FMath::Abs(MouseInput.Y) > 0.05f)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(RecoilRecoveryTimer);
+        return;
+    }
+
+    FRotator NewRotation = CurrentRotation;
+    NewRotation.Pitch = FMath::Lerp(CurrentRotation.Pitch, recoveryRotator.Pitch, DeltaTime * RecoverySpeed);
+
+    // 회전 적용
+    PlayerController->SetControlRotation(NewRotation);
+
+    // 회복 완료 검사 (거의 원위치에 도달하면 타이머 종료)
+    if (FMath::Abs(CurrentRotation.Pitch - recoveryRotator.Pitch) < 0.1f)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(RecoilRecoveryTimer);
+    }
+
 }

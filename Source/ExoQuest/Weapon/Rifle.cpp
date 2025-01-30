@@ -1,12 +1,12 @@
-#include "Weapon/Rifle.h"
+ï»¿#include "Weapon/Rifle.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SceneComponent.h"
 #include "Character/CharacterBase.h"
 #include <Kismet/GameplayStatics.h>
 #include "Enemy/EnemyFSM.h"
-#include "Camera/CameraComponent.h"           // Ä«¸Ş¶ó ÄÄÆ÷³ÍÆ®
+#include "Camera/CameraComponent.h"           // ì¹´ë©”ë¼ ì»´í¬ë„ŒíŠ¸
 
-// yÃàÀÌ ¾Õ¹æÇâ µÇ¾îÀÖ´Â ¿¡¼Â
+// yì¶•ì´ ì•ë°©í–¥ ë˜ì–´ìˆëŠ” ì—ì…‹
 
 ARifle::ARifle()
 {
@@ -22,17 +22,17 @@ ARifle::ARifle()
 	meshComp->SetCollisionProfileName(TEXT("NoCollision"));
 	RootComponent = meshComp;
 
-	// MuzzleLocation Scene Component »ı¼º ¹× ÃÊ±âÈ­
+	// MuzzleLocation Scene Component ìƒì„± ë° ì´ˆê¸°í™”
 	muzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	muzzleLocation->SetupAttachment(RootComponent);
 
-	// ±âº» À§Ä¡ ¼³Á¤ (ÃÑ±¸ ¾ÕºÎºĞÀ¸·Î À§Ä¡ ¼³Á¤)
-	muzzleLocation->SetRelativeLocation(FVector(0.f, 40.f, 2.f)); // X, Y, Z ÁÂÇ¥ Á¶Á¤ °¡´É
+	// ê¸°ë³¸ ìœ„ì¹˜ ì„¤ì • (ì´êµ¬ ì•ë¶€ë¶„ìœ¼ë¡œ ìœ„ì¹˜ ì„¤ì •)
+	muzzleLocation->SetRelativeLocation(FVector(0.f, 40.f, 2.f)); // X, Y, Z ì¢Œí‘œ ì¡°ì • ê°€ëŠ¥
 	
-	// µ¥¹ÌÁö
+	// ë°ë¯¸ì§€
 	damage = 5;
 
-    lastFireTime = -fireCooldown; // Ã³À½¿£ ¹Ù·Î ¹ß»ç °¡´ÉÇÏµµ·Ï ÃÊ±âÈ­
+    lastFireTime = -fireCooldown; // ì²˜ìŒì—” ë°”ë¡œ ë°œì‚¬ ê°€ëŠ¥í•˜ë„ë¡ ì´ˆê¸°í™”
 }
 
 void ARifle::BeginPlay()
@@ -40,106 +40,161 @@ void ARifle::BeginPlay()
 	Super::BeginPlay();
 
 	ownerCharacter = Cast<ACharacterBase>(UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass()));
+
+    PlayerController = GetWorld()->GetFirstPlayerController();
+
 }
 
 void ARifle::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 
 void ARifle::Fire()
 {
-    // ÇöÀç ½Ã°£ °¡Á®¿À±â
+    // í˜„ì¬ ì‹œê°„ ê°€ì ¸ì˜¤ê¸°
     float currentTime = GetWorld()->GetTimeSeconds();
 
-    // ¸¶Áö¸· ¹ß»ç ÀÌÈÄ 0.1ÃÊ°¡ Áö³ªÁö ¾Ê¾ÒÀ¸¸é ¹ß»çÇÏÁö ¾ÊÀ½
+    // ë§ˆì§€ë§‰ ë°œì‚¬ ì´í›„ 0.1ì´ˆê°€ ì§€ë‚˜ì§€ ì•Šì•˜ìœ¼ë©´ ë°œì‚¬í•˜ì§€ ì•ŠìŒ
     if (currentTime - lastFireTime < fireCooldown)
     {
         return;
     }
 
-    lastFireTime = currentTime; // ¸¶Áö¸· ¹ß»ç ½Ã°£ ¾÷µ¥ÀÌÆ®
+    lastFireTime = currentTime; // ë§ˆì§€ë§‰ ë°œì‚¬ ì‹œê°„ ì—…ë°ì´íŠ¸
 
 
-    // 1. Ä«¸Ş¶ó À§Ä¡¿Í ¹æÇâ °¡Á®¿À±â
+    // 1. ì¹´ë©”ë¼ ìœ„ì¹˜ì™€ ë°©í–¥ ê°€ì ¸ì˜¤ê¸°
     FVector CameraLocation;
     FRotator CameraRotation;
-    APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
     if (PlayerController)
     {
         PlayerController->GetPlayerViewPoint(CameraLocation, CameraRotation);
     }
     else
     {
-        return; // ÇÃ·¹ÀÌ¾î ÄÁÆ®·Ñ·¯°¡ ¾øÀ¸¸é ÇÔ¼ö Á¾·á
+        return; // í”Œë ˆì´ì–´ ì»¨íŠ¸ë¡¤ëŸ¬ê°€ ì—†ìœ¼ë©´ í•¨ìˆ˜ ì¢…ë£Œ
     }
 
-    // 2. Ä«¸Ş¶ó ¹æÇâÀ¸·Î ¶óÀÎ Æ®·¹ÀÌ½º ½ÇÇàÇÏ¿© ¸ñÇ¥ ÁöÁ¡ °è»ê
+    // 2. ì¹´ë©”ë¼ ë°©í–¥ìœ¼ë¡œ ë¼ì¸ íŠ¸ë ˆì´ìŠ¤ ì‹¤í–‰í•˜ì—¬ ëª©í‘œ ì§€ì  ê³„ì‚°
     FVector CameraForwardVector = CameraRotation.Vector();
     FVector CameraTraceStart = CameraLocation;
-    FVector CameraTraceEnd = CameraTraceStart + (CameraForwardVector * 10000.0f); // 10000 À¯´Ö °Å¸®±îÁö
+    FVector CameraTraceEnd = CameraTraceStart + (CameraForwardVector * 10000.0f); // 10000 ìœ ë‹› ê±°ë¦¬ê¹Œì§€
 
     FHitResult CameraHitResult;
     FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this); // ÀÚ±â ÀÚ½Å Á¦¿Ü
+    Params.AddIgnoredActor(this); // ìê¸° ìì‹  ì œì™¸
 
-    FVector TargetLocation = CameraTraceEnd; // ±âº»°ª ¼³Á¤
+    FVector TargetLocation = CameraTraceEnd; // ê¸°ë³¸ê°’ ì„¤ì •
     if (GetWorld()->LineTraceSingleByChannel(CameraHitResult, CameraTraceStart, CameraTraceEnd, ECC_Visibility, Params))
     {
-        TargetLocation = CameraHitResult.Location; // Ãæµ¹ ÁöÁ¡ÀÌ ¸ñÇ¥ À§Ä¡°¡ µÊ
+        TargetLocation = CameraHitResult.Location; // ì¶©ëŒ ì§€ì ì´ ëª©í‘œ ìœ„ì¹˜ê°€ ë¨
     }
 
-    // 3. ÃÑ±¸ À§Ä¡¿¡¼­ ¸ñÇ¥ ÁöÁ¡À¸·Î ¹ß»ç ¼³Á¤
-    FVector MuzzleLocation = muzzleLocation->GetComponentLocation(); // ÃÑ±¸ À§Ä¡
-    FVector ShootDirection = (TargetLocation - MuzzleLocation).GetSafeNormal(); // ÃÑ±¸¿¡¼­ ¸ñÇ¥ ÁöÁ¡À¸·ÎÀÇ ¹æÇâ º¤ÅÍ
+    // 3. ì´êµ¬ ìœ„ì¹˜ì—ì„œ ëª©í‘œ ì§€ì ìœ¼ë¡œ ë°œì‚¬ ì„¤ì •
+    FVector MuzzleLocation = muzzleLocation->GetComponentLocation(); // ì´êµ¬ ìœ„ì¹˜
+    FVector ShootDirection = (TargetLocation - MuzzleLocation).GetSafeNormal(); // ì´êµ¬ì—ì„œ ëª©í‘œ ì§€ì ìœ¼ë¡œì˜ ë°©í–¥ ë²¡í„°
 
-    FVector MuzzleTraceEnd = MuzzleLocation + (ShootDirection * 5000.0f); // ¸ñÇ¥ ÁöÁ¡À¸·Î ¶óÀÎ Æ®·¹ÀÌ½º
+    FVector MuzzleTraceEnd = MuzzleLocation + (ShootDirection * 5000.0f); // ëª©í‘œ ì§€ì ìœ¼ë¡œ ë¼ì¸ íŠ¸ë ˆì´ìŠ¤
 
-    // 4. ÃÑ±¸¿¡¼­ ¸ñÇ¥ ÁöÁ¡±îÁö ¶óÀÎ Æ®·¹ÀÌ½º ¹× Ãæµ¹ Ã³¸®
+    // 4. ì´êµ¬ì—ì„œ ëª©í‘œ ì§€ì ê¹Œì§€ ë¼ì¸ íŠ¸ë ˆì´ìŠ¤ ë° ì¶©ëŒ ì²˜ë¦¬
     FHitResult MuzzleHitResult;
     bool bMuzzleHit = GetWorld()->LineTraceSingleByChannel(MuzzleHitResult, MuzzleLocation, MuzzleTraceEnd, ECC_Visibility, Params);
 
-    // µğ¹ö±× ¶óÀÎ ±×¸®±â (ÃÑ±¸¿¡¼­ ¸ñÇ¥ ÁöÁ¡±îÁö)
+    // ë””ë²„ê·¸ ë¼ì¸ ê·¸ë¦¬ê¸° (ì´êµ¬ì—ì„œ ëª©í‘œ ì§€ì ê¹Œì§€)
     DrawDebugLine(
         GetWorld(),
-        MuzzleLocation,  // ½ÃÀÛÁ¡ (ÃÑ±¸ À§Ä¡)
-        MuzzleTraceEnd,  // ³¡Á¡ (¸ñÇ¥ ÁöÁ¡ ¹æÇâÀ¸·Î 5000 À¯´Ö)
-        FColor::Red,     // ¼± »ö»ó
-        false,           // Áö¼Ó ¿©ºÎ (ÀÏ½ÃÀû)
-        1.0f,            // Áö¼Ó ½Ã°£
-        0,               // µÎ²² (µğ¹ö±× ¶óÀÎÀÇ Ã¤³Î)
-        1.0f             // ¼±ÀÇ µÎ²²
+        MuzzleLocation,  // ì‹œì‘ì  (ì´êµ¬ ìœ„ì¹˜)
+        MuzzleTraceEnd,  // ëì  (ëª©í‘œ ì§€ì  ë°©í–¥ìœ¼ë¡œ 5000 ìœ ë‹›)
+        FColor::Red,     // ì„  ìƒ‰ìƒ
+        false,           // ì§€ì† ì—¬ë¶€ (ì¼ì‹œì )
+        1.0f,            // ì§€ì† ì‹œê°„
+        0,               // ë‘ê»˜ (ë””ë²„ê·¸ ë¼ì¸ì˜ ì±„ë„)
+        1.0f             // ì„ ì˜ ë‘ê»˜
     );
 
-    // 5. Ãæµ¹ÇÑ °æ¿ì Ã³¸®
+    // 5. ì¶©ëŒí•œ ê²½ìš° ì²˜ë¦¬
     if (bMuzzleHit)
     {
-        // Ãæµ¹ ÁöÁ¡¿¡ µğ¹ö±× Á¡ Ç¥½Ã
+        // ì¶©ëŒ ì§€ì ì— ë””ë²„ê·¸ ì  í‘œì‹œ
         DrawDebugPoint(
             GetWorld(),
-            MuzzleHitResult.ImpactPoint, // Ãæµ¹ ÁöÁ¡
-            10.0f,                       // Á¡ÀÇ Å©±â
-            FColor::Red,                 // Á¡ÀÇ »ö»ó
-            false,                       // ÀÏ½ÃÀû Ç¥½Ã
-            1.0f                         // Áö¼Ó ½Ã°£
+            MuzzleHitResult.ImpactPoint, // ì¶©ëŒ ì§€ì 
+            10.0f,                       // ì ì˜ í¬ê¸°
+            FColor::Red,                 // ì ì˜ ìƒ‰ìƒ
+            false,                       // ì¼ì‹œì  í‘œì‹œ
+            1.0f                         // ì§€ì† ì‹œê°„
         );
 
-        // ÃÑ¾Ë ÆÄÆí È¿°ú »ı¼º
-        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bulletEffectFactory, MuzzleHitResult.ImpactPoint);
+        // ì´ì•Œ íŒŒí¸ íš¨ê³¼ ìƒì„±
+        UGameplayStatics::SpawnEmitterAtLocation(GetWorld(), bulletEffect, MuzzleHitResult.ImpactPoint);
 
-        // Ãæµ¹ÇÑ ¾×ÅÍ°¡ ÀûÀÎÁö È®ÀÎÇÏ°í µ¥¹ÌÁö Ã³¸®
+        // ì¶©ëŒí•œ ì•¡í„°ê°€ ì ì¸ì§€ í™•ì¸í•˜ê³  ë°ë¯¸ì§€ ì²˜ë¦¬
         AActor* HitActor = MuzzleHitResult.GetActor();
         if (HitActor)
         {
-            // ÀûÀÇ FSM ÄÄÆ÷³ÍÆ®¸¦ °¡Á®¿Í¼­ µ¥¹ÌÁö Ã³¸®
+            // ì ì˜ FSM ì»´í¬ë„ŒíŠ¸ë¥¼ ê°€ì ¸ì™€ì„œ ë°ë¯¸ì§€ ì²˜ë¦¬
             if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(HitActor->GetComponentByClass(UEnemyFSM::StaticClass())))
             {
                 EnemyFSM->OnDamageProcess();
             }
         }
     }
+
+    // ë°˜ë™ íš¨ê³¼ 
+    ApplyRecoil();
 }
 
+void ARifle::ApplyRecoil()
+{
+    recoveryRotator = PlayerController->GetControlRotation();
+
+    //  ë°˜ë™ í¬ê¸° ì„¤ì •
+    float VerticalRecoil = FMath::RandRange(recoilVerticalMin, recoilVerticalMax);   // ìœ„ë¡œ íŠ€ëŠ” ì •ë„
+    float HorizontalRecoil = FMath::RandRange(recoilHorizontalMin, recoilHorizontalMax); // ì¢Œìš° í”ë“¤ë¦¼
+
+    //  í˜„ì¬ ì‹œì ì—ì„œ íšŒì „ ì ìš©
+    PlayerController->AddPitchInput(-VerticalRecoil);
+    PlayerController->AddYawInput(HorizontalRecoil);
+
+    // RecoverRecoil();
+
+    ////  ë°˜ë™ ë³µêµ¬ë¥¼ ìœ„í•œ íƒ€ì´ë¨¸ ì„¤ì •
+    GetWorld()->GetTimerManager().SetTimer(RecoilRecoveryTimer, this, &ARifle::RecoverRecoil, 0.01f, true);
+}
+
+void ARifle::RecoverRecoil()
+{
+
+    float DeltaTime = GetWorld()->GetDeltaSeconds(); // í”„ë ˆì„ë³„ DeltaTime ê°€ì ¸ì˜¤ê¸°
+    float RecoverySpeed = 1.0f; // ë°˜ë™ íšŒë³µ ì†ë„ (ì»¤ì§ˆìˆ˜ë¡ ë¹¨ë¼ì§)
+
+    // í˜„ì¬ ì¹´ë©”ë¼ íšŒì „ê°’ ê°€ì ¸ì˜¤ê¸°
+    FRotator CurrentRotation = PlayerController->GetControlRotation();
+
+    //  ì‚¬ìš©ìì˜ ì…ë ¥ ê°ì§€ (ë§ˆìš°ìŠ¤ ì›€ì§ì„ í™•ì¸)
+    FVector2D MouseInput;
+    PlayerController->GetInputMouseDelta(MouseInput.X, MouseInput.Y);
+
+    // ì‚¬ìš©ìê°€ ë§ˆìš°ìŠ¤ë¥¼ ì›€ì§ì´ë©´ ì¦‰ì‹œ ë³µêµ¬ ì¤‘ë‹¨
+    if (FMath::Abs(MouseInput.X) > 0.05f || FMath::Abs(MouseInput.Y) > 0.05f)
+    {
+        GetWorld()->GetTimerManager().ClearTimer(RecoilRecoveryTimer);
+        return;
+    }
+
+    FRotator NewRotation = CurrentRotation;
+        NewRotation.Pitch = FMath::Lerp(CurrentRotation.Pitch, recoveryRotator.Pitch, DeltaTime * RecoverySpeed);
+
+    // íšŒì „ ì ìš©
+    PlayerController->SetControlRotation(NewRotation);
+
+    // íšŒë³µ ì™„ë£Œ ê²€ì‚¬ (ê±°ì˜ ì›ìœ„ì¹˜ì— ë„ë‹¬í•˜ë©´ íƒ€ì´ë¨¸ ì¢…ë£Œ)
+    if (FMath::Abs(CurrentRotation.Pitch - recoveryRotator.Pitch) < 0.1f)
+    {
+      GetWorld()->GetTimerManager().ClearTimer(RecoilRecoveryTimer);
+    }
+       
+}
 

@@ -67,4 +67,32 @@ public:
 	void ResetFire();
 
 	void ShowProjectilePrediction();
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void ApplyRecoil();
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void RecoverRecoil();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FTimerHandle RecoilRecoveryTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FRotator recoveryRotator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMin{ 7.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMax{ 10.f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMin{ -0.55f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMax{ 0.55f };
+
+	class APlayerController* PlayerController;
+
 };

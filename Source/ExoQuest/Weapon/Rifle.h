@@ -38,7 +38,7 @@ public:
 
 	// 총알 이펙트
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BulletEffect)
-	class UParticleSystem* bulletEffectFactory;
+	TObjectPtr<UParticleSystem> bulletEffect;
 
 	// 데미지
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Damage)
@@ -53,4 +53,33 @@ public:
 
 	// 마지막 발사 시간
 	float lastFireTime;
+
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void ApplyRecoil();
+
+	UFUNCTION(BlueprintCallable, Category = "Recoil")
+	void RecoverRecoil();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FTimerHandle RecoilRecoveryTimer;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	FRotator recoveryRotator;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMin{ 0.2f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilVerticalMax{ 0.5f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMin{ -0.3f };
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
+	float recoilHorizontalMax{ 0.3f };
+
+	class APlayerController* PlayerController;
 };

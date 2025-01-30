@@ -118,7 +118,7 @@ ACharacterBase::ACharacterBase()
 	// grenadePos = CreateDefaultSubobject<UChildActorComponent>(TEXT("Grenade Launch Position"));
 	// 캐릭터의 Mesh에 부착
 	// grenadePos->SetupAttachment(GetMesh(), FName(TEXT("Grenade"))); // 소켓 이름 Grenade 확인 필요
-	
+
 
 
 	bmouseMoveMode = true;
@@ -253,7 +253,7 @@ void ACharacterBase::BeginPlay()
 
 	//// 1초 간격으로 위치 기록
 	//GetWorldTimerManager().SetTimer(LocationRecordTimerHandle, this, &ACharacterBase::RecordLocation, 1.0f, true);
-	
+
 }
 
 void ACharacterBase::Tick(float DeltaTime)
@@ -378,40 +378,32 @@ void ACharacterBase::Tick(float DeltaTime)
 	//	TimeRecords.RemoveAt(0);
 	//}
 
-// 현재 시간 기록
 
- // 현재 시간
+
+
+// =======================================================
+	// 현재 시간
 	float CurrentTime = GetWorld()->GetTimeSeconds();
 
-	// 1초마다 저장하도록 설정
-	if (CurrentTime - LastSaveTime >= 1.f)
+	// 저장 빈도
+	if (CurrentTime - LastSaveTime >= 0.1f)
 	{
-		// 새로운 기록 추가
-		FTimeRecord NewRecord;
-		NewRecord.Location = GetActorLocation();
-		NewRecord.Rotation = GetActorRotation();
-		NewRecord.Timestamp = CurrentTime;
-
-		// 배열에 추가
-		TimeRecords.Add(NewRecord);
-
-		// 위치를 화면에 출력
-		FString LocationString = FString::Printf(TEXT("Location: X=%.2f, Y=%.2f, Z=%.2f"),
-			NewRecord.Location.X,
-			NewRecord.Location.Y,
-			NewRecord.Location.Z);
-
-		UKismetSystemLibrary::PrintString(this, LocationString, true, true, FLinearColor::Green, 2.0f);
+		// 위치 저장 배열에 저장
+		FTimeRecord newRecord(GetActorLocation(), GetActorRotation(), CurrentTime);
+		TimeRecords.Add(newRecord);
 
 		// 마지막 저장 시간 업데이트
 		LastSaveTime = CurrentTime;
 	}
-
-	// 5초 이상 지난 기록 삭제
-	while (TimeRecords.Num() > 0 && (CurrentTime - TimeRecords[0].Timestamp) > 5.0f)
+	if (TimeRecords.Num() > 0)
 	{
-		TimeRecords.RemoveAt(0);
+		// 5초 이상 지난 기록 삭제
+		while ((CurrentTime - TimeRecords[0].Timestamp) > 5.0f)
+		{
+			TimeRecords.RemoveAt(0);
+		}
 	}
+
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -447,7 +439,7 @@ void ACharacterBase::CheckEquipWeapon()
 		}
 	}
 
-	if (EquippedWeapons.Num()<=2) {
+	if (EquippedWeapons.Num() <= 2) {
 
 
 		// WeaponForEquip으로 획득한 무기 확인
@@ -460,7 +452,8 @@ void ACharacterBase::CheckEquipWeapon()
 			{
 			case EWeaponType::Rifle:
 				if (playerRifle) continue;
-				playerRifle = GetWorld()->SpawnActor<ARifle>();
+				playerRifle = GetWorld()->SpawnActor<ARifle>(rifleBlueprint);
+				//playerRifle = GetWorld()->SpawnActor<ARifle>();
 				WeaponActor = playerRifle;
 				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Rifle")) : FName(TEXT("RifleBack"));
 				EQCharacterState = (PrimaryWeapon == EWeaponType::Rifle) ? ECharacterState::RifleMode : EQCharacterState;
@@ -470,7 +463,9 @@ void ACharacterBase::CheckEquipWeapon()
 
 			case EWeaponType::Shotgun:
 				if (playerShotgun) continue;
-				playerShotgun = GetWorld()->SpawnActor<AShotgun>();
+				playerShotgun = GetWorld()->SpawnActor<AShotgun>(shotgunBlueprint);
+
+				//playerShotgun = GetWorld()->SpawnActor<AShotgun>();
 				WeaponActor = playerShotgun;
 				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Shotgun")) : FName(TEXT("ShotgunBack"));
 				EQCharacterState = (PrimaryWeapon == EWeaponType::Shotgun) ? ECharacterState::ShotgunMode : EQCharacterState;
@@ -479,7 +474,9 @@ void ACharacterBase::CheckEquipWeapon()
 
 			case EWeaponType::RocketLauncher:
 				if (playerRocketLauncher) continue;
-				playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
+				playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>(rocketLauncherBlueprint);
+
+				//playerRocketLauncher = GetWorld()->SpawnActor<ARocketLauncher>();
 				WeaponActor = playerRocketLauncher;
 				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("RocketLauncher")) : FName(TEXT("RocketLauncherBack"));
 				EQCharacterState = (PrimaryWeapon == EWeaponType::RocketLauncher) ? ECharacterState::RocketLauncherMode : EQCharacterState;
@@ -487,7 +484,9 @@ void ACharacterBase::CheckEquipWeapon()
 
 			case EWeaponType::Sword:
 				if (playerSword) continue;
-				playerSword = GetWorld()->SpawnActor<ASword>();
+				playerSword = GetWorld()->SpawnActor<ASword>(swordBlueprint);
+
+				//	playerSword = GetWorld()->SpawnActor<ASword>();
 				WeaponActor = playerSword;
 				SocketName = (WeaponType == PrimaryWeapon) ? FName(TEXT("Sword")) : FName(TEXT("SwordBack"));
 				EQCharacterState = (PrimaryWeapon == EWeaponType::Sword) ? ECharacterState::SwordMode : EQCharacterState;
@@ -510,7 +509,7 @@ void ACharacterBase::CheckEquipWeapon()
 
 	APlayerController* PlayerController = Cast<APlayerController>(GetController());
 
-	
+
 	if (EquippedWeapons.Num() == 1 && !bMouseCursorHidden && PlayerController)
 	{
 		PlayerController->bShowMouseCursor = false;          // 마우스 커서 숨김
@@ -675,7 +674,7 @@ void ACharacterBase::WASDClick(const FInputActionValue& InputValue)
 void ACharacterBase::Rotate(const FInputActionValue& InputValue)
 {
 	// 무기가 없으면 무시
-	if (EquippedWeapons.Num() == 0&& isFirstSpawn  ) return;
+	if (EquippedWeapons.Num() == 0 && isFirstSpawn) return;
 	if (bIsInventoryOpen) return;
 
 
@@ -986,72 +985,53 @@ void ACharacterBase::SetCharacterTransparency(float transparency)
 
 void ACharacterBase::ActivateTimeRewind(float duration)
 {
-	if (TimeRecords.Num() == 0) return;
-
-	// 디버그 메시지 출력
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Time Rewind Activated!"));
-
-	// 되돌리기 타이머 설정 (0.02초마다 호출 -> 부드러운 움직임)
-	GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 0.01f, true);
-
-
-	// 되돌리기 시작 (목표 위치 설정)
-	if (TimeRecords.Num() > 1)
+	if (TimeRecords.Num() == 0 )
 	{
-		CurrentTargetIndex = TimeRecords.Num() - 1; // 마지막 인덱스부터 시작
-		PreviousPosition = GetActorLocation(); // 현재 위치 저장
-		NextPosition = TimeRecords[CurrentTargetIndex].Location; // 목표 위치 설정
-		LerpAlpha = 0.0f; // 보간 시작점
+		return; // 배열이 비어 있거나 이미 되돌리기 중이라면 종료
 	}
+
+	RewindElapsedTime = 0.0f;
+
+	// 되돌리기 중 충돌 방지
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	// 0.01초 간격으로 50번 실행하여 1초 동안 되돌리기
+	GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 0.01f, true);
 }
 
 void ACharacterBase::RewindStep()
 {
-	if (TimeRecords.Num() == 0 || CurrentTargetIndex < 0)
+	if (TimeRecords.Num() == 0 || RewindElapsedTime >= RewindDuration)
 	{
+		// 되돌리기 종료
 		GetWorldTimerManager().ClearTimer(RewindTimerHandle);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Time Rewind Finished!"));
+		TimeRecords.Empty();
+
+		// 충돌 다시 활성화
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
 		return;
 	}
 
-	// Lerp 보간 (자연스럽게 이동)
-	LerpAlpha += 0.05f; // 부드럽게 이동할 비율 증가
-	SetActorLocation(FMath::Lerp(PreviousPosition, NextPosition, LerpAlpha));
+	// 진행도 계산 (1 ~ 0)
+	float Progress = 1.f - RewindElapsedTime / RewindDuration;
+	// 
+	int32 TotalFrames = TimeRecords.Num();
+	
+	// 현재(1) -> 과거(0) 
+	int32 TargetIndex = FMath::Clamp(FMath::Lerp(0, TotalFrames - 1, Progress), 0, TotalFrames - 1);
 
-	// 목표 위치에 거의 도달했으면 다음 타겟으로 이동
-	if (LerpAlpha >= 1.0f)
+	if (TimeRecords.IsValidIndex(TargetIndex))
 	{
-		--CurrentTargetIndex;
-
-		if (CurrentTargetIndex >= 0)
-		{
-			PreviousPosition = NextPosition; // 현재 위치를 이전 위치로 변경
-			NextPosition = TimeRecords[CurrentTargetIndex].Location; // 다음 목표 위치
-			LerpAlpha = 0.0f; // 보간 초기화
-		}
-		else
-		{
-			GetWorldTimerManager().ClearTimer(RewindTimerHandle);
-			GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Time Rewind Finished!"));
-		}
+		SetActorLocation(TimeRecords[TargetIndex].Location);
+		//SetActorRotation(TimeRecords[TargetIndex].Rotation);
 	}
+
+	RewindElapsedTime += 0.01f; // 타이머 간격과 동일하게 증가
 }
 
-void ACharacterBase::RecordLocation()
-{
-	// 현재 위치와 회전 기록
-	//FTimeRecord NewRecord(GetActorLocation(), GetActorRotation(), GetWorld()->GetTimeSeconds());
-	//TimeRecords.Add(NewRecord);
-
-	//// 오래된 기록 제거
-	//while (TimeRecords.Num() > 0 && GetWorld()->GetTimeSeconds() - TimeRecords[0].Timestamp > MaxRecordTime)
-	//{
-	//	TimeRecords.RemoveAt(0);
-	//}
-
-	//// 디버그 메시지
-	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Green, TEXT("Location recorded!"));
-}
 
 void ACharacterBase::SaveStateBeforeLevelChange()
 {
@@ -1187,7 +1167,7 @@ void ACharacterBase::ThrowGrenade()
 
 	// 수류탄 던지기 불가능 상태로 전환
 	bCanThrowGrenade = false;
-	
+
 	// 메쉬에서 "Grenade" 소켓의 월드 위치와 회전값 가져오기
 	FVector GrenadeSpawnLocation = GetMesh()->GetSocketLocation(FName(TEXT("Grenade")));
 	FRotator GrenadeSpawnRotation = GetMesh()->GetSocketRotation(FName(TEXT("Grenade")));
@@ -1215,10 +1195,10 @@ void ACharacterBase::ThrowGrenade()
 
 
 
-	playerBasicGrenade->AttachToComponent(GetMesh(), 
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale, 
+	playerBasicGrenade->AttachToComponent(GetMesh(),
+		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 		FName(TEXT("Grenade")));
-	
+
 	playerBasicGrenade->SetOwner(this);
 
 
@@ -1289,9 +1269,9 @@ void ACharacterBase::ChangeWeapon()
 	{
 		return; // 무기가 두 개 미만이면 함수 종료
 	}
-	
+
 	// 주무기가 있으면
-	if (EquippedWeapons[0] != EWeaponType::None) 
+	if (EquippedWeapons[0] != EWeaponType::None)
 	{
 		AActor* HandAttachedWeapon = nullptr;
 		FName BackSocketName;
@@ -1397,14 +1377,14 @@ void ACharacterBase::ChangeWeapon()
 
 
 	// 애니메이션 상태 변수
-	
+
 }
 
 AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
 {
 	// 캐릭터의 SkeletalMeshComponent를 가져오기
 	USkeletalMeshComponent* SkeletalMesh = GetMesh();
-	
+
 	if (!SkeletalMesh)
 	{
 		return nullptr;
@@ -1431,7 +1411,7 @@ AActor* ACharacterBase::GetAttachedActorAtSocket(FName SocketName)
 void ACharacterBase::ToggleInventory()
 {
 
-	APlayerController*playerController = GetWorld()->GetFirstPlayerController();
+	APlayerController* playerController = GetWorld()->GetFirstPlayerController();
 
 
 
@@ -1575,7 +1555,7 @@ void ACharacterBase::DropWeapon()
 	}
 
 	// 무기 상태에 따라 설정 변경
-	
+
 	ChangeState();
 
 	if (PrimaryWeapon == EWeaponType::Rifle)

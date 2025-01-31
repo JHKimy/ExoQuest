@@ -131,6 +131,11 @@ void AShotgun::Fire()
             }
         }
     }
+    if (PlayerController && cameraShakeClass)
+    {
+        PlayerController->PlayerCameraManager->StartCameraShake(cameraShakeClass);
+    }
+
 
     ApplyRecoil();
 }

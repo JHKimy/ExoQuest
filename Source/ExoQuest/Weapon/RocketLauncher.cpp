@@ -8,6 +8,8 @@
 #include "Weapon/RocketProjectile.h"
 
 #include "DrawDebugHelpers.h"
+#include "Camera/CameraShakeBase.h" // 카메라 셰이크 추가
+
 
 
 ARocketLauncher::ARocketLauncher()
@@ -81,6 +83,11 @@ void ARocketLauncher::Fire()
 
         if (Rocket)
         {
+            // 카메라 셰이크 실행
+            if (PlayerController && cameraShakeClass)
+            {
+                PlayerController->PlayerCameraManager->StartCameraShake(cameraShakeClass);
+            }
            // UKismetSystemLibrary::PrintString(this, TEXT("Rocket Spawned Successfully!"), true, true, FColor::Green, 2.0f);
         }
         else

@@ -91,4 +91,9 @@ public:
 	float recoilHorizontalMax{ 0.3f };
 
 	class APlayerController* PlayerController;
+
+
+	// 카메라 셰이크 효과 추가
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	TSubclassOf<class UCameraShakeBase> cameraShakeClass;
 };

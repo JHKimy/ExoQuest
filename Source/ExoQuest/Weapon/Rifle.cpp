@@ -142,6 +142,12 @@ void ARifle::Fire()
         }
     }
 
+    if (PlayerController && cameraShakeClass)
+    {
+        PlayerController->PlayerCameraManager->StartCameraShake(cameraShakeClass);
+    }
+
+
     // 반동 효과 
     ApplyRecoil();
 }

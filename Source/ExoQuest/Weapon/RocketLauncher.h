@@ -82,10 +82,10 @@ public:
 	FRotator recoveryRotator;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
-	float recoilVerticalMin{ 7.f };
+	float recoilVerticalMin{ 3.f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
-	float recoilVerticalMax{ 10.f };
+	float recoilVerticalMax{ 5.f };
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Recoil")
 	float recoilHorizontalMin{ -0.55f };
@@ -95,4 +95,8 @@ public:
 
 	class APlayerController* PlayerController;
 
+
+	// 카메라 셰이크 효과 추가
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	TSubclassOf<class UCameraShakeBase> cameraShakeClass;
 };

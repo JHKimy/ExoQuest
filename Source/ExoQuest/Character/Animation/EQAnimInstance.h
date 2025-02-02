@@ -50,6 +50,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Character State")
 	ECharacterState CharacterState;
 
+	virtual void NativeInitializeAnimation() override;
+
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds)override;
 
@@ -68,5 +70,16 @@ public:
 
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grenade")
 	class ABasicGrenade* EquippedGrenade;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float characterYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float prevCharacterYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float rootYawOffset;
 
 };

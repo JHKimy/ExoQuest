@@ -9,13 +9,27 @@
 #include "Weapon/Grenade/BasicGrenade.h"
 #include "Components/SphereComponent.h"
 #include <Camera/CameraComponent.h>
+#include "Kismet/KismetMathLibrary.h"
+#include "Math/UnrealMathUtility.h"
 
+
+
+
+void UEQAnimInstance::NativeInitializeAnimation()
+{
+	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
+}
 
 void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	//Super::NativeUpdateAnimation(DeltaSeconds);
 
-	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
+	
+
+	if (!AnimCharacter)
+	{
+		return; // AnimCharacter가 nullptr이면 함수 종료
+	}
 
 	if (AnimCharacter)
 	{
@@ -68,6 +82,20 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 
+	if (bIsMoving) {
+		rootYawOffset = 0;
+	}
+	else if (!bIsMoving) 
+	{
+		prevCharacterYaw = characterYaw;
+
+		characterYaw = AnimCharacter->GetActorRotation().Yaw;
+	
+		rootYawOffset = UKismetMathLibrary::NormalizeAxis
+		(rootYawOffset - (characterYaw - prevCharacterYaw));
+	
+		rootYawOffset = FMath::Clamp(rootYawOffset, -90.0f, 90.0f);
+	}
 
 
 }
@@ -174,3 +202,13 @@ void UEQAnimInstance::AnimNotify_Throw()
 	// 필요시 붙은 객체 지우고 다시 스폰 해서 프로젝타일로 던지는 방식
 
 }
+
+
+
+
+
+
+
+
+
+

@@ -82,4 +82,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
 	float rootYawOffset;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float pitch;
+
+
+
+
+
+
+
+
+
+
 };

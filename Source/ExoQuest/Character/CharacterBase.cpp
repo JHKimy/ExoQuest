@@ -240,8 +240,6 @@ void ACharacterBase::BeginPlay()
 
 
 
-
-
 	// InventoryUI가 초기화되지 않았다면 생성
 	if (!InventoryUI)
 	{
@@ -404,6 +402,55 @@ void ACharacterBase::Tick(float DeltaTime)
 		}
 	}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+	if ((GetVelocity().SizeSquared()) > 0)
+	{
+		bIsMoving = true;
+	}
+	else 
+	{
+		bIsMoving = false;
+	}
+
+
+
+	if (bIsMoving)
+	{
+		rootYawOffset = 0;
+	}
+
+	else if (!bIsMoving)
+	{
+		prevCharacterYaw = characterYaw;
+
+		characterYaw = GetActorRotation().Yaw;
+
+		rootYawOffset = UKismetMathLibrary::NormalizeAxis
+		(rootYawOffset - (characterYaw - prevCharacterYaw));
+
+		rootYawOffset = FMath::Clamp(rootYawOffset, -90.0f, 90.0f);
+	}
+
+	//if (rootYawOffset >= 80)
+	//{
+	//	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("rootYawOffset: %f"), rootYawOffset), true, true, FColor::Red, 2.0f);
+	//	bUseControllerRotationYaw = false;
+
+	//	TurnInPlace();
+	//}
+
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -540,10 +587,27 @@ void ACharacterBase::ChangeState()
 			springArmComp->SocketOffset.Y = 70;
 			tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 			GetCharacterMovement()->bOrientRotationToMovement = true;
-			springArmComp->bUsePawnControlRotation = true;
+			springArmComp->bUsePawnControlRotation = false;
 
-			bUseControllerRotationYaw = false;
-		}
+		
+
+
+
+
+
+			bUseControllerRotationYaw = true;
+		
+
+
+
+
+
+
+
+
+
+
+	}
 		break;
 
 	case ECharacterState::RifleMode:
@@ -555,7 +619,16 @@ void ACharacterBase::ChangeState()
 		springArmComp->SocketOffset.Y = 70;
 		tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 		GetCharacterMovement()->bOrientRotationToMovement = false;
+		
+		
+		
+		
 		bUseControllerRotationYaw = true;
+		
+
+		// 이것    
+		// bUseControllerRotationYaw = true;
+		
 		isFirstSpawn = false;
 		break;
 
@@ -1592,3 +1665,35 @@ void ACharacterBase::DropWeapon()
 	}
 }
 
+
+
+
+
+
+
+void ACharacterBase::TurnInPlace()
+{
+	if (bIsRotating)
+	{
+		return;
+	}
+
+	bIsRotating = true;
+
+	// 컨트롤러 회전 비활성화
+	//bUseControllerRotationYaw = false;
+
+	yawStart = GetActorRotation().Yaw;
+	yawTarget = yawStart + rotationAmount;
+
+	SetActorRotation(FRotator(0, yawTarget, 0));
+	bIsRotating = false;
+	// 일정 시간이 지난 후 회전이 끝났다고 판단하고 bUseControllerRotationYaw을 다시 true로 설정
+	//GetWorldTimerManager().SetTimer(RotationTimerHandle, this, &ACharacterBase::ResetRotation, 1.f, false);
+}
+
+void ACharacterBase::ResetRotation()
+{
+	//bIsRotating = false;
+	//bUseControllerRotationYaw = true;  // 회전이 끝난 후 다시 컨트롤러 회전을 활성화
+}

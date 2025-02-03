@@ -12,9 +12,6 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 
-
-
-
 void UEQAnimInstance::NativeInitializeAnimation()
 {
 	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
@@ -82,9 +79,15 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 
-	if (bIsMoving) {
+	pitch = AnimCharacter->GetBaseAimRotation().Pitch;
+
+
+
+	if (bIsMoving) 
+	{
 		rootYawOffset = 0;
 	}
+
 	else if (!bIsMoving) 
 	{
 		prevCharacterYaw = characterYaw;
@@ -104,7 +107,6 @@ void UEQAnimInstance::SetCharacterState(ECharacterState NewState)
 {
 	CharacterState = NewState;
 }
-
 
 void UEQAnimInstance::AnimNotify_EndThrow()
 {
@@ -202,13 +204,3 @@ void UEQAnimInstance::AnimNotify_Throw()
 	// 필요시 붙은 객체 지우고 다시 스폰 해서 프로젝타일로 던지는 방식
 
 }
-
-
-
-
-
-
-
-
-
-

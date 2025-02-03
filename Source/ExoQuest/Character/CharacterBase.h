@@ -134,6 +134,9 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
 	class UAnimMontage* ThrowGrenadeMontage;
 
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
+	bool test = false;
+
 //=====================================================================================
 // 이동 & 입력 관련
 //=====================================================================================
@@ -519,6 +522,57 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Map")
 	void TeleportRoom();
+
+
+
+
+
+
+
+
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "Place")
+	void TurnInPlace();
+
+	UFUNCTION(BlueprintCallable, Category = "Place")
+	void ResetRotation();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	float yawStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	float yawTarget;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	float rotationAmount = 45.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	float RotationDuration = 5.0f; // 5초 동안 회전
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	float RotationElapsedTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Place")
+	bool bIsRotating = false;
+
+	FTimerHandle RotationTimerHandle;
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	bool bIsMoving;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float characterYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float prevCharacterYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
+	float rootYawOffset;
+
 
 //=====================================================================================
 // 디버그 용

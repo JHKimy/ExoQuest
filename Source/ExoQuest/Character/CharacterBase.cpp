@@ -107,6 +107,9 @@ ACharacterBase::ACharacterBase()
 	miniMapCam->ProjectionType = ECameraProjectionMode::Orthographic;
 	miniMapCam->OrthoWidth = 1024.f;
 
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+	GetMesh()->SetCollisionResponseToChannel(ECC_WorldDynamic, ECollisionResponse::ECR_Block);
 
 	GrenadeLaunchPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("Grenade"));
 	GrenadeLaunchPosition->SetupAttachment(GetCapsuleComponent());
@@ -587,13 +590,9 @@ void ACharacterBase::ChangeState()
 			springArmComp->SocketOffset.Y = 70;
 			tpsCamComp->SetRelativeRotation(FRotator(-40.f, 0.f, 0.f));
 			GetCharacterMovement()->bOrientRotationToMovement = true;
-			springArmComp->bUsePawnControlRotation = false;
+			springArmComp->bUsePawnControlRotation = true;
 
 		
-
-
-
-
 
 			bUseControllerRotationYaw = true;
 		
@@ -1535,6 +1534,7 @@ void ACharacterBase::SetInputRestrictions(bool bRestrict)
 
 void ACharacterBase::DropWeapon()
 {
+
 	// 현재 장착된 무기가 없으면 함수 종료
 	if (EquippedWeapons.IsEmpty())
 	{

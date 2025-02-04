@@ -30,7 +30,7 @@ ARocketLauncher::ARocketLauncher()
 	muzzleLocation->SetupAttachment(RootComponent);
 
 	// 기본 위치 설정 (총구 앞부분으로 위치 설정)
-	muzzleLocation->SetRelativeLocation(FVector(0.f, 60.f, 2.f)); // X, Y, Z 좌표 조정 가능
+	muzzleLocation->SetRelativeLocation(FVector(0.f, 100.f, 2.f)); // X, Y, Z 좌표 조정 가능
 
     // 블루프린트 오버라이드
     // RocketProjectileClass 초기화

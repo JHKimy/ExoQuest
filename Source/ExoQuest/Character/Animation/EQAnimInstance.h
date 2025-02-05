@@ -3,7 +3,24 @@
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimNotifies/AnimNotify.h"	// 노티파이
+
+
+
+
+
+
+#include "Kismet/KismetSystemLibrary.h"
+
+
+
 #include "EQAnimInstance.generated.h"
+
+
+
+
+
+
+
 
 //// 캐릭터 상태
 //UENUM(BlueprintType)
@@ -23,6 +40,14 @@ class EXOQUEST_API UEQAnimInstance : public UAnimInstance
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Character)
 	class ACharacterBase* AnimCharacter;
+
+
+
+
+	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
+	class UAnimMontage* ThrowGrenadeMontage;
+
+
 
 	//// 애니메이션 상태
 	//EAnimState EQAnimState;
@@ -68,6 +93,15 @@ public:
 	UFUNCTION()
 	void AnimNotify_Throw();
 
+
+
+
+
+
+	UFUNCTION()
+	void AnimNotify_Aim();
+
+
 	UPROPERTY(EditAnywhere,BlueprintReadWrite, Category = "Grenade")
 	class ABasicGrenade* EquippedGrenade;
 
@@ -86,12 +120,12 @@ public:
 	float pitch;
 
 
+	UFUNCTION()
+	void AnimNotify_Pause();
 
+	UFUNCTION()
+	void ResumeMontage();
 
-
-
-
-
-
+	FTimerHandle PauseTimerHandle;  // 타이머 핸들 추가
 
 };

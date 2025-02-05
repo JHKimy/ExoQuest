@@ -12,9 +12,14 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
 
+
+#include "Kismet/KismetSystemLibrary.h"
+
 void UEQAnimInstance::NativeInitializeAnimation()
 {
 	AnimCharacter = Cast<ACharacterBase>(TryGetPawnOwner());
+
+
 }
 
 void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -101,7 +106,14 @@ void UEQAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	}
 
 
+
+	
+
+
 }
+
+
+
 
 void UEQAnimInstance::SetCharacterState(ECharacterState NewState)
 {
@@ -166,10 +178,18 @@ void UEQAnimInstance::AnimNotify_EndThrow()
 
 void UEQAnimInstance::AnimNotify_Throw()
 {
-	// 특정 소켓에서 부착된 액터 가져오기
-	TArray<USceneComponent*> AttachedComponents = AnimCharacter->GetMesh()->GetAttachChildren();
+	if (!AnimCharacter) return; // 캐릭터가 없으면 종료
 
-	for (USceneComponent* Component : AttachedComponents) 
+	// 부착된 컴포넌트 중 "Grenade" 소켓에 있는 StaticMeshComponent 제거
+	if (AnimCharacter->GrenadeMeshComponent)
+	{
+		AnimCharacter->GrenadeMeshComponent->DestroyComponent();
+		AnimCharacter->GrenadeMeshComponent = nullptr;
+	}
+
+	// 기존 부착된 수류탄 찾기
+	TArray<USceneComponent*> AttachedComponents = AnimCharacter->GetMesh()->GetAttachChildren();
+	for (USceneComponent* Component : AttachedComponents)
 	{
 		if (Component->GetAttachSocketName() == TEXT("Grenade"))
 		{
@@ -178,29 +198,56 @@ void UEQAnimInstance::AnimNotify_Throw()
 			break;
 		}
 	}
+
+	// 기존 수류탄이 있으면 제거
+	if (EquippedGrenade)
+	{
+		EquippedGrenade->collisionComponent->IgnoreActorWhenMoving(AnimCharacter, true);
+		EquippedGrenade->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+		EquippedGrenade->collisionComponent->SetSimulatePhysics(true);
+		EquippedGrenade->Destroy();
+	}
+
+	// 새 수류탄 스폰
+	FActorSpawnParameters SpawnParams;
+	SpawnParams.Owner = AnimCharacter; // 소유자 설정
+
+	GetWorld()->SpawnActor<ABasicGrenade>(
+		ABasicGrenade::StaticClass(),
+		AnimCharacter->LaunchPosition->GetComponentLocation(),
+		AnimCharacter->LaunchPosition->GetComponentRotation(),
+		SpawnParams
+	);
+
+}
+
+void UEQAnimInstance::AnimNotify_Aim()
+{
+	if (AnimCharacter->bIsThrowingGrenade) {
+		Montage_Pause(ThrowGrenadeMontage);
+	}
+	else {
+		return;
+	}
+	//else {
+	//	Montage_Resume(ThrowGrenadeMontage);
+	//}
+}
+
+void UEQAnimInstance::AnimNotify_Pause()
+{
+	UKismetSystemLibrary::PrintString(this, TEXT("Pause 실행됨!"), true, true, FLinearColor::Red, 3.0f);
+
+	Montage_Pause(nullptr);
 	
-
-
-
-	// 수류탄의 예상 궤적 표시
-	// EquippedGrenade->PredictGrenadePath(AnimCharacter->GrenadeLaunchVelocity);
-
-	// 소유자와의 충돌 무시 설정
-	EquippedGrenade->collisionComponent->IgnoreActorWhenMoving(AnimCharacter, true);
-
-	// 수류탄 소켓에서 분리
-	EquippedGrenade->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-
-	EquippedGrenade->collisionComponent->SetSimulatePhysics(true);
+	// 0.5초 후에 애니메이션 다시 재생
+	GetWorld()->GetTimerManager().SetTimer(PauseTimerHandle, this, &UEQAnimInstance::ResumeMontage, 0.5f, false);
 	
+}
 
-	// 초기 발사 속도 설정 (포물선 효과를 위한 Z축 속도 추가)
-	FVector LaunchVelocity = AnimCharacter->GrenadeLaunchVelocity;
-	LaunchVelocity.Z += 500.0f; // Z축 방향 속도 추가
+void UEQAnimInstance::ResumeMontage()
+{
+	Montage_Resume(nullptr);
+	UKismetSystemLibrary::PrintString(this, TEXT("Pause 끝, 애니메이션 재생"), true, true, FLinearColor::Green, 3.0f);
 	
-	// 실제로 던지기
-	EquippedGrenade->collisionComponent
-		->AddImpulse(LaunchVelocity, NAME_None, true);
-	// 필요시 붙은 객체 지우고 다시 스폰 해서 프로젝타일로 던지는 방식
-
 }

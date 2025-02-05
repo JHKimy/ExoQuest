@@ -29,11 +29,36 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Components")
 	class USphereComponent* collisionComponent;
 
-	UPROPERTY(VisibleAnywhere)
-	class UProjectileMovementComponent* movementComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 	class UParticleSystem* explosionEffect;
+
+
+
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	class UProjectileMovementComponent* movementComponent;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float Speed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float maxSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float gravity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float damage;
+
+
+
+
+
+
+
 
 
 	// 충돌 처리 및 폭발 효과
@@ -49,9 +74,9 @@ public:
 	UFUNCTION()
 	UStaticMeshComponent* GetMesh() const { return meshComponent; }
 
-	// 예상 경로 함수
-	UFUNCTION()
-	void PredictGrenadePath(FVector LaunchVelocity, float MaxSimTime = 5.f);
+	//// 예상 경로 함수
+	//UFUNCTION()
+	//void PredictGrenadePath(FVector LaunchVelocity, float MaxSimTime = 5.f);
 
 
 

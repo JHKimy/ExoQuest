@@ -130,12 +130,14 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
 	class UAnimMontage* swordComboMontage;
 
-	// 대검 콤보 공격 몽타주
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
 	class UAnimMontage* ThrowGrenadeMontage;
 
 	UPROPERTY(EditAnywhere, BluePrintReadWrite, Category = "Animation")
 	bool test = false;
+
+	//class UAnimInstance* AnimInstance;
+	//class UEQAnimInstance* EQAnimInstance;
 
 //=====================================================================================
 // 이동 & 입력 관련
@@ -493,6 +495,29 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
 	class UArrowComponent* GrenadeLaunchPosition;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	class USceneComponent* LaunchPosition;
+
+
+
+
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void AimGrenade();
+
+	UFUNCTION(BlueprintCallable, Category = "Attack")
+	void ReadyAimGrenade();
+
+	bool bAimming = false;
+
+	bool bIsThrowingGrenade = false;
+
+	void ShowProjectilePrediction();
+
+	FTimerHandle TimerHandle2;
+
+	class UStaticMeshComponent* GrenadeMeshComponent;
+
 	
 //=====================================================================================
 // 적 관련
@@ -572,6 +597,18 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AimOffset")
 	float rootYawOffset;
+
+
+
+
+
+
+
+
+	FTimerHandle ComboDelayTimerHandle;
+
+	bool bIsMontagePlaying;
+
 
 
 //=====================================================================================
@@ -683,6 +720,8 @@ public:
 		UKismetSystemLibrary::PrintString(this, CharacterStateString, true, true, FColor::Blue, 5.0f);
 	}
 
+
+	void Test();
 	//// 애니메이션 몽타주 노티파이
 	//UFUNCTION()
 	//void ThrowEnd();

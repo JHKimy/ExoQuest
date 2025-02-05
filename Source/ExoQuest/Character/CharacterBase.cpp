@@ -60,6 +60,7 @@
 #include "Item/ItemDataBase.h"
 
 #include "Weapon/WeaponForEquip.h"
+#include "Components/SceneComponent.h"
 
 
 ACharacterBase::ACharacterBase()
@@ -113,7 +114,17 @@ ACharacterBase::ACharacterBase()
 
 	GrenadeLaunchPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("Grenade"));
 	GrenadeLaunchPosition->SetupAttachment(GetCapsuleComponent());
-	GrenadeLaunchPosition->SetRelativeLocation(FVector(60.f, 0.f, 60.f));
+	GrenadeLaunchPosition->SetRelativeLocation(FVector(200.f, 0.f, 100.f));
+
+
+
+
+	LaunchPosition = CreateDefaultSubobject<USceneComponent>(TEXT("LaunchPos"));
+	LaunchPosition->SetupAttachment(GetCapsuleComponent());
+	LaunchPosition->SetRelativeLocation(FVector(200.f, 0.f, 150.f));
+
+
+
 
 	//characterPositionArrow->OwnerNosee
 
@@ -254,6 +265,7 @@ void ACharacterBase::BeginPlay()
 
 	//// 1초 간격으로 위치 기록
 	//GetWorldTimerManager().SetTimer(LocationRecordTimerHandle, this, &ACharacterBase::RecordLocation, 1.0f, true);
+
 
 }
 
@@ -454,13 +466,36 @@ void ACharacterBase::Tick(float DeltaTime)
 	//	TurnInPlace();
 	//}
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	if (bIsThrowingGrenade)
+	{
+		ShowProjectilePrediction();
+		//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		//UEQAnimInstance* anim = Cast<UEQAnimInstance>(AnimInstance);
+
+		// anim->AnimNotify_Aim();
+	}
+
+
 }
 
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 }
-
 
 void ACharacterBase::CheckEquipWeapon()
 {
@@ -947,8 +982,7 @@ void ACharacterBase::HandleStamina(float DeltaTime)
 
 void ACharacterBase::SwordAttack()
 {
-	if (bIsInventoryOpen || bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;
-
+	if (currentCombo == 3 || bIsInventoryOpen || bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;
 	playerSword->Slash();
 
 	// 섹션
@@ -970,9 +1004,19 @@ void ACharacterBase::SwordAttack()
 		else if (currentCombo == 1)
 		{
 			AnimInstance->Montage_JumpToSection(FName("LeftSlash"));
-			currentCombo = 0;
+			currentCombo = 2;
 			// 타이머 초기화 (두 번째 공격이 성공적으로 연결되었기 때문에 초기화)
-			GetWorld()->GetTimerManager().ClearTimer(ComboResetTimerHandle);
+			GetWorld()->GetTimerManager().SetTimer(ComboResetTimerHandle, this, &ACharacterBase::ResetCombo, 0.15f, false);
+			
+		}
+		else if (currentCombo == 2)
+		{
+			AnimInstance->Montage_JumpToSection(FName("UpSlash"));
+			currentCombo = 3;
+			// 타이머 초기화 (두 번째 공격이 성공적으로 연결되었기 때문에 초기화)
+			//GetWorld()->GetTimerManager().ClearTimer(ComboResetTimerHandle);
+			GetWorld()->GetTimerManager().SetTimer(ComboResetTimerHandle, this, &ACharacterBase::ResetCombo, 0.5f, false);
+
 		}
 
 	}
@@ -1235,104 +1279,320 @@ void ACharacterBase::RestoreStateAfterLevelChange()
 
 void ACharacterBase::ThrowGrenade()
 {
-	if (bIsDashing || bIsRunning || !bCanThrowGrenade || EquippedWeapons.IsEmpty()) return;
+	//if (bIsDashing || bIsRunning || !bCanThrowGrenade || EquippedWeapons.IsEmpty()) return;
 
-	// 수류탄 던지기 불가능 상태로 전환
-	bCanThrowGrenade = false;
+	//// 수류탄 던지기 불가능 상태로 전환
+	//bCanThrowGrenade = false;
 
-	// 메쉬에서 "Grenade" 소켓의 월드 위치와 회전값 가져오기
-	FVector GrenadeSpawnLocation = GetMesh()->GetSocketLocation(FName(TEXT("Grenade")));
-	FRotator GrenadeSpawnRotation = GetMesh()->GetSocketRotation(FName(TEXT("Grenade")));
+	//// 메쉬에서 "Grenade" 소켓의 월드 위치와 회전값 가져오기
+	//FVector GrenadeSpawnLocation = GetMesh()->GetSocketLocation(FName(TEXT("Grenade")));
+	//FRotator GrenadeSpawnRotation = GetMesh()->GetSocketRotation(FName(TEXT("Grenade")));
 
-	// 수류탄 스폰
-	FActorSpawnParameters SpawnParams;
-	SpawnParams.Owner = this; // 수류탄의 소유자 설정
-
-
-	// 수류탄 스폰
-	playerBasicGrenade = GetWorld()->SpawnActor<ABasicGrenade>(
-		GrenadeSpawnLocation,
-		GrenadeSpawnRotation,
-		SpawnParams
-	);
-
-	//********************
-	playerBasicGrenade->GetMesh()->SetSimulatePhysics(false);
-	playerBasicGrenade->collisionComponent->SetSimulatePhysics(false);
-	playerBasicGrenade->collisionComponent->SetGenerateOverlapEvents(true);
+	//// 수류탄 스폰
+	//FActorSpawnParameters SpawnParams;
+	//SpawnParams.Owner = this; // 수류탄의 소유자 설정
 
 
+	//// 수류탄 스폰
+	//playerBasicGrenade = GetWorld()->SpawnActor<ABasicGrenade>(
+	//	GrenadeSpawnLocation,
+	//	GrenadeSpawnRotation,
+	//	SpawnParams
+	//);
+
+	////********************
+	//playerBasicGrenade->GetMesh()->SetSimulatePhysics(false);
+	//playerBasicGrenade->collisionComponent->SetSimulatePhysics(false);
+	//playerBasicGrenade->collisionComponent->SetGenerateOverlapEvents(true);
 
 
 
 
 
-	playerBasicGrenade->AttachToComponent(GetMesh(),
-		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-		FName(TEXT("Grenade")));
-
-	playerBasicGrenade->SetOwner(this);
 
 
+	//playerBasicGrenade->AttachToComponent(GetMesh(),
+	//	FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+	//	FName(TEXT("Grenade")));
+
+	//playerBasicGrenade->SetOwner(this);
 
 
-	{
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-		if (AnimInstance && ThrowGrenadeMontage)
-		{
-			AnimInstance->Montage_Play(ThrowGrenadeMontage);
+	//{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 
-			// 오른손 소켓에 부착된 액터 가져오기
-			AActor* attachedActor = nullptr;
+	//	if (AnimInstance && ThrowGrenadeMontage)
+	//	{
+	//		//AnimInstance->Montage_Play(ThrowGrenadeMontage);
+			AnimInstance->Montage_Resume(ThrowGrenadeMontage);
+	//		// 오른손 소켓에 부착된 액터 가져오기
+	//		AActor* attachedActor = nullptr;
 
-			for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
-			{
-				if (ChildComp)
-				{
-					auto cg = ChildComp->GetAttachSocketName();
+	//		for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
+	//		{
+	//			if (ChildComp)
+	//			{
+	//				auto cg = ChildComp->GetAttachSocketName();
 
-					if (cg == RifleSocket || cg == ShotgunSocket || cg == RocketLauncherSocket || cg == SwordSocket)
-					{
-						attachedActor = Cast<AActor>(ChildComp->GetOwner());
-						break;
-					}
-				}
-			}
+	//				if (cg == RifleSocket || cg == ShotgunSocket || cg == RocketLauncherSocket || cg == SwordSocket)
+	//				{
+	//					attachedActor = Cast<AActor>(ChildComp->GetOwner());
+	//					break;
+	//				}
+	//			}
+	//		}
 
-			if (attachedActor)
-			{
-				// 루트 컴포넌트를 가져옴
+	//		if (attachedActor)
+	//		{
+	//			// 루트 컴포넌트를 가져옴
 
-				if (attachedActor->IsA(ASword::StaticClass()))
-				{
-					attachedActor->AttachToComponent(
-						GetMesh(),
-						FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-						LeftSwordSocket);
-				}
-				else
-				{
-					// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
-					attachedActor->AttachToComponent(
-						GetMesh(),
-						FAttachmentTransformRules::SnapToTargetNotIncludingScale,
-						LeftHandSocket
-					);
-				}
-			}
-		}
-	}
+	//			if (attachedActor->IsA(ASword::StaticClass()))
+	//			{
+	//				attachedActor->AttachToComponent(
+	//					GetMesh(),
+	//					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+	//					LeftSwordSocket);
+	//			}
+	//			else
+	//			{
+	//				// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
+	//				attachedActor->AttachToComponent(
+	//					GetMesh(),
+	//					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+	//					LeftHandSocket
+	//				);
+	//			}
+	//		}
+	//	}
+	//}
+
+
+	bIsThrowingGrenade = false;
+
+	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	//UEQAnimInstance* anim = Cast<UEQAnimInstance>(AnimInstance);
+	//anim->Montage_Resume(nullptr);
+
 
 	// 쿨타임 타이머 설정
 	GetWorld()->GetTimerManager().SetTimer(GrenadeCooldownTimer, this, &ACharacterBase::ResetGrenadeCooldown, 1.0f, false);
 }
 
+void ACharacterBase::ReadyAimGrenade()
+{
+	if (bIsThrowingGrenade) return; // 이미 조준 중이면 실행하지 않음
+	if (bIsDashing || bIsRunning  || EquippedWeapons.IsEmpty()) return;
+
+
+	UKismetSystemLibrary::PrintString(this, TEXT("Aim"), true, true, FColor::Green, 5.0f);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	UEQAnimInstance* anim = Cast<UEQAnimInstance>(AnimInstance);
+	anim->Montage_Play(ThrowGrenadeMontage);
+
+	AimGrenade();
+
+	bIsThrowingGrenade = true; // 조준 시작 상태
+	//GetWorldTimerManager().SetTimer(TimerHandle2, this, &ACharacterBase::AimGrenade, 1.0f, false);
+}
+
+
+void ACharacterBase::AimGrenade()
+{
+
+	//if (playerBasicGrenade) return;
+	//anim->AnimNotify_Aim();
+
+
+
+	//bIsThrowingGrenade = false; // 조준 시작 상태
+
+	 // 이미 수류탄이 생성되었으면 다시 생성하지 않음
+	if (GrenadeMeshComponent)
+	{
+		return;
+	}
+
+
+
+	// 수류탄 던지기 불가능 상태로 전환
+	//bCanThrowGrenade = false;
+
+
+	if (!GrenadeMeshComponent)
+	{
+
+		GrenadeMeshComponent = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass());
+
+		// StaticLoadObject로 StaticMesh 로드 (FObjectFinder 사용 X)
+		UStaticMesh* GrenadeMesh = Cast<UStaticMesh>(StaticLoadObject(UStaticMesh::StaticClass(), nullptr, TEXT("/Game/Asset/Weapon/Grenade/BasicGrenade/SM_Grenade.SM_Grenade")));
+
+		if (GrenadeMesh)
+		{
+			GrenadeMeshComponent->SetStaticMesh(GrenadeMesh);
+		}
+		else
+		{
+			UKismetSystemLibrary::PrintString(this, TEXT("Grenade Mesh Not Found!"), true, true, FColor::Red, 3.0f);
+		}
+
+		GrenadeMeshComponent->RegisterComponent();
+		GrenadeMeshComponent->AttachToComponent(GetMesh(),
+			FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+			FName(TEXT("Grenade")));
+
+		GrenadeMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		GrenadeMeshComponent->SetSimulatePhysics(false);
+	}
+	//// 메쉬에서 "Grenade" 소켓의 월드 위치와 회전값 가져오기
+	//FVector GrenadeSpawnLocation = GetMesh()->GetSocketLocation(FName(TEXT("Grenade")));
+	//FRotator GrenadeSpawnRotation = GetMesh()->GetSocketRotation(FName(TEXT("Grenade")));
+
+	//// 수류탄 스폰
+	//FActorSpawnParameters SpawnParams;
+	//SpawnParams.Owner = this; // 수류탄의 소유자 설정
+
+
+	//// 수류탄 스폰
+	//playerBasicGrenade = GetWorld()->SpawnActor<ABasicGrenade>(
+	//	GrenadeSpawnLocation,
+	//	GrenadeSpawnRotation,
+	//	SpawnParams
+	//);
+
+	//********************
+	//playerBasicGrenade->GetMesh()->SetSimulatePhysics(false);
+	//playerBasicGrenade->collisionComponent->SetSimulatePhysics(false);
+	//playerBasicGrenade->collisionComponent->SetGenerateOverlapEvents(false);
+	//playerBasicGrenade->Speed = 0.f; // 초기 속도를 설정
+	//playerBasicGrenade->maxSpeed = 0.f;
+	//playerBasicGrenade->gravity = 0.f;
+	//
+
+	//playerBasicGrenade->collisionComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//playerBasicGrenade->collisionComponent->SetGenerateOverlapEvents(false);
+	//playerBasicGrenade->collisionComponent->SetSimulatePhysics(false);
+
+
+
+
+
+	//playerBasicGrenade->AttachToComponent(GetMesh(),
+	//	FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+	//	FName(TEXT("Grenade")));
+
+	//playerBasicGrenade->SetOwner(this);
+
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance && ThrowGrenadeMontage)
+	{
+		// 오른손 소켓에 부착된 액터 가져오기
+		AActor* attachedActor = nullptr;
+
+		for (USceneComponent* ChildComp : GetMesh()->GetAttachChildren())
+		{
+			if (ChildComp)
+			{
+				auto cg = ChildComp->GetAttachSocketName();
+
+				if (cg == RifleSocket || cg == ShotgunSocket || cg == RocketLauncherSocket || cg == SwordSocket)
+				{
+					attachedActor = Cast<AActor>(ChildComp->GetOwner());
+					break;
+				}
+			}
+		}
+
+		if (attachedActor)
+		{
+			// 루트 컴포넌트를 가져옴
+
+			if (attachedActor->IsA(ASword::StaticClass()))
+			{
+				attachedActor->AttachToComponent(
+					GetMesh(),
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+					LeftSwordSocket);
+			}
+			else
+			{
+				// 오른손에 붙어 있는 무기를 왼손 소켓으로 이동
+				attachedActor->AttachToComponent(
+					GetMesh(),
+					FAttachmentTransformRules::SnapToTargetNotIncludingScale,
+					LeftHandSocket
+				);
+			}
+		}
+	}
+
+
+
+	// 쿨타임 타이머 설정
+	//GetWorld()->GetTimerManager().SetTimer(GrenadeCooldownTimer, this, &ACharacterBase::ResetGrenadeCooldown, 1.0f, false);
+
+
+
+
+
+	// anim -> Montage_Play(ThrowGrenadeMontage);
+
+}
+
+
+
+
+void ACharacterBase::ShowProjectilePrediction()
+{
+	APlayerController* playerController2 = GetWorld()->GetFirstPlayerController();
+
+	FVector StartLocation = LaunchPosition->GetComponentLocation();
+	FRotator LaunchRotation;
+
+
+	FVector CameraLocation;
+	FRotator CameraRotation;
+	playerController2->GetPlayerViewPoint(CameraLocation, CameraRotation);
+	LaunchRotation = CameraRotation;
+
+	// 카메라 방향 또는 총구 방향을 기반으로 한 초기 속도 설정
+	FVector LaunchVelocity = LaunchRotation.Vector() * 3500.f; // 로켓 발사 속도와 일치하는 초기 속도 설정
+
+	// FPredictProjectilePathParams 설정
+	FPredictProjectilePathParams PredictParams;
+	PredictParams.StartLocation = StartLocation;
+	PredictParams.LaunchVelocity = LaunchVelocity;
+	PredictParams.bTraceWithCollision = true;
+	PredictParams.ProjectileRadius = 10.f; // 발사체 크기와 일치하도록 설정
+	PredictParams.MaxSimTime = 5.0f; // 시뮬레이션 시간 (초)
+
+	PredictParams.OverrideGravityZ = GetWorld()->GetGravityZ() * 2;
+
+
+	PredictParams.SimFrequency = 15.f;
+	PredictParams.DrawDebugType = EDrawDebugTrace::Type::ForDuration;
+	PredictParams.DrawDebugTime = 0.1f;
+
+	FPredictProjectilePathResult PredictResult;
+	UGameplayStatics::PredictProjectilePath(this, PredictParams, PredictResult);
+	
+}
+
+
+
+
+
+
 // 쿨타임 해제 함수
 void ACharacterBase::ResetGrenadeCooldown()
 {
-	bCanThrowGrenade = true; // 수류탄 던질 수 있는 상태로 전환
+	//bCanThrowGrenade = true; // 수류탄 던질 수 있는 상태로 전환
 }
+
+
 
 void ACharacterBase::ChangeWeapon()
 {
@@ -1697,3 +1957,5 @@ void ACharacterBase::ResetRotation()
 	//bIsRotating = false;
 	//bUseControllerRotationYaw = true;  // 회전이 끝난 후 다시 컨트롤러 회전을 활성화
 }
+
+

@@ -1,6 +1,7 @@
 #include "MainUI.h"
 #include "Character/CharacterBase.h"
 #include "Kismet/GameplayStatics.h"
+#include "Components/CanvasPanelSlot.h"
 
 UMainUI::UMainUI(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -39,5 +40,38 @@ void UMainUI::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 
 		staminaRatio = Character->stamina / Character->maxStamina;
 		staminaString = FString::FromInt(Character->stamina);
+	}
+
+	
+	
+	UImage* TargetImage = nullptr;
+	
+	switch (Character->PrimaryWeapon) 
+	{
+	case EWeaponType::Rifle:
+		TargetImage = RifleImage;
+		break;
+	case EWeaponType::Shotgun:
+		TargetImage = ShotgunImage;
+		break;
+	case EWeaponType::RocketLauncher:
+		TargetImage = RocketLauncherImage;
+		break;
+	case EWeaponType::Sword:
+		TargetImage = SwordImage;
+		break;
+
+	default:
+		break;
+	}
+
+	// TargetImage가 nullptr이 아닌 경우만 처리
+	if (TargetImage)
+	{
+		UCanvasPanelSlot* PanelSlot = Cast<UCanvasPanelSlot>(TargetImage->Slot);
+		if (PanelSlot)
+		{
+			PanelSlot->SetZOrder(1);
+		}
 	}
 }

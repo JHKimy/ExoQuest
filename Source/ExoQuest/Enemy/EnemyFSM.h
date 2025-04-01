@@ -61,7 +61,7 @@ public:
 
 	// 대기 시간
 	UPROPERTY(EditAnywhere, Category = FSM)
-	float idleDelayTIme = 2;
+	float idleDelayTime = 2;
 
 	// 경과 시간
 	float currentTime = 0;

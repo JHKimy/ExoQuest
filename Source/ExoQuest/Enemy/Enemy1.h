@@ -21,5 +21,13 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	// 손에 충돌체
+	UPROPERTY(VisibleAnywhere)
+	class UCapsuleComponent* AttackCollision;
 
+	// 손에 맞으면 실행
+	UFUNCTION()
+	void OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+		UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+		const FHitResult& SweepResult);
 };

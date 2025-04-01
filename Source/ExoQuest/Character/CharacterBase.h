@@ -350,6 +350,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool isReSpawn; // 초당 감소량
 
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	virtual float TakeDamage
+	(float DamageAmount,
+		FDamageEvent const& DamageEvent,
+		AController* EventInstigator,
+		AActor* DamageCauser) override;
+
 
 //=====================================================================================
 // 무기 & 공격

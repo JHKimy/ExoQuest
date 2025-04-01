@@ -137,6 +137,10 @@ float AEnemyBase::TakeDamage(
 	return DamageAmount;
 }
 
+void AEnemyBase::Attack()
+{
+}
+
 void AEnemyBase::UpdateHealthBar()
 {
 	if (HPBarWidget)

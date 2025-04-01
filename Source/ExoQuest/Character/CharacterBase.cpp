@@ -980,6 +980,21 @@ void ACharacterBase::HandleStamina(float DeltaTime)
 
 }
 
+float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	health -= DamageAmount;
+
+	UKismetSystemLibrary::PrintString(this, FString::Printf(TEXT("체력: %.1f"), health));
+
+	if (health <= 0)
+	{
+		// 사망 처리
+		UE_LOG(LogTemp, Warning, TEXT("플레이어 사망"));
+	}
+
+	return DamageAmount;
+}
+
 void ACharacterBase::SwordAttack()
 {
 	if (currentCombo == 3 || bIsInventoryOpen || bIsDashing || bIsRunning || PrimaryWeapon != EWeaponType::Sword) return;

@@ -12,6 +12,9 @@ class EXOQUEST_API UEnemy1AnimInstance : public UAnimInstance
 	GENERATED_BODY()
 	
 public:
+	UPROPERTY()
+	class AEnemy1* enemyOwner;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
 	EEnemyState animState;
 
@@ -24,4 +27,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = FSMEvent)
 	void OnEndAttackAnimation();
 
+
+	UFUNCTION(BlueprintCallable)
+	void AnimNotify_E1AttackStart();
+
+	UFUNCTION(BlueprintCallable)
+	void AnimNotify_E1AttackEnd();
 };

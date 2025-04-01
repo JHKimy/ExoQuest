@@ -93,7 +93,7 @@ void UEnemyFSM::IdleState()
 	// 누적 시간 계산
 	currentTime += GetWorld()->DeltaTimeSeconds;
 
-	if (currentTime > idleDelayTIme) {
+	if (currentTime > idleDelayTime) {
 
 		EState = EEnemyState::Move;
 		currentTime = 0;

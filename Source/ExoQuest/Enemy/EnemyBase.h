@@ -80,6 +80,7 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
+	virtual void Attack(); // FSM이 호출할 함수
 
 
 public:

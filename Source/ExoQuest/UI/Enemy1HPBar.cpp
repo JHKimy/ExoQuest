@@ -8,17 +8,11 @@
 
 void UEnemy1HPBar::NativeConstruct()
 {
-	percent = 1;
-}
+	healthPercent = maxHealthPercent;
 
-void UEnemy1HPBar::Init(AEnemyCharacter* OwnerCharacter)
-{
-	Owner = OwnerCharacter;
 }
 
 void UEnemy1HPBar::UpdateHP(float Percent)
 {
-	// HP_ProgressBar->SetPercent(Percent);
-	// HP_ProgressBar = Percent;
-	percent = Percent;
+	healthPercent = Percent;
 }

@@ -69,7 +69,7 @@ void ASword::OnWeaponOverlapBegin(UPrimitiveComponent* OverlappedComponent, AAct
 	{
 		AEnemyBase* Enemy = Cast<AEnemyBase>(OtherActor);
 
-		if (Enemy && Enemy->health > 0)  // 적이 살아있는지 확인
+		if (Enemy && Enemy->IsAlive())  // 적이 살아있는지 확인
 		{
 			// UGameplayStatics::ApplyDamage 사용
 			UGameplayStatics::ApplyDamage(Enemy, damage, OwnerPawn->GetController(), this, UDamageType::StaticClass());

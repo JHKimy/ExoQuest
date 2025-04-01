@@ -507,10 +507,10 @@ void ACharacterBase::CheckEquipWeapon()
 	bmouseMoveMode = false;
 	{
 
-		if (enemyFSM)
-		{
-			enemyFSM->UpdateWeaponDamage();
-		}
+		//if (enemyFSM)
+		//{
+		//	enemyFSM->UpdateWeaponDamage();
+		//}
 
 		// 조준 UI 크로스 헤어 인스턴스 생성
 		APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();

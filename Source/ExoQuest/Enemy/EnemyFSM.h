@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-
 #include "EnemyFSM.generated.h"
 
 
@@ -15,7 +14,7 @@ enum class EEnemyState : uint8
 	Move		UMETA(DisplayName = "Move State"),
 	Attack		UMETA(DisplayName = "Attack State"),
 	Damage		UMETA(DisplayName = "Damage State"),
-	Die			UMETA(DisplayName = "Die State")
+	Death		UMETA(DisplayName = "Death State")
 };
 
 
@@ -54,10 +53,10 @@ public:
 	void DamageState();
 
 	// 죽음 상태
-	void DieState();
+	void DeathState();
 
-	// 피격 알림 이벤트
-	void OnDamageProcess();
+	//// 피격 알림 이벤트
+	//void OnDamageProcess();
 
 
 	// 대기 시간
@@ -93,12 +92,12 @@ public:
 
 
 
-	// 무기 인스턴스 
-	class ARifle* rifleInstance;
-	class AShotgun* shotgunInstance;
-	//class ARocketLauncher* rocketLauncherInstance;
-	class ARocketProjectile* rocketLauncherInstance;
-	class ASword* swordInstance;
+	//// 무기 인스턴스 
+	//class ARifle* rifleInstance;
+	//class AShotgun* shotgunInstance;
+	////class ARocketLauncher* rocketLauncherInstance;
+	//class ARocketProjectile* rocketLauncherInstance;
+	//class ASword* swordInstance;
 
 	// 무기별 데미지
 	UPROPERTY(EditAnywhere, Category = Damage)
@@ -114,8 +113,8 @@ public:
 	float swordDamage;
 
 
-	// 무기 데미지 업데이트 함수
-	void UpdateWeaponDamage();
+	//// 무기 데미지 업데이트 함수
+	//void UpdateWeaponDamage();
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	class UEnemy1AnimInstance* anim;

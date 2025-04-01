@@ -12,38 +12,66 @@ class EXOQUEST_API AEnemyBase : public ACharacter
 public:
 	AEnemyBase();
 
-
 protected:
 	virtual void BeginPlay() override;
-
-public:
 	virtual void Tick(float DeltaTime) override;
-
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	// 미니맵 표시 아이콘
-	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = MiniMap)
-	class UPaperSpriteComponent* enemyPosition;
+	//======================================================
+	// 컴포넌트
+	//======================================================
+protected:
+	// 미니맵에 표시되는 아이콘
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "MiniMap")
+	TObjectPtr<class UPaperSpriteComponent> EnemyPosition = nullptr;
 
 	// 애니메이션
-	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = Animation)
-	UClass* AnimBP;
+	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = "Animation")
+	TSubclassOf<UAnimInstance> AnimBPClass;
+
+	//FSM 컴포넌트
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "FSM")
+	TObjectPtr<UActorComponent> FSM = nullptr;
+
+	// EnemyBase.h
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	class UWidgetComponent* HPBarWidget;
 
 
+
+
+	
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool bIsAlive = true;
+	// 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	float maxHealth = 100.f;
 
 public:
 	// 체력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float health;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float health = 100.f;
 
 	// 공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float attackPower;
+	float attackPower = 10.f;
 
-	// AI
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FSM")
-	class UEnemyFSM* fsm;
+	// 공격력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float healthBarRange = 500.f;
 
+
+public:
+	// Blueprint에서만 읽기 가능, C++에선 바로 접근 가능
+	UFUNCTION(BlueprintCallable, Category = "Stats")
+	FORCEINLINE bool IsAlive() const { return bIsAlive; }
+
+
+
+// 함수
+protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	virtual float TakeDamage
@@ -51,12 +79,15 @@ public:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
-	
-	// EnemyBase.h
-	UPROPERTY(VisibleAnywhere, Category = "UI")
-	class UWidgetComponent* HPBarWidget;
 
 
-	UFUNCTION()
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Health")
 	void UpdateHealthBar();
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void MovementHealthBar();
+
+
 };

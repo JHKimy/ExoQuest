@@ -121,13 +121,17 @@ void AShotgun::Fire()
 
             // 적이 맞았는지 체크 및 처리
             AActor* HitActor = PelletHitResult.GetActor();
-            if (HitActor && HitActor->GetComponentByClass(UEnemyFSM::StaticClass()))
+            if (HitActor)
             {
-                UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(HitActor->GetComponentByClass(UEnemyFSM::StaticClass()));
-                if (EnemyFSM)
-                {
-                    EnemyFSM->OnDamageProcess();
-                }
+                UGameplayStatics::ApplyPointDamage(
+                    HitActor,
+                    damage,
+                    AdjustedShootDirection,
+                    PelletHitResult,
+                    PlayerController,
+                    this,
+                    UDamageType::StaticClass()
+                );
             }
         }
     }

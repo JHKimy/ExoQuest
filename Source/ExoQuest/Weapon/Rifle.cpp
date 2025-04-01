@@ -134,11 +134,20 @@ void ARifle::Fire()
         AActor* HitActor = MuzzleHitResult.GetActor();
         if (HitActor)
         {
-            // 적의 FSM 컴포넌트를 가져와서 데미지 처리
-            if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(HitActor->GetComponentByClass(UEnemyFSM::StaticClass())))
-            {
-                EnemyFSM->OnDamageProcess();
-            }
+            //// 적의 FSM 컴포넌트를 가져와서 데미지 처리
+            //if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(HitActor->GetComponentByClass(UEnemyFSM::StaticClass())))
+            //{
+            //    EnemyFSM->OnDamageProcess();
+            //}
+			UGameplayStatics::ApplyPointDamage(
+				HitActor,
+				damage,
+				ShootDirection,
+				MuzzleHitResult,
+				PlayerController,
+				this,
+				UDamageType::StaticClass()
+			);
         }
     }
 

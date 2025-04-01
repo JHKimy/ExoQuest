@@ -133,8 +133,8 @@ void ARocketProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, 
 	// 로켓 제거
 	Destroy();
 
-	if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(OtherActor->GetComponentByClass(UEnemyFSM::StaticClass() ) ))
-	{
-		EnemyFSM->OnDamageProcess();
-	}
+	//if (UEnemyFSM* EnemyFSM = Cast<UEnemyFSM>(OtherActor->GetComponentByClass(UEnemyFSM::StaticClass() ) ))
+	//{
+	//	EnemyFSM->OnDamageProcess();
+	//}
 }

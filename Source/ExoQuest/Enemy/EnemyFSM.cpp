@@ -31,34 +31,6 @@ void UEnemyFSM::BeginPlay()
 	enemy = Cast<AEnemyBase>(GetOwner());
 
 
-
-	// 데미지 초기화
-	//switch (target->PrimaryWeapon)
-	//{
-	//case EWeaponType::Rifle:
-	//	rifleInstance = Cast<ARifle>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-	//	rifleDamage = rifleInstance->damage;
-	//	break;
-
-	////case EWeaponType::Shotgun:
-	////	shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-	////	shotgunDamage = shotgunInstance->damage;
-	////	break;
-
-	////case EWeaponType::RocketLauncher:
-	////	rocketLauncherInstance = Cast<ARocketLauncher>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-	////	rocketLaunchetDamage = rocketLauncherInstance->damage;
-	////	break;
-
-	////case EWeaponType::Sword:
-	////	swordInstance = Cast<ASword>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-	////	swordDamage = swordInstance->damage;
-	////	break;
-
-	//default:
-	//	break;
-	//}
-
 }
 
 
@@ -98,22 +70,22 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 	case EEnemyState::Damage:
 		DamageState();
 		break;
-	case EEnemyState::Die:
-		DieState();
+	case EEnemyState::Death:
+		DeathState();
 
 		break;
 	}
 
-	// 획득무기에 따른 데미지
-	UpdateWeaponDamage();
+	//// 획득무기에 따른 데미지
+	//UpdateWeaponDamage();
 
 	// 캐릭터의 주무기가 이전 무기와 다를때
 	// 즉, 무기가 바뀌면
-	if (target && target->PrimaryWeapon != target->PreviousWeaponType)
-	{
-		UpdateWeaponDamage();
-		target->PreviousWeaponType = target->PrimaryWeapon;
-	}
+	//if (target && target->PrimaryWeapon != target->PreviousWeaponType)
+	//{
+	//	UpdateWeaponDamage();
+	//	target->PreviousWeaponType = target->PrimaryWeapon;
+	//}
 }
 
 void UEnemyFSM::IdleState()
@@ -133,6 +105,8 @@ void UEnemyFSM::IdleState()
 
 void UEnemyFSM::MoveState()
 {
+	if (!enemy || !target) return; // <-- nullptr 방지
+
 	// 타겟위치
 	FVector destination = target->GetActorLocation();
 
@@ -207,10 +181,15 @@ void UEnemyFSM::DamageState()
 		}
 
 	}
+	if (!enemy->IsAlive()) {
+		EState = EEnemyState::Death;
+	}
+
+	
 
 }
 
-void UEnemyFSM::DieState()
+void UEnemyFSM::DeathState()
 {
 	// 등속운동으로 밑으로 내려가기
 	FVector P0 = enemy->GetActorLocation();
@@ -229,96 +208,97 @@ void UEnemyFSM::DieState()
 				enemy->GetActorLocation(),
 				enemy->GetActorRotation());
 	}
-
-}
-
-void UEnemyFSM::OnDamageProcess()
-{
-	if (target->PrimaryWeapon != EWeaponType::None) {
-		// 캐릭터의 무기에 따라 데미지 다르게
-		switch (target->PrimaryWeapon)
-		{
-		case EWeaponType::Rifle:
-			enemy->health -= rifleDamage;
-			enemy->UpdateHealthBar();
-			break;
-
-		case EWeaponType::Shotgun:
-			enemy->health -= shotgunDamage;
-			enemy->UpdateHealthBar();
-			break;
-
-		case EWeaponType::RocketLauncher:
-			enemy->health -= rocketLaunchetDamage;
-			enemy->UpdateHealthBar();
-			break;
-
-		case EWeaponType::Sword:
-			// 따로 EenmyBase에 만듦
-
-			break;
-		}
-	}
-
-	// 체력 다 떨어지면
-	if (enemy->health > 0)
-	{
-		EState = EEnemyState::Damage;
-	}
-	else
-	{
-		EState = EEnemyState::Die;
-		enemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-
-	// 애니메이션 인스턴스와 동기화
 	anim->animState = EState;
 
-
 }
 
-void UEnemyFSM::UpdateWeaponDamage()
-{
-	// 현재 캐릭터의 무기 타입에 따라 해당 무기 인스턴스와 데미지 값을 캐싱
-	if (target)
-	{
-		switch (target->PrimaryWeapon)
-		{
-		case EWeaponType::Rifle:
-			rifleInstance = Cast<ARifle>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-			if (rifleInstance)
-			{
-				rifleDamage = rifleInstance->damage;
-			}
-			break;
+//void UEnemyFSM::OnDamageProcess()
+//{
+//	if (target->PrimaryWeapon != EWeaponType::None) {
+//		// 캐릭터의 무기에 따라 데미지 다르게
+//		switch (target->PrimaryWeapon)
+//		{
+//		case EWeaponType::Rifle:
+//			//enemy->health -= rifleDamage;
+//			enemy->UpdateHealthBar();
+//			break;
+//
+//		case EWeaponType::Shotgun:
+//			//enemy->health -= shotgunDamage;
+//			enemy->UpdateHealthBar();
+//			break;
+//
+//		case EWeaponType::RocketLauncher:
+//			//enemy->health -= rocketLaunchetDamage;
+//			enemy->UpdateHealthBar();
+//			break;
+//
+//		case EWeaponType::Sword:
+//			// 따로 EenmyBase에 만듦
+//
+//			break;
+//		}
+//	}
+//
+//	// 체력 다 떨어지면
+//	if (!enemy->IsAlive())
+//	{
+//		EState = EEnemyState::Damage;
+//	}
+//	else
+//	{
+//		EState = EEnemyState::Die;
+//		enemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//	}
+//
+//	// 애니메이션 인스턴스와 동기화
+//	anim->animState = EState;
+//
+//
+//}
 
-		case EWeaponType::Shotgun:
-			shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), AShotgun::StaticClass()));
-			if (shotgunInstance)
-			{
-				shotgunDamage = shotgunInstance->damage;
-			}
-			break;
-
-		case EWeaponType::RocketLauncher:
-			// 여기서만 발사체로 넣어주기
-			rocketLauncherInstance = Cast<ARocketProjectile>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketProjectile::StaticClass()));
-			if (rocketLauncherInstance)
-			{
-				rocketLaunchetDamage = rocketLauncherInstance->damage;
-			}
-			break;
-
-			//case EWeaponType::Sword:
-			//	swordInstance = Cast<ASword>(UGameplayStatics::GetActorOfClass(GetWorld(), ASword::StaticClass()));
-			//	if (swordInstance)
-			//	{
-			//		swordDamage = swordInstance->damage;
-			//	}
-			//	break;
-
-		default:
-			break;
-		}
-	}
-}
+//void UEnemyFSM::UpdateWeaponDamage()
+//{
+//	// 현재 캐릭터의 무기 타입에 따라 해당 무기 인스턴스와 데미지 값을 캐싱
+//	if (target)
+//	{
+//		switch (target->PrimaryWeapon)
+//		{
+//		case EWeaponType::Rifle:
+//			rifleInstance = Cast<ARifle>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
+//			if (rifleInstance)
+//			{
+//				rifleDamage = rifleInstance->damage;
+//			}
+//			break;
+//
+//		case EWeaponType::Shotgun:
+//			shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), AShotgun::StaticClass()));
+//			if (shotgunInstance)
+//			{
+//				shotgunDamage = shotgunInstance->damage;
+//			}
+//			break;
+//
+//		case EWeaponType::RocketLauncher:
+//			// 여기서만 발사체로 넣어주기
+//			rocketLauncherInstance = Cast<ARocketProjectile>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketProjectile::StaticClass()));
+//			if (rocketLauncherInstance)
+//			{
+//				rocketLaunchetDamage = rocketLauncherInstance->damage;
+//			}
+//			break;
+//
+//			//case EWeaponType::Sword:
+//			//	swordInstance = Cast<ASword>(UGameplayStatics::GetActorOfClass(GetWorld(), ASword::StaticClass()));
+//			//	if (swordInstance)
+//			//	{
+//			//		swordDamage = swordInstance->damage;
+//			//	}
+//			//	break;
+//
+//		default:
+//			break;
+//		}
+//	}
+//}

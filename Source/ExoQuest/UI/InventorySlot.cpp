@@ -37,7 +37,7 @@ void UInventorySlot::UpdateSlotData(const FString& NewItemName, int32 NewItemNum
 
 void UInventorySlot::OnSlotClicked()
 {
-    if (ItemName == "Medical Kit")
+    if (ItemName == "MedicalKit")
     {
         if (ItemDataBase && ItemDataBase->UseItem(ItemName))
         {
@@ -81,7 +81,7 @@ void UInventorySlot::OnSlotClicked()
         {
             if (character)
             {
-                character->ActivateGhostMode(5.f);
+                character->ActivateGhostMode();
 
                 // 인벤토리 업데이트
                 if (character->InventoryUI)
@@ -99,7 +99,7 @@ void UInventorySlot::OnSlotClicked()
             if (character)
             {
                 // 시간 되돌리기 활성화
-                character->ActivateTimeRewind(5.f);
+                character->ActivateTimeRewind();
 
 
                 // 인벤토리 업데이트

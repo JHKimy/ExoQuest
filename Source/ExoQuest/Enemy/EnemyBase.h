@@ -51,5 +51,12 @@ public:
 		FDamageEvent const& DamageEvent,
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
+	
+	// EnemyBase.h
+	UPROPERTY(VisibleAnywhere, Category = "UI")
+	class UWidgetComponent* HPBarWidget;
 
+
+	UFUNCTION()
+	void UpdateHealthBar();
 };

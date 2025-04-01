@@ -16,6 +16,8 @@ public:
 	virtual void NativeConstruct() override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override; // NativeTick 선언
 
+	class ACharacterBase* Character;
+
 	UPROPERTY(VisibleAnywhere, BluePrintReadWrite, Category = health)
 	FString healthString;
 	
@@ -40,4 +42,37 @@ public:
 
 	UPROPERTY(meta = (BindWidget))
 	UImage* RifleImage;
+
+	UFUNCTION()
+	void HideAllWeaponIcons();
+
+	UFUNCTION()
+	void SetZorder(UImage* image,int32 z);
+
+
+
+	// 수류탄
+	UPROPERTY(meta = (BindWidget))
+	UImage* GrenadeImage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Grenade)
+	FString GrenadeCountText;
+
+
+
+	// 스킬
+	UPROPERTY(meta = (BindWidget))
+	UImage* GhostSKillImage;
+
+	UPROPERTY(meta = (BindWidget))
+	UImage* TimeBackSkillImage;
+
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Skill)
+	FString GhostSkillText;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Skill)
+	FString TimeBackSkillText;
+
+
 };

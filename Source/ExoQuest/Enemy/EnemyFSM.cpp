@@ -240,15 +240,17 @@ void UEnemyFSM::OnDamageProcess()
 		{
 		case EWeaponType::Rifle:
 			enemy->health -= rifleDamage;
+			enemy->UpdateHealthBar();
 			break;
 
 		case EWeaponType::Shotgun:
 			enemy->health -= shotgunDamage;
+			enemy->UpdateHealthBar();
 			break;
 
 		case EWeaponType::RocketLauncher:
 			enemy->health -= rocketLaunchetDamage;
-
+			enemy->UpdateHealthBar();
 			break;
 
 		case EWeaponType::Sword:

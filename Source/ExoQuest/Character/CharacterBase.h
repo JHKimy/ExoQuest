@@ -217,9 +217,12 @@ public:
 // 스킬
 //=====================================================================================
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SKillGhost")
+	float GhostSkillDuration = 5.f;
+
 	// 고스트 모드 활성화
 	UFUNCTION(BlueprintCallable,				Category = "SkillGhost")
-	void ActivateGhostMode(float Duration);
+	void ActivateGhostMode();
 
 	// 고스트 모드 비활성화
 	UFUNCTION(BlueprintCallable,				Category = "SkillGhost")
@@ -235,10 +238,11 @@ public:
 
 
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "SkillTime")
+	float TimeSkillDuration = 5.f;
 
 	UFUNCTION(BlueprintCallable, Category = "SkillTime")
-	void ActivateTimeRewind(float duration);
+	void ActivateTimeRewind();
 
 	UFUNCTION(BlueprintCallable, Category = "SkillTime")
 	void RewindStep();
@@ -342,6 +346,10 @@ public:
 	// 스태미나 관리 함수 호출
 	UFUNCTION(BlueprintCallable, Category = "Stats")
 	void HandleStamina(float DeltaTime);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	bool isReSpawn; // 초당 감소량
+
 
 //=====================================================================================
 // 무기 & 공격
@@ -472,6 +480,12 @@ public:
 
 
 // 수류탄
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	int32 CurrentGrenadeCount = 5;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	int32 MaxGrenadeCount = 5;
+
 	UFUNCTION(BlueprintCallable, Category = "Attack")
 	void ThrowGrenade();
 

@@ -28,7 +28,7 @@ public:
 	ECharacterState SavedState;  // 캐릭터 상태
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
-	float SavedHealth;
+	float SavedHealth = 100.f;
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 	float SavedStamina;

@@ -150,6 +150,16 @@ void AEQPlayerController::SetupInputBindings(ACharacterBase* myCharacter)
 		{
 			EnhancedInputComponent->BindAction(IA_WeaponDrop, ETriggerEvent::Completed, myCharacter, &ACharacterBase::DropWeapon);
 		}
+
+		if (IA_GhostSkill)
+		{
+			EnhancedInputComponent->BindAction(IA_GhostSkill, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ActivateGhostMode);
+		}
+
+		if (IA_TimeSkill)
+		{
+			EnhancedInputComponent->BindAction(IA_TimeSkill, ETriggerEvent::Completed, myCharacter, &ACharacterBase::ActivateTimeRewind);
+		}
 	}
 }
 

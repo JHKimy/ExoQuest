@@ -1044,8 +1044,17 @@ void ACharacterBase::ZoomOut()
 	springArmComp->SocketOffset.Y = 70;
 }
 
-void ACharacterBase::ActivateGhostMode(float Duration)
+
+
+void ACharacterBase::ActivateGhostMode()
 {
+	// 아이템 개수 감소
+	ItemDataBase->UseItem("GhostGear");
+	InventoryUI->UpdateInventory();
+
+
+
+
 	// 충돌 채널 무시
 	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
@@ -1063,7 +1072,7 @@ void ACharacterBase::ActivateGhostMode(float Duration)
 	//}
 
 	// 타이머로 일정 시간 후 고스트 상태 해제
-	GetWorldTimerManager().SetTimer(GhostTimerHandle, this, &ACharacterBase::DeactivateGhostMode, Duration, false);
+	GetWorldTimerManager().SetTimer(GhostTimerHandle, this, &ACharacterBase::DeactivateGhostMode, GhostSkillDuration, false);
 }
 
 void ACharacterBase::DeactivateGhostMode()
@@ -1099,12 +1108,18 @@ void ACharacterBase::SetCharacterTransparency(float transparency)
 	}
 }
 
-void ACharacterBase::ActivateTimeRewind(float duration)
+void ACharacterBase::ActivateTimeRewind()
 {
 	if (TimeRecords.Num() == 0 )
 	{
 		return; // 배열이 비어 있거나 이미 되돌리기 중이라면 종료
 	}
+
+
+	// 아이템 개수 감소
+	ItemDataBase->UseItem("TimeFluxGear");
+	InventoryUI->UpdateInventory();
+
 
 	RewindElapsedTime = 0.0f;
 
@@ -1278,7 +1293,12 @@ void ACharacterBase::RestoreStateAfterLevelChange()
 }
 
 void ACharacterBase::ThrowGrenade()
+
 {
+	if (CurrentGrenadeCount <= 0) {
+		return;
+	}
+	CurrentGrenadeCount--;
 	//if (bIsDashing || bIsRunning || !bCanThrowGrenade || EquippedWeapons.IsEmpty()) return;
 
 	//// 수류탄 던지기 불가능 상태로 전환
@@ -1321,6 +1341,7 @@ void ACharacterBase::ThrowGrenade()
 
 	//{
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	// 애니메이션에서 수류탄 생성 후 나가기
 
 	//	if (AnimInstance && ThrowGrenadeMontage)
 	//	{

@@ -29,7 +29,7 @@ AHealthItem::AHealthItem()
     capsuleCollision->OnComponentBeginOverlap.AddDynamic(this, &AHealthItem::OnBeginOverlap);
 
     // 기본 값 초기화
-    ItemName = TEXT("Medical Kit");
+    ItemName = TEXT("MedicalKit");
     ItemNum = 1;
 }
 

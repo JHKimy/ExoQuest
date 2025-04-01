@@ -7,12 +7,14 @@
 #include "Item/Starflux.h"
 
 #include "PaperSpriteComponent.h"
+#include "Components/WidgetComponent.h"
+#include  "UI/Enemy1HPBar.h"
 
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-
 	GetCapsuleComponent()->SetRelativeScale3D(FVector(2.5f, 2.5f, 1.5f));
+	RootComponent = GetCapsuleComponent();
 
 	ConstructorHelpers::FObjectFinder<USkeletalMesh>
 		TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Asset/Enemy/Enemy1/SM_Enemy1.SM_Enemy1'"));
@@ -27,6 +29,17 @@ AEnemyBase::AEnemyBase()
 
 	// FSM의 주인으로 설정
 	fsm = CreateDefaultSubobject<UEnemyFSM>(TEXT("FSM"));
+
+	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBar")); // 원래대로
+	HPBarWidget->SetupAttachment(RootComponent);
+	HPBarWidget->SetWidgetSpace(EWidgetSpace::World);
+	HPBarWidget->SetDrawSize(FVector2D(200.f, 20.f));
+
+	static ConstructorHelpers::FClassFinder<UUserWidget> HPBarClass(TEXT("/Game/BluePrint/Enemy/Enemy1/WBP_Enemy1HPBar.WBP_Enemy1HPBar_C"));
+	if (HPBarClass.Succeeded())
+	{
+		HPBarWidget->SetWidgetClass(HPBarClass.Class);  // WBP 클래스 지정
+	}
 
 
 }
@@ -131,5 +144,23 @@ float AEnemyBase::TakeDamage(
 		}
 	}
 
+
+
 	return DamageAmount;
+}
+
+void AEnemyBase::UpdateHealthBar()
+{
+	if (HPBarWidget)
+	{
+		UUserWidget* Widget = HPBarWidget->GetUserWidgetObject();
+		if (Widget)
+		{
+			UEnemy1HPBar* EnemyHP = Cast<UEnemy1HPBar>(Widget);
+			if (EnemyHP)
+			{
+				EnemyHP->UpdateHP(health / 100.f);  // 체력 비율 전달
+			}
+		}
+	}
 }

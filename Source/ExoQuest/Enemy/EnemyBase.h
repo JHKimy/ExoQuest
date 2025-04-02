@@ -49,6 +49,13 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float maxHealth = 100.f;
 
+	// 아래로 사라짐
+	UPROPERTY(EditAnywhere, Category = FSM)
+	float dieSpeed = 50.0f;
+
+	UPROPERTY(EditAnywhere, Category = Animation)
+	bool bSpawnStarflux = false;
+
 public:
 	// 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
@@ -60,7 +67,7 @@ public:
 
 	// 공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float healthBarRange = 500.f;
+	float healthBarRange = 1000.f;
 
 
 public:
@@ -72,7 +79,6 @@ public:
 
 // 함수
 protected:
-
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	virtual float TakeDamage
 	(float DamageAmount,
@@ -80,15 +86,20 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Damage")
 	virtual void Attack(); // FSM이 호출할 함수
 
 
+
 public:
-	UFUNCTION(BlueprintCallable, Category = "Health")
-	void UpdateHealthBar();
+	UFUNCTION(BlueprintCallable, Category = "Damage")
+	virtual void Death();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
-	void MovementHealthBar();
+	virtual void UpdateHealthBar();
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	virtual void MovementHealthBar();
 
 
 };

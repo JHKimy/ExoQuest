@@ -18,6 +18,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
 	EEnemyState animState;
 
+
 	UFUNCTION()
 	virtual void NativeUpdateAnimation(float DeltaSeconds)override;
 
@@ -33,4 +34,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AnimNotify_E1AttackEnd();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
+	UAnimMontage* HitMontage;
+
+	UFUNCTION(BlueprintCallable)
+	void PlayHitMontage();
+
+
+
 };

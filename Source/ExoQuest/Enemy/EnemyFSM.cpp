@@ -11,14 +11,12 @@
 #include "Weapon/Sword.h"
 #include "Enemy1AnimInstance.h"
 #include "Item/Starflux.h"
-
+#include "Enemy/Enemy1.h"
 
 UEnemyFSM::UEnemyFSM()
 {
 	PrimaryComponentTick.bCanEverTick = true;
-
 }
-
 
 void UEnemyFSM::BeginPlay()
 {
@@ -27,278 +25,125 @@ void UEnemyFSM::BeginPlay()
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass());
 
 	target = Cast<ACharacterBase>(actor);
-
 	enemy = Cast<AEnemyBase>(GetOwner());
+	enemy1 = Cast<AEnemy1>(GetOwner());
+	anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
 
+	StateMap.Add(EEnemyState::Idle, &IdleState);
+	StateMap.Add(EEnemyState::Move, &MoveState);
+	StateMap.Add(EEnemyState::Attack, &AttackState);
+	StateMap.Add(EEnemyState::Damage, &DamageState);
+	StateMap.Add(EEnemyState::Death, &DeathState);
+
+	ChangeState(EEnemyState::Idle);
 
 }
-
 
 void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// Enemy의 애니메이션 인스턴스 가져오기
-	// 테스트 해보니 FSM이 EnemyBase의 생성자에서 호출되기 때문에
-	// FSM 클래스에서 anim을 BeginPlay보다 늦게 호출해줘야 함
-	// EnemyBase() -> EnemyFSM(),비긴플레이등
-	// -> EnemyBase의 비긴플레이에서 ABP 설정
-	// -> 그러니 EnemyFSM에선 비긴 플레이 다음걸로 가져와야함 
-	if (!anim)
+	if (CurrentState)
 	{
-		if (enemy && enemy->GetMesh())
-		{
-			anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
-			if (anim)
-			{
-				UE_LOG(LogTemp, Warning, TEXT("Successfully initialized anim in Tick"));
-			}
-		}
+		CurrentState->Update(this, DeltaTime);
 	}
 
-	switch (EState)
-	{
-	case EEnemyState::Idle:
-		IdleState();
-		break;
-	case EEnemyState::Move:
-		MoveState();
-		break;
-	case EEnemyState::Attack:
-		AttackState();
-		break;
-	case EEnemyState::Damage:
-		DamageState();
-		break;
-	case EEnemyState::Death:
-		DeathState();
-
-		break;
-	}
-
-	//// 획득무기에 따른 데미지
-	//UpdateWeaponDamage();
-
-	// 캐릭터의 주무기가 이전 무기와 다를때
-	// 즉, 무기가 바뀌면
-	//if (target && target->PrimaryWeapon != target->PreviousWeaponType)
-	//{
-	//	UpdateWeaponDamage();
-	//	target->PreviousWeaponType = target->PrimaryWeapon;
-	//}
 }
 
-void UEnemyFSM::IdleState()
+void UEnemyFSM::ChangeState(EEnemyState NewState)
 {
-	// 누적 시간 계산
-	currentTime += GetWorld()->DeltaTimeSeconds;
+	if (CurrentState)
+		CurrentState->Exit(this);
 
-	if (currentTime > idleDelayTime) {
-
-		EState = EEnemyState::Move;
-		currentTime = 0;
+	if (StateMap.Contains(NewState))
+	{
+		CurrentState = StateMap[NewState];
+		CurrentStateType = NewState;
+		CurrentState->Enter(this);
 	}
-
-	// 애니메이션 인스턴스와 동기화
-	anim->animState = EState;
 }
 
-void UEnemyFSM::MoveState()
+void UEnemyFSM::ResetTimer()
 {
-	if (!enemy || !target) return; // <-- nullptr 방지
-
-	// 타겟위치
-	FVector destination = target->GetActorLocation();
-
-	// 움직일 방향 = 타겟 위치 - 적위치 
-	FVector dir = destination - enemy->GetActorLocation();
-
-	// 벡터의 크기를 1로 정규화하여, 방향벡터만 반환
-	enemy->AddMovementInput(dir.GetSafeNormal());
-
-	// 적이 계속 움직이는데 타겟과의 거리가 범위보다 작아지면
-	if (dir.Size() < attackRange)
-	{
-		EState = EEnemyState::Attack;
-
-		// 애니메이션 인스턴스와 동기화
-		if (anim)
-		{
-			anim->animState = EState;
-		}
-		// 공격 애니메이션 활성화
-		anim->bAttackPlay = true;
-		// 공격 상태 전환 시 대기 시간 바로 끝나게
-		currentTime = attackDelayTime;
-	}
+	currentTime = 0.f;
 }
 
-void UEnemyFSM::AttackState()
+void UEnemyFSM::AddTimer(float DeltaTime)
 {
-	currentTime += GetWorld()->DeltaTimeSeconds;
-
-	// 공격 대기 시간 지나면 시간 초기화
-	if (currentTime > attackDelayTime)
-	{
-		currentTime = 0;
-
-		// 공격가능 움직임
-		anim->bAttackPlay = true;
-
-	}
-
-	// 적과 플레이어 거리
-	float distance = FVector::Distance(target->GetActorLocation(),
-		enemy->GetActorLocation());
-
-	if (!anim->bAttackPlay && distance > attackRange)
-	{
-		EState = EEnemyState::Move;
-		// 애니메이션 인스턴스와 동기화
-		anim->animState = EState;
-	}
-	//else if (distance < attackRange) 
-	//{
-	// EState = EEnemyState::Attack;
-	//	anim->bAttackPlay = true;
-	//}
+	currentTime += DeltaTime;
 }
 
-void UEnemyFSM::DamageState()
+float UEnemyFSM::GetTimer() const
 {
-	currentTime += GetWorld()->DeltaTimeSeconds;
-
-	// 피격 대기 시간 넘기면 아이들상태
-	if (currentTime > damageDelayTime)
-	{
-		EState = EEnemyState::Idle;
-		currentTime = 0;
-
-		// 애니메이션 인스턴스와 동기화
-		if (anim)
-		{
-			anim->animState = EState;
-		}
-
-	}
-	if (!enemy->IsAlive()) {
-		EState = EEnemyState::Death;
-	}
-
-	
-
+	return currentTime;
 }
-
-void UEnemyFSM::DeathState()
+// ===================================================================================================================================
+// ========== EnemyIdleState ==========
+void EnemyIdleState::Enter(UEnemyFSM* FSM)
 {
-	// 등속운동으로 밑으로 내려가기
-	FVector P0 = enemy->GetActorLocation();
-	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
-	FVector P = P0 + vt;
-	enemy->SetActorLocation(P);
+	FSM->anim->animState = EEnemyState::Idle;
+	FSM->ResetTimer();
+}
+void EnemyIdleState::Update(UEnemyFSM* FSM, float DeltaTime)
+{
+	FSM->AddTimer(DeltaTime);
+	if (FSM->GetTimer() > 2.f)
+		FSM->ChangeState(EEnemyState::Move);
+}
+void EnemyIdleState::Exit(UEnemyFSM* FSM) {}
 
-	if (P.Z < -200.f)
-	{
-		enemy->Destroy();
-	}
-	if (!bSpawnStarflux) {
-		bSpawnStarflux = true;
-		GetWorld()->SpawnActor<AStarflux>
-			(AStarflux::StaticClass(),
-				enemy->GetActorLocation(),
-				enemy->GetActorRotation());
-	}
-	anim->animState = EState;
+void EnemyMoveState::Enter(UEnemyFSM* FSM)
+{
+	FSM->anim->animState = EEnemyState::Move;
+}
+void EnemyMoveState::Update(UEnemyFSM* FSM, float DeltaTime)
+{
+	if (!FSM->enemy || !FSM->target) return;
+	FVector dir = FSM->target->GetActorLocation() - FSM->enemy->GetActorLocation();
+	FSM->enemy->AddMovementInput(dir.GetSafeNormal());
+	if (dir.Size() < 150.f)
+		FSM->ChangeState(EEnemyState::Attack);
+}
+void EnemyMoveState::Exit(UEnemyFSM* FSM) {}
 
+void EnemyAttackState::Enter(UEnemyFSM* FSM)
+{
+	FSM->anim->animState = EEnemyState::Attack;
+	FSM->anim->bAttackPlay = true;
+	FSM->ResetTimer();
+}
+void EnemyAttackState::Update(UEnemyFSM* FSM, float DeltaTime)
+{
+	FSM->AddTimer(DeltaTime);
+	if (FSM->GetTimer() > 1.5f)
+		FSM->ChangeState(EEnemyState::Idle);
+}
+void EnemyAttackState::Exit(UEnemyFSM* FSM)
+{
+	FSM->anim->bAttackPlay = false;
 }
 
-//void UEnemyFSM::OnDamageProcess()
-//{
-//	if (target->PrimaryWeapon != EWeaponType::None) {
-//		// 캐릭터의 무기에 따라 데미지 다르게
-//		switch (target->PrimaryWeapon)
-//		{
-//		case EWeaponType::Rifle:
-//			//enemy->health -= rifleDamage;
-//			enemy->UpdateHealthBar();
-//			break;
-//
-//		case EWeaponType::Shotgun:
-//			//enemy->health -= shotgunDamage;
-//			enemy->UpdateHealthBar();
-//			break;
-//
-//		case EWeaponType::RocketLauncher:
-//			//enemy->health -= rocketLaunchetDamage;
-//			enemy->UpdateHealthBar();
-//			break;
-//
-//		case EWeaponType::Sword:
-//			// 따로 EenmyBase에 만듦
-//
-//			break;
-//		}
-//	}
-//
-//	// 체력 다 떨어지면
-//	if (!enemy->IsAlive())
-//	{
-//		EState = EEnemyState::Damage;
-//	}
-//	else
-//	{
-//		EState = EEnemyState::Die;
-//		enemy->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-//	}
-//
-//	// 애니메이션 인스턴스와 동기화
-//	anim->animState = EState;
-//
-//
-//}
+void EnemyDamageState::Enter(UEnemyFSM* FSM)
+{
+	FSM->anim->animState = EEnemyState::Damage;
+	FSM->ResetTimer();
+}
+void EnemyDamageState::Update(UEnemyFSM* FSM, float DeltaTime)
+{
+	FSM->AddTimer(DeltaTime);
+	if (FSM->GetTimer() > 1.0f)
+		FSM->ChangeState(EEnemyState::Idle);
+}
+void EnemyDamageState::Exit(UEnemyFSM* FSM) {}
 
-//void UEnemyFSM::UpdateWeaponDamage()
-//{
-//	// 현재 캐릭터의 무기 타입에 따라 해당 무기 인스턴스와 데미지 값을 캐싱
-//	if (target)
-//	{
-//		switch (target->PrimaryWeapon)
-//		{
-//		case EWeaponType::Rifle:
-//			rifleInstance = Cast<ARifle>(UGameplayStatics::GetActorOfClass(GetWorld(), ARifle::StaticClass()));
-//			if (rifleInstance)
-//			{
-//				rifleDamage = rifleInstance->damage;
-//			}
-//			break;
-//
-//		case EWeaponType::Shotgun:
-//			shotgunInstance = Cast<AShotgun>(UGameplayStatics::GetActorOfClass(GetWorld(), AShotgun::StaticClass()));
-//			if (shotgunInstance)
-//			{
-//				shotgunDamage = shotgunInstance->damage;
-//			}
-//			break;
-//
-//		case EWeaponType::RocketLauncher:
-//			// 여기서만 발사체로 넣어주기
-//			rocketLauncherInstance = Cast<ARocketProjectile>(UGameplayStatics::GetActorOfClass(GetWorld(), ARocketProjectile::StaticClass()));
-//			if (rocketLauncherInstance)
-//			{
-//				rocketLaunchetDamage = rocketLauncherInstance->damage;
-//			}
-//			break;
-//
-//			//case EWeaponType::Sword:
-//			//	swordInstance = Cast<ASword>(UGameplayStatics::GetActorOfClass(GetWorld(), ASword::StaticClass()));
-//			//	if (swordInstance)
-//			//	{
-//			//		swordDamage = swordInstance->damage;
-//			//	}
-//			//	break;
-//
-//		default:
-//			break;
-//		}
-//	}
-//}
+void EnemyDeathState::Enter(UEnemyFSM* FSM)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Parent"));
+
+	FSM->anim->animState = EEnemyState::Death;
+
+	// ****************
+	FSM->enemy1->Death();
+}
+void EnemyDeathState::Update(UEnemyFSM* FSM, float DeltaTime) {}
+void EnemyDeathState::Exit(UEnemyFSM* FSM) {}

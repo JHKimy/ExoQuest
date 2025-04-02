@@ -83,16 +83,14 @@ void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 
 }
 
-
-
-// ## 어플라이 테이크 데미지 사용해 보고 싶어서 스워드 시스템만 이걸로 작성 ##
-// 칼로 할때 데미지
 float AEnemyBase::TakeDamage(
 	float DamageAmount, FDamageEvent const& DamageEvent, 
 	AController* EventInstigator, AActor* DamageCauser)
 {
 	// FSM 가져오기
 	auto fsmForDamage = Cast<UEnemyFSM>(GetComponentByClass(UEnemyFSM::StaticClass()));
+
+	fsmForDamage->ChangeState(EEnemyState::Damage);
 
 	// 체력 
 	health -= DamageAmount;
@@ -107,7 +105,7 @@ float AEnemyBase::TakeDamage(
 		// FSM이 nullptr인지 확인
 		if (fsmForDamage)
 		{
-			fsmForDamage->EState = EEnemyState::Death;  // FSM 상태 전환
+			fsmForDamage->ChangeState(EEnemyState::Death);  // FSM 상태 전환
 			// 처치시 충돌체 지우기
 			fsmForDamage->enemy->GetCapsuleComponent()->
 				SetCollisionEnabled(ECollisionEnabled::NoCollision);
@@ -139,6 +137,29 @@ float AEnemyBase::TakeDamage(
 
 void AEnemyBase::Attack()
 {
+}
+
+void AEnemyBase::Death()
+{
+	// Destroy();
+
+	// 등속운동으로 밑으로 내려가기
+	FVector P0 = GetActorLocation();
+	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
+	FVector P = P0 + vt;
+	SetActorLocation(P);
+
+	if (P.Z < -200.f)
+	{
+		Destroy();
+	}
+	if (!bSpawnStarflux) {
+		bSpawnStarflux = true;
+		GetWorld()->SpawnActor<AStarflux>
+			(AStarflux::StaticClass(),
+				GetActorLocation(),
+				GetActorRotation());
+	}
 }
 
 void AEnemyBase::UpdateHealthBar()

@@ -1,11 +1,12 @@
 #include "Enemy/Enemy1.h"
-#include "Enemy/EnemyFSM.h"	// AI
+//#include "Enemy/EnemyFSM.h"	// AI
+#include "Enemy/Enemy1FSM.h"	// AI
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Character/CharacterBase.h"              // 플레이어에게 데미지 줄 때 필요
 #include "GameFramework/DamageType.h"      // 이건 타입을 정할 때 필요
 #include "Engine/EngineTypes.h"         // FDamageEvent 포함됨!!
-
+#include "Enemy/Enemy1AnimInstance.h"
 #include "GameFramework/Controller.h"  // AController 정의 필요 시
 
 AEnemy1::AEnemy1()
@@ -29,10 +30,9 @@ AEnemy1::AEnemy1()
 	AttackCollision->SetGenerateOverlapEvents(false); // 기본은 꺼둠
 	AttackCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemy1::OnHandOverlap);
 
-
-
+	
 	// FSM의 주인으로 설정
-	FSM = CreateDefaultSubobject<UEnemyFSM>(TEXT("FSM"));
+	FSM = CreateDefaultSubobject<UEnemy1FSM>(TEXT("FSM"));
 }
 
 void AEnemy1::BeginPlay()
@@ -80,3 +80,22 @@ void AEnemy1::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 		UE_LOG(LogTemp, Warning, TEXT("ApplyDamage !"));
 	}
 }
+
+float AEnemy1::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float actualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	//  AnimInstance는 GetMesh()->GetAnimInstance()로 가져와야 함!
+	if (UEnemy1AnimInstance* anim = Cast<UEnemy1AnimInstance>(GetMesh()->GetAnimInstance()))
+	{
+		anim->PlayHitMontage();
+	}
+
+	return actualDamage;
+}
+
+void AEnemy1::Death()
+{
+	Super::Death();
+}
+

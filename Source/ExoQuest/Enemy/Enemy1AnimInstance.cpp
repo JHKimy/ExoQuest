@@ -29,3 +29,16 @@ void UEnemy1AnimInstance::AnimNotify_E1AttackEnd()
         enemyOwner->AttackCollision->SetGenerateOverlapEvents(false);
     }
 }
+
+void UEnemy1AnimInstance::PlayHitMontage()
+{
+    if (HitMontage)
+    {
+        Montage_Play(HitMontage);
+        UE_LOG(LogTemp, Warning, TEXT("Playing Hit Montage"));
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("HitMontage is NULL!! Did you assign it in AnimBP?"));
+    }
+}

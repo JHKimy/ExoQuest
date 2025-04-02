@@ -4,17 +4,69 @@
 #include "Components/ActorComponent.h"
 #include "EnemyFSM.generated.h"
 
-
-
-// 겹치는 이름을 막기 위해 class 선언
 UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
-	Idle		UMETA(DisplayName = "Idle State"),
-	Move		UMETA(DisplayName = "Move State"),
-	Attack		UMETA(DisplayName = "Attack State"),
-	Damage		UMETA(DisplayName = "Damage State"),
-	Death		UMETA(DisplayName = "Death State")
+	Idle,
+	Move,
+	Attack,
+	Damage,
+	Death
+};
+
+class UEnemyFSM;
+
+class IEnemyState {
+public:
+	virtual void Enter(UEnemyFSM* FSM) = 0;
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) = 0;
+	virtual void Exit(UEnemyFSM* FSM) = 0;
+	virtual ~IEnemyState() = default;
+};
+
+class EnemyIdleState : public IEnemyState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyMoveState : public IEnemyState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyAttackState : public IEnemyState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyDamageState : public IEnemyState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyDeathState : public IEnemyState {
+public:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
 };
 
 
@@ -32,97 +84,38 @@ protected:
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	void ChangeState(EEnemyState NewState);
 
+public:
 
-	// 상태 변수
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = FSM)
-	EEnemyState EState = EEnemyState::Idle;
-
-
-
-	// 대기 상태
-	void IdleState();
-
-	// 이동 상태
-	void MoveState();
-
-	// 공격 상태
-	void AttackState();
-
-	// 피격 상태
-	void DamageState();
-
-	// 죽음 상태
-	void DeathState();
-
-	//// 피격 알림 이벤트
-	//void OnDamageProcess();
-
-
-	// 대기 시간
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float idleDelayTime = 2;
-
-	// 경과 시간
-	float currentTime = 0;
-
-	// 타겟
 	UPROPERTY(VisibleAnywhere, Category = FSM)
 	class ACharacterBase* target;
 
-	// 적
 	UPROPERTY()
 	class AEnemyBase* enemy;
 
-	// 공격 범위
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float attackRange = 150.f;
-
-	// 공격대기시간
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float attackDelayTime = 2.0f;
-
-	// 피격 대기 시간
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float damageDelayTime = 2.0f;
-
-	// 아래로 사라짐
-	UPROPERTY(EditAnywhere, Category = FSM)
-	float dieSpeed = 50.0f;
-
-
-
-	//// 무기 인스턴스 
-	//class ARifle* rifleInstance;
-	//class AShotgun* shotgunInstance;
-	////class ARocketLauncher* rocketLauncherInstance;
-	//class ARocketProjectile* rocketLauncherInstance;
-	//class ASword* swordInstance;
-
-	// 무기별 데미지
-	UPROPERTY(EditAnywhere, Category = Damage)
-	float rifleDamage;
-
-	UPROPERTY(EditAnywhere, Category = Damage)
-	float shotgunDamage;
-
-	UPROPERTY(EditAnywhere, Category = Damage)
-	float rocketLaunchetDamage;
-
-	UPROPERTY(EditAnywhere, Category = Damage)
-	float swordDamage;
-
-
-	//// 무기 데미지 업데이트 함수
-	//void UpdateWeaponDamage();
+	UPROPERTY()
+	class AEnemy1* enemy1;
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	class UEnemy1AnimInstance* anim;
 
-	UPROPERTY(EditAnywhere, Category = Animation)
-	bool bAttackCircle = false;
+protected:
+	IEnemyState* CurrentState = nullptr;
+	EEnemyState CurrentStateType;
+	TMap<EEnemyState, IEnemyState*> StateMap;
 
-	UPROPERTY(EditAnywhere, Category = Animation)
-	bool bSpawnStarflux = false;
+	// 상태 객체 미리 생성
+	EnemyIdleState IdleState;
+	EnemyMoveState MoveState;
+	EnemyAttackState AttackState;
+	EnemyDamageState DamageState;
+	EnemyDeathState DeathState;
 
+	float currentTime = 0.f;
+	
+public:
+	void ResetTimer();
+	void AddTimer(float DeltaTime);
+	float GetTimer() const;
 };

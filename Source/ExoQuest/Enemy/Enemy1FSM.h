@@ -16,6 +16,15 @@ public:
 	void Exit(UEnemyFSM* FSM) override;
 };
 
+class Enemy1PatrolState : public EnemyPatrolState {
+protected:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+
 class Enemy1MoveState : public EnemyMoveState {
 public:
 	void Enter(UEnemyFSM* FSM) override;
@@ -60,6 +69,7 @@ class EXOQUEST_API UEnemy1FSM : public UEnemyFSM
 public:
 	UEnemy1FSM();
 	Enemy1IdleState   Enemy1IdleState;
+	Enemy1PatrolState Enemy1PatrolState;
 	Enemy1MoveState   Enemy1MoveState;
 	Enemy1AttackState Enemy1AttackState;
 	Enemy1DamageState Enemy1DamageState;
@@ -67,8 +77,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	virtual void ChangeState(EEnemyState NewState) override;
+
+	//FORCEINLINE float GetDistanceToTarget() override
+	//{
+	//	return FVector::Dist(target->GetActorLocation(), enemy1->GetActorLocation());
+	//};
 };
 
 

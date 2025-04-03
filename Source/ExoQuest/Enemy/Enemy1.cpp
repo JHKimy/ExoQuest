@@ -1,5 +1,6 @@
 #include "Enemy/Enemy1.h"
 //#include "Enemy/EnemyFSM.h"	// AI
+
 #include "Enemy/Enemy1FSM.h"	// AI
 #include "Components/CapsuleComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -8,6 +9,8 @@
 #include "Engine/EngineTypes.h"         // FDamageEvent 포함됨!!
 #include "Enemy/Enemy1AnimInstance.h"
 #include "GameFramework/Controller.h"  // AController 정의 필요 시
+#include "GameFramework/CharacterMovementComponent.h"
+#include "AIController.h"
 
 AEnemy1::AEnemy1()
 {
@@ -47,13 +50,32 @@ void AEnemy1::BeginPlay()
 
 	localMesh->SetAnimInstanceClass(AnimBPClass);
 
-	if (AnimBPClass) {
-		UE_LOG(LogTemp, Warning, TEXT("load! BP!!!!!!"));
-	}
+	//if (AnimBPClass) {
+	//	UE_LOG(LogTemp, Warning, TEXT("load! BP!!!!!!"));
+	//}
 
 	anim = Cast<UEnemy1AnimInstance>(GetMesh()->GetAnimInstance());
 
+	AI = Cast<AAIController>(GetController());
 
+	InitialPosition = GetActorLocation();
+
+	// 테스트용 패트롤 포인트 지정 (레벨에서 직접 할 수도 있음)
+	PatrolPoints.Add(InitialPosition + FVector(500, 0, 0));
+	PatrolPoints.Add(InitialPosition + FVector(500, 500, 0));
+	PatrolPoints.Add(InitialPosition + FVector(0, 500, 0));
+
+	//for (int32 i = 0; i < PatrolPoints.Num(); ++i)
+	//{
+	//	const FVector& pt = PatrolPoints[i];
+	//	FString msg = FString::Printf(TEXT("[%d] → X=%.1f, Y=%.1f, Z=%.1f"), i, pt.X, pt.Y, pt.Z);
+
+	//	// 화면 출력
+	//	UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor::Green, 2.0f);
+
+	//	// 로그 출력
+	//	UE_LOG(LogTemp, Warning, TEXT("%s"), *msg);
+	//}
 }
 
 void AEnemy1::Tick(float DeltaTime)
@@ -120,5 +142,87 @@ void AEnemy1::Death()
 
 void AEnemy1::MoveToTarget()
 {
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	Super::MoveToTarget();
+}
+
+void AEnemy1::MoveToPatrolPoint()
+{
+	if (PatrolPoints.Num() == 0) return;
+
+	FVector targetLocation = PatrolPoints[CurrentPatrolIndex];
+	FVector direction = targetLocation - GetActorLocation();
+
+	if (direction.Size() < 100.f)
+	{
+		CurrentPatrolIndex = (CurrentPatrolIndex + 1) % PatrolPoints.Num();
+		return;
+	}
+	// 걷는 속도 일시적으로 줄이기
+	GetCharacterMovement()->MaxWalkSpeed = 150.f;
+	// GetCharacterMovement()->Max
+	//if (!AI)
+	//{
+	//	AI = Cast<AAIController>(GetController());
+	//}
+
+	//if (AI)
+	//{
+	//	//FString msg = FString::Printf(TEXT("Move Patrol: %s"), *targetLocation.ToString());
+
+	//	//UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor::Green, 2.0f);
+
+	//	AI->MoveToLocation(targetLocation, 1.f);
+	//}
+
+	AddMovementInput(direction.GetSafeNormal());
+}
+
+bool AEnemy1::IsPlayerInSight()
+{
+	if (!target) return false;
+
+	// 1) 시야각 확인
+	FVector toTarget = target->GetActorLocation() - GetActorLocation();
+	toTarget.Normalize();
+
+	FVector forward = GetActorForwardVector();
+	float dot = FVector::DotProduct(forward, toTarget);
+	float angleDegrees = FMath::RadiansToDegrees(FMath::Acos(dot));
+	if (angleDegrees > ViewAngle * 0.5f)
+	{
+		return false; // 시야 밖
+	}
+
+	// 2) 라인트레이스로 가려졌는지 확인
+	FHitResult hitResult;
+	FVector start = GetActorLocation() + FVector(0, 0, 80); // 적 눈높이
+	FVector end = target->GetActorLocation() + FVector(0, 0, 30); // 플레이어 눈높이
+
+	FCollisionQueryParams params;
+	params.AddIgnoredActor(this); // 자기 자신 제외
+	params.AddIgnoredActor(target); // 플레이어는 무시
+
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		hitResult, start, end, ECC_Visibility, params
+	);
+
+	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 1.f, 0, 1.f);
+	// true: 무언가 맞았다 → 벽 있음
+	// false: 아무것도 안 맞았다 → 벽 없음
+	return !bHit;
+}
+
+void AEnemy1::ReturnToPatrolLocation()
+{
+	if (!Controller) return;
+
+	bReturningToOrigin = true;
+	if (!AI)
+	{
+		AI = Cast<AAIController>(GetController());
+	}
+	if (AI){
+		AI->MoveToLocation(InitialPosition, 5.f); // 5cm 오차까지 이동 허용
+	}
 }

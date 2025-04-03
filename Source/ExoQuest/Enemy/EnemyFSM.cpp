@@ -27,21 +27,21 @@ void UEnemyFSM::BeginPlay()
 	target = Cast<ACharacterBase>(actor);
 	
 	// 적 목록
-	enemy = Cast<AEnemyBase>(GetOwner()); // 부모(형체 X)
+	enemy = Cast<AEnemyBase>(GetOwner()); // 형체 X
 	enemy1 = Cast<AEnemy1>(enemy);		  // 첫번째 적
 
 
 
 	// anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
 
-	// StateMap.Add(EEnemyState::Idle, &IdleState);
-	// StateMap.Add(EEnemyState::Move, &MoveState);
-	// StateMap.Add(EEnemyState::Attack, &AttackState);
-	// StateMap.Add(EEnemyState::Damage, &DamageState);
-	// StateMap.Add(EEnemyState::Death, &DeathState);
+	 StateMap.Add(EEnemyState::Idle, &IdleState);
+	 StateMap.Add(EEnemyState::Patrol, &PatrolState);
+	 StateMap.Add(EEnemyState::Move, &MoveState);
+	 StateMap.Add(EEnemyState::Attack, &AttackState);
+	 StateMap.Add(EEnemyState::Damage, &DamageState);
+	 StateMap.Add(EEnemyState::Death, &DeathState);
 	
-	// ChangeState(EEnemyState::Idle);
-
+	 ChangeState(EEnemyState::Idle);
 }
 
 void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -66,6 +66,11 @@ void UEnemyFSM::ChangeState(EEnemyState NewState)
 		CurrentStateType = NewState;
 		CurrentState->Enter(this);
 	}
+}
+
+float UEnemyFSM::GetDistanceToTarget()
+{
+	return FVector::Dist(target->GetActorLocation(), enemy->GetActorLocation());
 }
 
 void UEnemyFSM::ResetTimer()
@@ -105,6 +110,18 @@ void EnemyIdleState::Update(UEnemyFSM* FSM, float DeltaTime)
 
 }
 void EnemyIdleState::Exit(UEnemyFSM* FSM) {}
+
+void EnemyPatrolState::Enter(UEnemyFSM* FSM)
+{
+}
+
+void EnemyPatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
+{
+}
+
+void EnemyPatrolState::Exit(UEnemyFSM* FSM)
+{
+}
 
 void EnemyMoveState::Enter(UEnemyFSM* FSM)
 {
@@ -157,3 +174,5 @@ void EnemyDeathState::Enter(UEnemyFSM* FSM)
 }
 void EnemyDeathState::Update(UEnemyFSM* FSM, float DeltaTime) {}
 void EnemyDeathState::Exit(UEnemyFSM* FSM) {}
+
+

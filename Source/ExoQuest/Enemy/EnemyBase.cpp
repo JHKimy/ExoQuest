@@ -13,6 +13,9 @@
 #include  "UI/Enemy1HPBar.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "AIController.h"
+
+
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -150,6 +153,8 @@ void AEnemyBase::Death()
 {
 	// Destroy();
 
+	HPBarWidget->SetVisibility(false);
+
 	// 등속운동으로 밑으로 내려가기
 	FVector P0 = GetActorLocation();
 	FVector vt = FVector::DownVector * dieSpeed * GetWorld()->DeltaTimeSeconds;
@@ -171,8 +176,14 @@ void AEnemyBase::Death()
 
 void AEnemyBase::MoveToTarget() 
 {
-	FVector dir = target->GetActorLocation() - GetActorLocation();
-	AddMovementInput(dir.GetSafeNormal());
+	//FVector dir = target->GetActorLocation() - GetActorLocation();
+	//AddMovementInput(dir.GetSafeNormal());
+
+	AAIController* ai = Cast<AAIController>(GetController());
+	if (ai)
+	{
+		ai->MoveToActor(target, 5.f); // 5cm까지 근접하면 멈춤
+	}
 }
 
 

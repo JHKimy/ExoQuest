@@ -8,6 +8,7 @@ UENUM(BlueprintType)
 enum class EEnemyState : uint8
 {
 	Idle,
+	Patrol,
 	Move,
 	Attack,
 	Damage,
@@ -25,6 +26,14 @@ public:
 };
 
 class EnemyIdleState : public IEnemyState {
+protected:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+class EnemyPatrolState : public IEnemyState {
 protected:
 	virtual void Enter(UEnemyFSM* FSM) override;
 
@@ -99,14 +108,18 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	class UEnemy1AnimInstance* anim;
+	
+	virtual float GetDistanceToTarget();
 
 protected:
+
 	IEnemyState* CurrentState = nullptr;
 	EEnemyState CurrentStateType;
 	TMap<EEnemyState, IEnemyState*> StateMap;
 
 	// 惑怕 按眉 固府 积己
 	EnemyIdleState IdleState;
+	EnemyPatrolState PatrolState;
 	EnemyMoveState MoveState;
 	EnemyAttackState AttackState;
 	EnemyDamageState DamageState;

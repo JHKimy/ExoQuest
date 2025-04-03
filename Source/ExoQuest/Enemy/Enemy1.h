@@ -53,4 +53,46 @@ public:
 	void Death() override;
 
 	void MoveToTarget() override;
+
+	UFUNCTION()
+	void MoveToPatrolPoint();
+	
+	// 순찰용 경로 리스트
+	UPROPERTY(EditAnywhere, Category = "Patrol")
+	TArray<FVector> PatrolPoints;
+
+	UPROPERTY(EditAnywhere, Category = "Patrol")
+	int32 CurrentPatrolIndex = 0;
+
+	UPROPERTY(EditAnywhere, Category = Detect)
+	float detectRange = 1000.f;
+	FORCEINLINE float GetDetectRange() {
+		return detectRange;
+	}
+
+	UPROPERTY(EditAnywhere, Category = Detect)
+	float attackRange = 150.f;
+	FORCEINLINE float GetAttackRange() {
+		return attackRange;
+	}
+
+	UPROPERTY(EditAnywhere, Category = "Detect")
+	float ViewAngle = 90.f; // 시야각 90도 (좌우 45도씩)
+	UFUNCTION()
+	bool IsPlayerInSight();
+	//UPROPERTY(EditAnywhere, Category = "Patrol")
+	//float PatrolMoveSpeed = 150.f;  // 기본 속도 (예: 150)
+
+	// 되돌아가기
+	UPROPERTY(VisibleAnywhere, Category = "Return")
+	bool bReturningToOrigin = false;
+
+	UPROPERTY(VisibleAnywhere, Category = "Return")
+	FVector InitialPosition;
+	UFUNCTION()
+	void ReturnToPatrolLocation();
+
+
+	class AAIController* AI;
+
 };

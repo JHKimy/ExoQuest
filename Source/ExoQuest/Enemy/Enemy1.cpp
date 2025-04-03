@@ -31,7 +31,7 @@ AEnemy1::AEnemy1()
 	AttackCollision->OnComponentBeginOverlap.AddDynamic(this, &AEnemy1::OnHandOverlap);
 
 	
-	// FSM의 주인으로 설정
+	// FSM1의 주인으로 설정
 	FSM = CreateDefaultSubobject<UEnemy1FSM>(TEXT("FSM"));
 }
 
@@ -44,11 +44,16 @@ void AEnemy1::BeginPlay()
 	AnimBPClass = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
 		TEXT("/Game/BluePrint/Enemy/Enemy1/ABP_Enemy1.ABP_Enemy1_C"));
 
+
+	localMesh->SetAnimInstanceClass(AnimBPClass);
+
 	if (AnimBPClass) {
 		UE_LOG(LogTemp, Warning, TEXT("load! BP!!!!!!"));
 	}
 
-	localMesh->SetAnimInstanceClass(AnimBPClass);
+	anim = Cast<UEnemy1AnimInstance>(GetMesh()->GetAnimInstance());
+
+
 }
 
 void AEnemy1::Tick(float DeltaTime)
@@ -62,9 +67,28 @@ void AEnemy1::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 }
 
+void AEnemy1::SetAnimState(EEnemyState newState)
+{
+	if (anim)
+	{
+		anim->animState = newState;
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("AEnemy1::SetAnimState 실패: anim이 nullptr입니다."));
+	}
+}
+
+
+void AEnemy1::SetAttackPlay(bool b)
+{
+	anim->bAttackPlay = b;
+}
+
 void AEnemy1::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	if (!bCanDamage) return;
 	ACharacterBase* player = Cast<ACharacterBase>(OtherActor);
 	if (player)
 	{
@@ -84,12 +108,7 @@ void AEnemy1::OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* Ot
 float AEnemy1::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float actualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	//  AnimInstance는 GetMesh()->GetAnimInstance()로 가져와야 함!
-	if (UEnemy1AnimInstance* anim = Cast<UEnemy1AnimInstance>(GetMesh()->GetAnimInstance()))
-	{
-		anim->PlayHitMontage();
-	}
+	anim->PlayHitMontage();
 
 	return actualDamage;
 }
@@ -99,3 +118,7 @@ void AEnemy1::Death()
 	Super::Death();
 }
 
+void AEnemy1::MoveToTarget()
+{
+	Super::MoveToTarget();
+}

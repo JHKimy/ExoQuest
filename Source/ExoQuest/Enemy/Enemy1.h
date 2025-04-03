@@ -25,6 +25,15 @@ public:
 	UPROPERTY(VisibleAnywhere)
 	class UCapsuleComponent* AttackCollision;
 
+	UPROPERTY(EditAnywhere, Category = Animation)
+	class UEnemy1AnimInstance* anim;
+
+	UFUNCTION()
+	void SetAnimState(EEnemyState NewState);
+
+	UFUNCTION()
+	void SetAttackPlay(bool b);
+
 	// 손에 맞으면 실행
 	UFUNCTION()
 	void OnHandOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -37,5 +46,11 @@ public:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
+	UPROPERTY(EditAnywhere, Category = Damage)
+	bool bCanDamage = true;
+
+
 	void Death() override;
+
+	void MoveToTarget() override;
 };

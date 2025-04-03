@@ -20,6 +20,8 @@ void UEnemy1AnimInstance::AnimNotify_E1AttackStart()
     {
         enemyOwner->AttackCollision->SetGenerateOverlapEvents(true);
     }
+    enemyOwner->bCanDamage = true;
+
 }
 
 void UEnemy1AnimInstance::AnimNotify_E1AttackEnd()
@@ -28,6 +30,7 @@ void UEnemy1AnimInstance::AnimNotify_E1AttackEnd()
     {
         enemyOwner->AttackCollision->SetGenerateOverlapEvents(false);
     }
+    enemyOwner->bCanDamage = false;
 }
 
 void UEnemy1AnimInstance::PlayHitMontage()

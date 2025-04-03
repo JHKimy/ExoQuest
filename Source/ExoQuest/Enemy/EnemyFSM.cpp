@@ -25,17 +25,22 @@ void UEnemyFSM::BeginPlay()
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass());
 
 	target = Cast<ACharacterBase>(actor);
-	enemy = Cast<AEnemyBase>(GetOwner());
-	enemy1 = Cast<AEnemy1>(GetOwner());
-	anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
+	
+	// 적 목록
+	enemy = Cast<AEnemyBase>(GetOwner()); // 부모(형체 X)
+	enemy1 = Cast<AEnemy1>(enemy);		  // 첫번째 적
 
-	StateMap.Add(EEnemyState::Idle, &IdleState);
-	StateMap.Add(EEnemyState::Move, &MoveState);
-	StateMap.Add(EEnemyState::Attack, &AttackState);
-	StateMap.Add(EEnemyState::Damage, &DamageState);
-	StateMap.Add(EEnemyState::Death, &DeathState);
 
-	ChangeState(EEnemyState::Idle);
+
+	// anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
+
+	// StateMap.Add(EEnemyState::Idle, &IdleState);
+	// StateMap.Add(EEnemyState::Move, &MoveState);
+	// StateMap.Add(EEnemyState::Attack, &AttackState);
+	// StateMap.Add(EEnemyState::Damage, &DamageState);
+	// StateMap.Add(EEnemyState::Death, &DeathState);
+	
+	// ChangeState(EEnemyState::Idle);
 
 }
 
@@ -81,69 +86,74 @@ float UEnemyFSM::GetTimer() const
 // ========== EnemyIdleState ==========
 void EnemyIdleState::Enter(UEnemyFSM* FSM)
 {
-	FSM->anim->animState = EEnemyState::Idle;
-	FSM->ResetTimer();
+	// FSM->enemy1->SetAnimState(EEnemyState::Idle);
+	// FSM->anim->animState = EEnemyState::Idle;
+	// FSM->ResetTimer();
+
+	UKismetSystemLibrary::PrintString(FSM, TEXT("Entered Parent Idle State"), true, false, FLinearColor::Yellow, 1.5f);
+
 }
 void EnemyIdleState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
-	FSM->AddTimer(DeltaTime);
-	if (FSM->GetTimer() > 2.f)
-		FSM->ChangeState(EEnemyState::Move);
+	
+	
+	//FSM->AddTimer(DeltaTime);
+	//if (FSM->GetTimer() > 2.f)
+	//	FSM->ChangeState(EEnemyState::Move);
+
+
+
 }
 void EnemyIdleState::Exit(UEnemyFSM* FSM) {}
 
 void EnemyMoveState::Enter(UEnemyFSM* FSM)
 {
-	FSM->anim->animState = EEnemyState::Move;
+	// FSM->anim->animState = EEnemyState::Move;
 }
 void EnemyMoveState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
-	if (!FSM->enemy || !FSM->target) return;
-	FVector dir = FSM->target->GetActorLocation() - FSM->enemy->GetActorLocation();
-	FSM->enemy->AddMovementInput(dir.GetSafeNormal());
-	if (dir.Size() < 150.f)
-		FSM->ChangeState(EEnemyState::Attack);
+	//if (!FSM->enemy || !FSM->target) return;
+	//FVector dir = FSM->target->GetActorLocation() - FSM->enemy->GetActorLocation();
+	//FSM->enemy->AddMovementInput(dir.GetSafeNormal());
+	//if (dir.Size() < 150.f)
+	//	FSM->ChangeState(EEnemyState::Attack);
 }
 void EnemyMoveState::Exit(UEnemyFSM* FSM) {}
 
 void EnemyAttackState::Enter(UEnemyFSM* FSM)
 {
-	FSM->anim->animState = EEnemyState::Attack;
-	FSM->anim->bAttackPlay = true;
-	FSM->ResetTimer();
+	// FSM->anim->animState = EEnemyState::Attack;
+	// FSM->anim->bAttackPlay = true;
+	//FSM->ResetTimer();
 }
 void EnemyAttackState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
-	FSM->AddTimer(DeltaTime);
-	if (FSM->GetTimer() > 1.5f)
-		FSM->ChangeState(EEnemyState::Idle);
+	//FSM->AddTimer(DeltaTime);
+	//if (FSM->GetTimer() > 1.5f)
+	//	FSM->ChangeState(EEnemyState::Idle);
 }
 void EnemyAttackState::Exit(UEnemyFSM* FSM)
 {
-	FSM->anim->bAttackPlay = false;
+	//FSM->anim->bAttackPlay = false;
 }
 
 void EnemyDamageState::Enter(UEnemyFSM* FSM)
 {
-	FSM->anim->animState = EEnemyState::Damage;
-	FSM->ResetTimer();
+	//FSM->ResetTimer();
 }
 void EnemyDamageState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
-	FSM->AddTimer(DeltaTime);
-	if (FSM->GetTimer() > 1.0f)
-		FSM->ChangeState(EEnemyState::Idle);
+	//FSM->AddTimer(DeltaTime);
+	//if (FSM->GetTimer() > 1.0f)
+	//	FSM->ChangeState(EEnemyState::Idle);
 }
 void EnemyDamageState::Exit(UEnemyFSM* FSM) {}
 
 void EnemyDeathState::Enter(UEnemyFSM* FSM)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Parent"));
-
-	FSM->anim->animState = EEnemyState::Death;
-
 	// ****************
-	FSM->enemy1->Death();
+	// FSM->enemy1->Death();
 }
 void EnemyDeathState::Update(UEnemyFSM* FSM, float DeltaTime) {}
 void EnemyDeathState::Exit(UEnemyFSM* FSM) {}

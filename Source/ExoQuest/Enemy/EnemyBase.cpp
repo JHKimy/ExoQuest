@@ -6,6 +6,8 @@
 #include "Kismet/KismetSystemLibrary.h"		// È­¸é ÅØ½ºÃ÷ Ãâ·Â 
 #include "Item/Starflux.h"
 
+#include "Character/CharacterBase.h"
+
 #include "PaperSpriteComponent.h"
 #include "Components/WidgetComponent.h"
 #include  "UI/Enemy1HPBar.h"
@@ -65,6 +67,11 @@ void AEnemyBase::BeginPlay()
 		EnemyPosition->bVisibleInSceneCaptureOnly = true;
 	}
 	GetCharacterMovement()->bOrientRotationToMovement = true;
+
+
+	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass());
+
+	target = Cast<ACharacterBase>(actor);
 
 	//// ½ºÅÈ
 	//health = 100.f;
@@ -161,6 +168,13 @@ void AEnemyBase::Death()
 				GetActorRotation());
 	}
 }
+
+void AEnemyBase::MoveToTarget() 
+{
+	FVector dir = target->GetActorLocation() - GetActorLocation();
+	AddMovementInput(dir.GetSafeNormal());
+}
+
 
 void AEnemyBase::UpdateHealthBar()
 {

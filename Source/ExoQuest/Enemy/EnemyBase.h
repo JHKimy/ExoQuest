@@ -37,7 +37,8 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "UI")
 	class UWidgetComponent* HPBarWidget;
 
-
+	UPROPERTY(VisibleAnywhere, Category = FSM)
+	class ACharacterBase* target;
 
 
 	
@@ -94,6 +95,10 @@ protected:
 public:
 	UFUNCTION(BlueprintCallable, Category = "Damage")
 	virtual void Death();
+
+public:
+	UFUNCTION(BlueprintCallable, Category = "Movement")
+	virtual void MoveToTarget();
 
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	virtual void UpdateHealthBar();

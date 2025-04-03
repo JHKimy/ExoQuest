@@ -25,48 +25,48 @@ public:
 };
 
 class EnemyIdleState : public IEnemyState {
-public:
-	void Enter(UEnemyFSM* FSM) override;
-
-	void Update(UEnemyFSM* FSM, float DeltaTime) override;
-
-	void Exit(UEnemyFSM* FSM) override;
-};
-
-class EnemyMoveState : public IEnemyState {
-public:
-	void Enter(UEnemyFSM* FSM) override;
-
-	void Update(UEnemyFSM* FSM, float DeltaTime) override;
-
-	void Exit(UEnemyFSM* FSM) override;
-};
-
-class EnemyAttackState : public IEnemyState {
-public:
-	void Enter(UEnemyFSM* FSM) override;
-
-	void Update(UEnemyFSM* FSM, float DeltaTime) override;
-
-	void Exit(UEnemyFSM* FSM) override;
-};
-
-class EnemyDamageState : public IEnemyState {
-public:
-	void Enter(UEnemyFSM* FSM) override;
-
-	void Update(UEnemyFSM* FSM, float DeltaTime) override;
-
-	void Exit(UEnemyFSM* FSM) override;
-};
-
-class EnemyDeathState : public IEnemyState {
-public:
+protected:
 	virtual void Enter(UEnemyFSM* FSM) override;
 
 	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
 
-	void Exit(UEnemyFSM* FSM) override;
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyMoveState : public IEnemyState {
+protected:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyAttackState : public IEnemyState {
+protected:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyDamageState : public IEnemyState {
+protected:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
+};
+
+class EnemyDeathState : public IEnemyState {
+protected:
+	virtual  void Enter(UEnemyFSM* FSM) override;
+
+	virtual  void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	virtual void Exit(UEnemyFSM* FSM) override;
 };
 
 
@@ -84,7 +84,7 @@ protected:
 
 public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-	void ChangeState(EEnemyState NewState);
+	virtual void ChangeState(EEnemyState NewState);
 
 public:
 
@@ -113,7 +113,7 @@ protected:
 	EnemyDeathState DeathState;
 
 	float currentTime = 0.f;
-	
+
 public:
 	void ResetTimer();
 	void AddTimer(float DeltaTime);

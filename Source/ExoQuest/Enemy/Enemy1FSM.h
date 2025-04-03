@@ -6,10 +6,50 @@
 #include "Enemy/EnemyFSM.h"
 #include "Enemy1FSM.generated.h"
 
-class Enemy1DeathState : public EnemyDeathState {
+
+class Enemy1IdleState : public EnemyIdleState {
 public:
 	void Enter(UEnemyFSM* FSM) override;
+
 	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class Enemy1MoveState : public EnemyMoveState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class Enemy1AttackState : public EnemyAttackState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class Enemy1DamageState : public EnemyDamageState {
+public:
+	void Enter(UEnemyFSM* FSM) override;
+
+	void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
+};
+
+class Enemy1DeathState : public EnemyDeathState {
+public:
+	virtual void Enter(UEnemyFSM* FSM) override;
+
+	virtual void Update(UEnemyFSM* FSM, float DeltaTime) override;
+
+	void Exit(UEnemyFSM* FSM) override;
 };
 
 UCLASS()
@@ -19,11 +59,16 @@ class EXOQUEST_API UEnemy1FSM : public UEnemyFSM
 
 public:
 	UEnemy1FSM();
-	Enemy1DeathState Enemy1DeathState;
+	Enemy1IdleState   Enemy1IdleState;
+	Enemy1MoveState   Enemy1MoveState;
+	Enemy1AttackState Enemy1AttackState;
+	Enemy1DamageState Enemy1DamageState;
+	Enemy1DeathState  Enemy1DeathState;
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void ChangeState(EEnemyState NewState) override;
 };
 
 

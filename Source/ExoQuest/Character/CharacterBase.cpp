@@ -1129,12 +1129,9 @@ void ACharacterBase::ActivateTimeRewind()
 	{
 		return; // 배열이 비어 있거나 이미 되돌리기 중이라면 종료
 	}
-
-
 	// 아이템 개수 감소
 	ItemDataBase->UseItem("TimeFluxGear");
 	InventoryUI->UpdateInventory();
-
 
 	RewindElapsedTime = 0.0f;
 
@@ -1142,7 +1139,6 @@ void ACharacterBase::ActivateTimeRewind()
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	// 0.01초 간격으로 50번 실행하여 1초 동안 되돌리기
 	GetWorldTimerManager().SetTimer(RewindTimerHandle, this, &ACharacterBase::RewindStep, 0.01f, true);
 }
 

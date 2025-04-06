@@ -22,7 +22,6 @@ public:
 	virtual void Enter(UEnemyFSM* FSM) = 0;
 	virtual void Update(UEnemyFSM* FSM, float DeltaTime) = 0;
 	virtual void Exit(UEnemyFSM* FSM) = 0;
-	virtual ~IEnemyState() = default;
 };
 
 class EnemyIdleState : public IEnemyState {
@@ -41,7 +40,6 @@ protected:
 
 	virtual void Exit(UEnemyFSM* FSM) override;
 };
-
 class EnemyMoveState : public IEnemyState {
 protected:
 	virtual void Enter(UEnemyFSM* FSM) override;
@@ -50,7 +48,6 @@ protected:
 
 	virtual void Exit(UEnemyFSM* FSM) override;
 };
-
 class EnemyAttackState : public IEnemyState {
 protected:
 	virtual void Enter(UEnemyFSM* FSM) override;
@@ -59,7 +56,6 @@ protected:
 
 	virtual void Exit(UEnemyFSM* FSM) override;
 };
-
 class EnemyDamageState : public IEnemyState {
 protected:
 	virtual void Enter(UEnemyFSM* FSM) override;
@@ -68,7 +64,6 @@ protected:
 
 	virtual void Exit(UEnemyFSM* FSM) override;
 };
-
 class EnemyDeathState : public IEnemyState {
 protected:
 	virtual  void Enter(UEnemyFSM* FSM) override;
@@ -105,6 +100,9 @@ public:
 
 	UPROPERTY()
 	class AEnemy1* enemy1;
+	
+	UPROPERTY()
+	class AEnemy2* enemy2;
 
 	UPROPERTY(EditAnywhere, Category = Animation)
 	class UEnemy1AnimInstance* anim;

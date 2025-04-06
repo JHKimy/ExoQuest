@@ -9,9 +9,10 @@
 #include "Weapon/RocketLauncher.h"
 #include "Weapon/RocketProjectile.h"
 #include "Weapon/Sword.h"
-#include "Enemy1AnimInstance.h"
+// #include "Enemy1AnimInstance.h"
 #include "Item/Starflux.h"
-#include "Enemy/Enemy1.h"
+#include "Enemy/Enemy1/Enemy1.h"
+#include "Enemy/Enemy2/Enemy2.h"
 
 UEnemyFSM::UEnemyFSM()
 {
@@ -29,7 +30,7 @@ void UEnemyFSM::BeginPlay()
 	// 적 목록
 	enemy = Cast<AEnemyBase>(GetOwner()); // 형체 X
 	enemy1 = Cast<AEnemy1>(enemy);		  // 첫번째 적
-
+	enemy2 = Cast<AEnemy2>(enemy);		  // 두번째 적
 
 
 	// anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());

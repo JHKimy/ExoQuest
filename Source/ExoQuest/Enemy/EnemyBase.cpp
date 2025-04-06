@@ -19,23 +19,12 @@
 AEnemyBase::AEnemyBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	
+	// 충돌체
 	GetCapsuleComponent()->SetRelativeScale3D(FVector(2.5f, 2.5f, 1.5f));
 	RootComponent = GetCapsuleComponent();
 
-	//ConstructorHelpers::FObjectFinder<USkeletalMesh>
-	//	TempMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Asset/Enemy/Enemy1/SM_Enemy1.SM_Enemy1'"));
-
-	//if (TempMesh.Succeeded())
-	//{
-	//	// 스켈레탈 메쉬 생성
-	//	GetMesh()->SetSkeletalMesh(TempMesh.Object);
-	//	// 위치 조정
-	//	GetMesh()->SetRelativeLocationAndRotation(FVector(0, 0, -90), FRotator(0, -90, 0));
-	//}
-
-	//// FSM의 주인으로 설정
-	//FSM = CreateDefaultSubobject<UEnemyFSM>(TEXT("FSM"));
-
+	// HP Bar
 	HPBarWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPBar")); // 원래대로
 	HPBarWidget->SetupAttachment(RootComponent);
 	HPBarWidget->SetWidgetSpace(EWidgetSpace::World);
@@ -47,38 +36,23 @@ AEnemyBase::AEnemyBase()
 	{
 		HPBarWidget->SetWidgetClass(HPBarClass.Class);  // WBP 클래스 지정
 	}
-
-
 }
 
 void AEnemyBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//USkeletalMeshComponent* localMesh = GetMesh();
-	//// StaticLoadClass를 사용하여 애니메이션 블루프린트 클래스 로드
-	//AnimBPClass = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
-	//	TEXT("/Game/BluePrint/Enemy/Enemy1/ABP_Enemy1.ABP_Enemy1_C"));
-	//
-	//if (AnimBPClass) {
-	//	UE_LOG(LogTemp, Warning, TEXT("load! BP!!!!!!"));
-	//}
-
-	//localMesh->SetAnimInstanceClass(AnimBPClass);
-
+	// 미니맵 아이콘
 	if (EnemyPosition) {
 		EnemyPosition->bVisibleInSceneCaptureOnly = true;
 	}
+	// 이동 방향으로 회전
 	GetCharacterMovement()->bOrientRotationToMovement = true;
-
 
 	auto actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACharacterBase::StaticClass());
 
+	// 캐릭터 타겟
 	target = Cast<ACharacterBase>(actor);
-
-	//// 스탯
-	//health = 100.f;
-	//attackPower = 10.f;
 }
 
 void AEnemyBase::Tick(float DeltaTime)
@@ -87,16 +61,13 @@ void AEnemyBase::Tick(float DeltaTime)
 	MovementHealthBar();
 }
 
-void AEnemyBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
 
 float AEnemyBase::TakeDamage(
 	float DamageAmount, FDamageEvent const& DamageEvent, 
 	AController* EventInstigator, AActor* DamageCauser)
 {
+	if (!bIsAlive) return 0.f;
+
 	// FSM 가져오기
 	auto fsmForDamage = Cast<UEnemyFSM>(GetComponentByClass(UEnemyFSM::StaticClass()));
 
@@ -119,15 +90,6 @@ float AEnemyBase::TakeDamage(
 			// 처치시 충돌체 지우기
 			fsmForDamage->enemy->GetCapsuleComponent()->
 				SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-			//UKismetSystemLibrary::PrintString
-			//(GetWorld(), TEXT("oops!!"), true, false, FLinearColor::Green, 2.f);
-		}
-		else
-		{
-			// FSM이 nullptr인 경우 에러 처리
-			//UKismetSystemLibrary::PrintString
-			//(GetWorld(), TEXT("NULL!!"), true, false, FLinearColor::Red, 2.f);
 		}
 	}
 
@@ -139,21 +101,16 @@ float AEnemyBase::TakeDamage(
 		bIsAlive = false;
 	}
 
-
-
-
 	return DamageAmount;
 }
 
-void AEnemyBase::Attack()
-{
-}
+
+
 
 void AEnemyBase::Death()
 {
-	// Destroy();
-
-	HPBarWidget->SetVisibility(false);
+	// HPBarWidget->SetVisibility(false);
+	HPBarWidget->DestroyComponent();
 
 	// 등속운동으로 밑으로 내려가기
 	FVector P0 = GetActorLocation();
@@ -176,16 +133,12 @@ void AEnemyBase::Death()
 
 void AEnemyBase::MoveToTarget() 
 {
-	//FVector dir = target->GetActorLocation() - GetActorLocation();
-	//AddMovementInput(dir.GetSafeNormal());
-
 	AAIController* ai = Cast<AAIController>(GetController());
 	if (ai)
 	{
 		ai->MoveToActor(target, 5.f); // 5cm까지 근접하면 멈춤
 	}
 }
-
 
 void AEnemyBase::UpdateHealthBar()
 {
@@ -219,8 +172,8 @@ void AEnemyBase::MovementHealthBar()
 
 			// 거리 계산 후 체력바 표시 여부 결정
 			float Distance = FVector::Dist(PlayerPawn->GetActorLocation(), GetActorLocation());
-			bool bShouldShow = Distance <= healthBarRange;
-			HPBarWidget->SetVisibility(bShouldShow);
+			bisHPBarShow = Distance <= healthBarRange;
+			HPBarWidget->SetVisibility(bisHPBarShow);
 		}
 	}
 }

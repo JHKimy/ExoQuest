@@ -15,7 +15,6 @@ public:
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//======================================================
 	// 컴포넌트
@@ -33,22 +32,30 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "FSM")
 	TObjectPtr<UActorComponent> FSM = nullptr;
 
-	// EnemyBase.h
-	UPROPERTY(VisibleAnywhere, Category = "UI")
+	// HP Widget
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	class UWidgetComponent* HPBarWidget;
-
-	UPROPERTY(VisibleAnywhere, Category = FSM)
+	// HP Widget
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
+	bool bisHPBarShow;
+	// 플레이어 타겟
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSM)
 	class ACharacterBase* target;
 
-
+	//// 애니메이션
+	//UFUNCTION()
+	//virtual void SetAnimState(EEnemyState NewState);
 	
 
-protected:
+public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	bool bIsAlive = true;
-	// 체력
+	//// 체력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
 	float maxHealth = 100.f;
+	// 체력
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
+	float health = 100.f;
 
 	// 아래로 사라짐
 	UPROPERTY(EditAnywhere, Category = FSM)
@@ -57,14 +64,9 @@ protected:
 	UPROPERTY(EditAnywhere, Category = Animation)
 	bool bSpawnStarflux = false;
 
-public:
-	// 체력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
-	float health = 100.f;
-
-	// 공격력
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
-	float attackPower = 10.f;
+	//// 공격력
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+	//float attackPower = 10.f;
 
 	// 공격력
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health")
@@ -87,8 +89,6 @@ protected:
 		AController* EventInstigator,
 		AActor* DamageCauser) override;
 
-	UFUNCTION(BlueprintCallable, Category = "Damage")
-	virtual void Attack(); // FSM이 호출할 함수
 
 
 

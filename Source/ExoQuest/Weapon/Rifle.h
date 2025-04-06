@@ -87,4 +87,8 @@ public:
 	// 카메라 셰이크 효과 추가
 	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
 	TSubclassOf<class UCameraShakeBase> cameraShakeClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Sound")
+	TObjectPtr<class USoundBase> fireSound;
+
 };

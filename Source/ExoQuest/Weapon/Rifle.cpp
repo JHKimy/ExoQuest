@@ -53,6 +53,10 @@ void ARifle::Tick(float DeltaTime)
 
 void ARifle::Fire()
 {
+    if (fireSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(GetWorld(), fireSound, GetActorLocation());
+    }
     // 현재 시간 가져오기
     float currentTime = GetWorld()->GetTimeSeconds();
 

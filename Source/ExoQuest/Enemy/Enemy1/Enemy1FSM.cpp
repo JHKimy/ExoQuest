@@ -1,7 +1,7 @@
-#include "Enemy/Enemy1FSM.h"
+#include "Enemy/Enemy1/Enemy1FSM.h"
 #include "Enemy/EnemyFSM.h"
-#include "Enemy/Enemy1.h"
-#include "Enemy/Enemy1AnimInstance.h"
+#include "Enemy/Enemy1/Enemy1.h"
+#include "Enemy/Enemy1/Enemy1AnimInstance.h"
 #include "Character/CharacterBase.h"
 #include <Kismet/GameplayStatics.h>
 

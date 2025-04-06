@@ -1,7 +1,17 @@
-#include "Enemy/Enemy1AnimInstance.h"
-#include "Enemy/Enemy1.h"
+#include "Enemy/Enemy1/Enemy1AnimInstance.h"
+#include "Enemy/Enemy1/Enemy1.h"
 #include "Components/CapsuleComponent.h"  // UCapsuleComponent 정의 추가
 
+
+void UEnemy1AnimInstance::SetAttackPlay(bool isPlaying)
+{
+    bAttackPlay = isPlaying;
+}
+
+void UEnemy1AnimInstance::SetAnimState(EEnemyState newState)
+{
+    animState = newState;
+}
 
 void UEnemy1AnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {

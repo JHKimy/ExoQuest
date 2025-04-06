@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "EnemyFSM.h"
+#include "Enemy/EnemyFSM.h"
 #include "Enemy1AnimInstance.generated.h"
 
 
@@ -10,7 +10,7 @@ UCLASS()
 class EXOQUEST_API UEnemy1AnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-	
+
 public:
 	UPROPERTY()
 	class AEnemy1* enemyOwner;
@@ -18,8 +18,13 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)
 	EEnemyState animState;
 
+	UFUNCTION(BlueprintCallable,Category = "AttackAnim")
+	void SetAttackPlay(bool isPlaying);
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "AnimState")
+	void SetAnimState(EEnemyState newState);
+
+	UFUNCTION(BlueprintCallable, Category ="Anim")
 	virtual void NativeUpdateAnimation(float DeltaSeconds)override;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = FSM)

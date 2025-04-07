@@ -989,7 +989,7 @@ float ACharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageE
 	if (health <= 0)
 	{
 		// 사망 처리
-		UE_LOG(LogTemp, Warning, TEXT("플레이어 사망"));
+		//UE_LOG(LogTemp, Warning, TEXT("플레이어 사망"));
 	}
 
 	return DamageAmount;
@@ -1816,11 +1816,11 @@ void ACharacterBase::SetInputRestrictions(bool bRestrict)
 	// 필요한 경우 추가 입력 제한 처리 가능
 	if (bRestrict)
 	{
-		UE_LOG(LogTemp, Log, TEXT("Character input restricted."));
+		//UE_LOG(LogTemp, Log, TEXT("Character input restricted."));
 	}
 	else
 	{
-		UE_LOG(LogTemp, Log, TEXT("Character input restored."));
+		//UE_LOG(LogTemp, Log, TEXT("Character input restored."));
 	}
 }
 

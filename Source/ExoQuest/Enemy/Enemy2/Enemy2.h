@@ -33,6 +33,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rifle")
 	TObjectPtr<class AEnemyRifle> EnemyRifle;
 
+	// IK 사용
+	UPROPERTY(BlueprintReadOnly)
+	FVector LeftHandIKPosition;
+
+	UPROPERTY(BlueprintReadOnly)
+	FRotator LeftHandIKRotation;
+
+	UFUNCTION(BlueprintCallable, Category = "IK")
+	void UpdateLeftHandIK();
+
 
 	// 총을 부착할 소켓 이름 (스켈레탈 메시 본 기준)
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rifle")

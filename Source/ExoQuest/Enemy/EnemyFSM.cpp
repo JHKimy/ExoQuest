@@ -13,6 +13,7 @@
 #include "Item/Starflux.h"
 #include "Enemy/Enemy1/Enemy1.h"
 #include "Enemy/Enemy2/Enemy2.h"
+#include "Enemy/Enemy2/Enemy2AIController.h"
 
 UEnemyFSM::UEnemyFSM()
 {
@@ -31,8 +32,10 @@ void UEnemyFSM::BeginPlay()
 	enemy = Cast<AEnemyBase>(GetOwner()); // 형체 X
 	enemy1 = Cast<AEnemy1>(enemy);		  // 첫번째 적
 	enemy2 = Cast<AEnemy2>(enemy);		  // 두번째 적
-
-
+	if (enemy2 && enemy2->GetController())
+	{
+		enemy2AIController = Cast<AEnemy2AIController>(enemy2->GetController());
+	}
 	// anim = Cast<UEnemy1AnimInstance>(enemy->GetMesh()->GetAnimInstance());
 
 	 StateMap.Add(EEnemyState::Idle, &IdleState);
@@ -48,6 +51,12 @@ void UEnemyFSM::BeginPlay()
 void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	//if (!enemy2AIController && enemy2)
+	//{
+	//	enemy2AIController = Cast<AEnemy2AIController>(enemy2->GetController());
+	//}
+
 
 	if (CurrentState)
 	{

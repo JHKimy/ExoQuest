@@ -104,6 +104,9 @@ public:
 	UPROPERTY()
 	class AEnemy2* enemy2;
 
+	UPROPERTY()
+	class AEnemy2AIController* enemy2AIController;
+
 	UPROPERTY(EditAnywhere, Category = Animation)
 	class UEnemy1AnimInstance* anim;
 	

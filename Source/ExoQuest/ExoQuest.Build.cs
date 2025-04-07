@@ -10,7 +10,7 @@ public class ExoQuest : ModuleRules
 
         PublicIncludePaths.AddRange(new string[] { "ExoQuest" });
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","EnhancedInput", "NavigationSystem", "AIModule", "UMG", "Paper2D", "ProceduralMeshComponent" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore","EnhancedInput", "NavigationSystem", "AIModule", "UMG", "Paper2D", "ProceduralMeshComponent", "GameplayTasks" });
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
 

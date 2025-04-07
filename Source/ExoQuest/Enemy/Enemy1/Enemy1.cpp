@@ -44,7 +44,6 @@ void AEnemy1::BeginPlay()
 	AnimBPClass = StaticLoadClass(UAnimInstance::StaticClass(), nullptr,
 		TEXT("/Game/BluePrint/Enemy/Enemy1/ABP_Enemy1.ABP_Enemy1_C"));
 
-
 	// 메쉬 입히기
 	// USkeletalMeshComponent* localMesh = GetMesh();
 	GetMesh()->SetAnimInstanceClass(AnimBPClass);

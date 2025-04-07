@@ -21,7 +21,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Weapon")
-    TObjectPtr<UStaticMeshComponent> rifleMesh;
+    TObjectPtr<class USkeletalMeshComponent> rifleMesh;
+
+
+    FTransform GetLeftHandSocketTransform() const;
+
 
     // 발사 위치
     UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "Weapon")

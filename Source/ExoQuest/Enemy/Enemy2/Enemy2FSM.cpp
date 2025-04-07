@@ -1,5 +1,6 @@
 #include "Enemy/Enemy2/Enemy2FSM.h"
 #include "Enemy/Enemy2/Enemy2.h"
+#include "Enemy/Enemy2/Enemy2AIController.h"
 
 UEnemy2FSM::UEnemy2FSM()
 {
@@ -21,50 +22,62 @@ void UEnemy2FSM::BeginPlay()
 }
 
 
-
-
 void Enemy2IdleState::Enter(UEnemyFSM* FSM)
 {
-	EnemyIdleState::Enter(FSM);
+	// EnemyIdleState::Enter(FSM);
+	
 	FSM->enemy2->SetAnimState(EEnemyState::Idle);
+
+	if (FSM->enemy2AIController) {
+		FSM->enemy2AIController->RunIdleBT();
+	}
+
 	FSM->ResetTimer();
 }
 
 void Enemy2IdleState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
-	EnemyIdleState::Update(FSM, DeltaTime);
+    // EnemyIdleState::Update(FSM, DeltaTime);
+	FSM->AddTimer(DeltaTime);  // 시간 누적
 
-	////FSM->AddTimer(DeltaTime);
 
-	//// 실제 움직임은 enemy1 안에서 처리됨 (FSM->enemy1->MoveToTarget())
-	////float distance = FVector::Dist(FSM->target->GetActorLocation(), FSM->enemy1->GetActorLocation());
-	//if (FSM->GetDistanceToTarget() < FSM->enemy2->GetAttackRange())
+	//if (FSM->GetTimer() > 3.0f)
 	//{
-	//	FSM->ChangeState(EEnemyState::Attack);
+	//	FSM->ChangeState(EEnemyState::Patrol);
 	//}
-	//else if (FSM->GetDistanceToTarget() < FSM->enemy1->GetDetectRange())
-	//{
-	//	FSM->ChangeState(EEnemyState::Move);
-	//}
-	//else
-	//{
-	//	FSM->ChangeState(EEnemyState::Patrol); // 일정 시간 후 순찰 시작해도 됨
-	//}
+
+
 }
-
 
 void Enemy2IdleState::Exit(UEnemyFSM* FSM)
 {
 	EnemyIdleState::Exit(FSM);
 	//FSM->ResetTimer();
 }
+
+
+
+
+
 void Enemy2PatrolState::Enter(UEnemyFSM* FSM)
 {
 	FSM->enemy2->SetAnimState(EEnemyState::Patrol);
+	
+	if (FSM->enemy2AIController) {
+		FSM->enemy2AIController->RunPatrolBT();
+	}
+
+
+	FSM->ResetTimer();  // 타이머 초기화
 }
 
 void Enemy2PatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
+	FSM->AddTimer(DeltaTime);  // 시간 누적
+	if (FSM->GetTimer() > 10.0f)
+	{
+		FSM->ChangeState(EEnemyState::Idle);
+	}
 	//FSM->enemy2->MoveToPatrolPoint();
 
 	//bool inSight = FSM->enemy1->IsPlayerInSight();
@@ -79,6 +92,8 @@ void Enemy2PatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
 void Enemy2PatrolState::Exit(UEnemyFSM* FSM)
 {
 }
+
+
 
 
 
@@ -131,6 +146,8 @@ void Enemy2MoveState::Exit(UEnemyFSM* FSM)
 
 
 
+
+
 void Enemy2AttackState::Enter(UEnemyFSM* FSM)
 {
 	FSM->enemy2->SetAnimState(EEnemyState::Attack);
@@ -158,6 +175,10 @@ void Enemy2AttackState::Exit(UEnemyFSM* FSM)
 	//FSM->enemy1->bDidAttackHit = false; // <- 상태 초기화
 }
 
+
+
+
+
 void Enemy2DamageState::Enter(UEnemyFSM* FSM)
 {
 	FSM->enemy2->SetAnimState(EEnemyState::Damage);
@@ -180,6 +201,10 @@ void Enemy2DamageState::Exit(UEnemyFSM* FSM)
 	EnemyDamageState::Exit(FSM);
 
 }
+
+
+
+
 
 void Enemy2DeathState::Enter(UEnemyFSM* FSM)
 {

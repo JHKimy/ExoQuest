@@ -83,6 +83,28 @@ float UEnemyFSM::GetDistanceToTarget()
 	return FVector::Dist(target->GetActorLocation(), enemy->GetActorLocation());
 }
 
+//void UEnemyFSM::OnPlayerDetected(APawn* DetectedPawn)
+//{
+//	if (!DetectedPawn || !enemy) return;
+//
+//	SetTarget(DetectedPawn);
+//
+//	if (CurrentStateType == EEnemyState::Idle || CurrentStateType == EEnemyState::Patrol)
+//	{
+//		ChangeState(EEnemyState::Move);
+//	}
+//}
+//
+//void UEnemyFSM::SetTarget(APawn* NewTarget)
+//{
+//	target =Cast<ACharacterBase> (NewTarget);
+//}
+//
+//APawn* UEnemyFSM::GetTarget() const
+//{
+//	return target;
+//}
+
 void UEnemyFSM::ResetTimer()
 {
 	currentTime = 0.f;

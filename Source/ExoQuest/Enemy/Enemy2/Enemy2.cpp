@@ -3,6 +3,11 @@
 #include "Enemy/Enemy2/Enemy2AnimInstance.h"
 #include "Enemy/Enemy2/Enemy2FSM.h"
 #include "Enemy/Enemy2/Enemy2AIController.h"
+#include "Perception/PawnSensingComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Enemy/Enemy2/Enemy2AIController.h"
+#include "BehaviorTree/BlackBoardComponent.h"
+#include "Character/CharacterBase.h"
 
 AEnemy2::AEnemy2()
 {
@@ -25,6 +30,15 @@ AEnemy2::AEnemy2()
 	//{
 	//	EnemyRifle->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, RifleSocketName);
 	//}
+
+	//  시야 감지 컴포넌트 초기화
+	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
+	PawnSensing->SensingInterval = 0.25f;
+	PawnSensing->bSeePawns = true;
+	PawnSensing->SetPeripheralVisionAngle(50.f); // 시야각 설정
+	PawnSensing->SightRadius = 1000.f; // ← 15m 감지 거리로 설정
+
+
 	// FSM1의 주인으로 설정
 	FSM = CreateDefaultSubobject<UEnemy2FSM>(TEXT("FSM"));
 }
@@ -54,21 +68,58 @@ void AEnemy2::BeginPlay()
 		//  손에 부착 (소켓 이름은 스켈레탈 메시의 본 이름 기준으로 설정)
 		EnemyRifle->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetIncludingScale, RifleSocketName);
 
-
+		EnemyRifle->OwnerEnemy = this;
 
 		UpdateLeftHandIK();
 
 		//AI = Cast<AAIController>(GetController());
 	}
 
-
+	if (PawnSensing)
+	{
+		PawnSensing->OnSeePawn.AddDynamic(this, &AEnemy2::OnSeePlayer);
+	}
 
 }
 
 void AEnemy2::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	//  거리 지속적으로 갱신
+	if (target)
+	{
+		AEnemy2AIController* EnemyController = Cast<AEnemy2AIController>(GetController());
+		if (EnemyController && EnemyController->BBComponent)
+		{
+			float Distance = FVector::Dist(target->GetActorLocation(), GetActorLocation());
+			EnemyController->BBComponent->SetValueAsFloat("DistanceToTarget", Distance);
+			UKismetSystemLibrary::PrintString(this, TEXT("Set Distance in BB"), true, false, FLinearColor::Green, 1.5f);
+
+		}
+	}
+
 	UpdateLeftHandIK();
+}
+
+void AEnemy2::OnSeePlayer(APawn* Pawn)
+{
+	if (Pawn)
+	{
+		bIsPlayerDetected = true;
+		target = Cast<ACharacterBase>(Pawn);
+
+		// AIController 가져오기
+		AEnemy2AIController* EnemyController = Cast<AEnemy2AIController>(GetController());
+		if (EnemyController && EnemyController->BBComponent)
+		{
+			// Blackboard에 TargetActor 키값 설정
+			EnemyController->BBComponent->SetValueAsObject("TargetActor", Pawn);
+			UKismetSystemLibrary::PrintString(this, TEXT("Set TargetActor in BB"), true, false, FLinearColor::Green, 1.5f);
+		}
+
+
+	}
 }
 
 void AEnemy2::UpdateLeftHandIK()
@@ -118,6 +169,17 @@ void AEnemy2::UpdateLeftHandIK()
 	}
 }
 
+void AEnemy2::RotateToTarget()
+{
+	FVector Direction = (target->GetActorLocation() - GetActorLocation()).GetSafeNormal();
+	FRotator TargetRotation = Direction.Rotation();
+
+	// Yaw만 회전하고, Pitch/Roll은 그대로 유지
+	FRotator NewRotation = FRotator(0.f, TargetRotation.Yaw, 0.f);
+
+	SetActorRotation(NewRotation);
+}
+
 
 void AEnemy2::SetAnimState(EEnemyState NewState)
 {
@@ -130,14 +192,22 @@ void AEnemy2::SetAnimState(EEnemyState NewState)
 float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	float actualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-	// anim->PlayHitMontage();
+	anim->PlayHitMontage();
 
 	return actualDamage;
+}
+
+void AEnemy2::FireRifle()
+{
+	anim->PlayFireMontage();
+	EnemyRifle->Fire();
 }
 
 // void AEnemy2::SetAnimState(EEnemyState NewState)
 // {
 // }
+
+
 
 void AEnemy2::Death()
 {

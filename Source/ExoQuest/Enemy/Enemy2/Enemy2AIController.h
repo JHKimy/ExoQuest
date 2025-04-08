@@ -15,6 +15,7 @@ public:
 
 	AEnemy2AIController();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BB")
 	class UBlackboardComponent* BBComponent;
 
 	UFUNCTION(BlueprintCallable)

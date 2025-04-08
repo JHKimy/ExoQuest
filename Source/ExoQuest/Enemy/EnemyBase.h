@@ -38,6 +38,8 @@ protected:
 	// HP Widget
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "UI")
 	bool bisHPBarShow;
+
+public:
 	// 플레이어 타겟
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = FSM)
 	class ACharacterBase* target;

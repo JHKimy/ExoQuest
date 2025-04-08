@@ -39,12 +39,20 @@ void UEnemy2AnimInstance::PlayHitMontage()
 {
     if (HitMontage)
     {
-        Montage_Play(HitMontage);
+        Montage_Play(HitMontage,2.f);
         //UE_LOG(LogTemp, Warning, TEXT("Playing Hit Montage"));
     }
     else
     {
         //UE_LOG(LogTemp, Error, TEXT("HitMontage is NULL!! Did you assign it in AnimBP?"));
+    }
+}
+
+void UEnemy2AnimInstance::PlayFireMontage()
+{
+    if (FireMontage)
+    {
+        Montage_Play(FireMontage);
     }
 }
 

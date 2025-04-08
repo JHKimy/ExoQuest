@@ -10,13 +10,24 @@ enum class EIdleActionType : uint8
 {
 	Default       UMETA(DisplayName = "Default"),
 	LookAround    UMETA(DisplayName = "Look Around"),
-	Stretching    UMETA(DisplayName = "Stretching"),
-	
-	
-	Relaxed       UMETA(DisplayName = "Relaxed"),
-	Alert         UMETA(DisplayName = "Alert"),
+	Stretching    UMETA(DisplayName = "Stretching")
 };
 
+// UENUM(BlueprintType)
+// enum class EIdleChaseType : uint8
+// {
+// 	  Default       UMETA(DisplayName = "Default"),
+// 	  LookAround    UMETA(DisplayName = "Look Around"),
+// 	  Stretching    UMETA(DisplayName = "Stretching")
+// };
+
+UENUM(BlueprintType)
+enum class EFireActionType : uint8
+{
+	Fire	       UMETA(DisplayName = "Fire"),
+	CrouchFire    UMETA(DisplayName = "CrouchFire"),
+	Stretching    UMETA(DisplayName = "Stretching")
+};
 
 
 UCLASS()
@@ -47,9 +58,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
 	UAnimMontage* HitMontage;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
+	UAnimMontage* FireMontage;
+
+
 	UFUNCTION(BlueprintCallable)
 	void PlayHitMontage();
 
+	UFUNCTION(BlueprintCallable)
+	void PlayFireMontage();
 
 	//// IK
 	//UPROPERTY(BlueprintReadOnly, Category = "IK")

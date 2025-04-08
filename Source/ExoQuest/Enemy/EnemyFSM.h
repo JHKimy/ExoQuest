@@ -112,6 +112,14 @@ public:
 	
 	virtual float GetDistanceToTarget();
 
+	//// 플레이어 감지 시 FSM이 상태 전이 처리
+	//virtual void OnPlayerDetected(APawn* DetectedPawn);
+
+	//// Target 저장 함수
+	//void SetTarget(APawn* NewTarget);
+
+	//APawn* GetTarget() const;
+
 protected:
 
 	IEnemyState* CurrentState = nullptr;

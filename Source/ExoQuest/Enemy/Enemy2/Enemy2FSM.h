@@ -73,4 +73,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+
+	float idleTime = 5.f;
 };

@@ -26,6 +26,9 @@ public:
 
     FTransform GetLeftHandSocketTransform() const;
 
+    // Enemy 참조
+    UPROPERTY(BlueprintReadWrite, Category = "Owner")
+    TObjectPtr<class AEnemy2> OwnerEnemy;
 
     // 발사 위치
     UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "Weapon")

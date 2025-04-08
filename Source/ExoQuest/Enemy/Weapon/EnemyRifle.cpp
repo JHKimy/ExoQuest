@@ -1,6 +1,9 @@
 #include "Enemy/Weapon/EnemyRifle.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Enemy/Enemy2/Enemy2.h"
+#include "Enemy/EnemyBase.h"
+#include "Character/CharacterBase.h"
 
 AEnemyRifle::AEnemyRifle()
 {
@@ -23,7 +26,7 @@ AEnemyRifle::AEnemyRifle()
 
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	MuzzleLocation->SetupAttachment(RootComponent);
-	MuzzleLocation->SetRelativeLocation(FVector(50.f, 0.f, 10.f));
+	MuzzleLocation->SetRelativeLocation(FVector(0.f, 77.f, 10.f));
 
 }
 
@@ -53,30 +56,44 @@ FTransform AEnemyRifle::GetLeftHandSocketTransform() const
 
 void AEnemyRifle::Fire()
 {
-    FVector Start = MuzzleLocation->GetComponentLocation();
-    FVector Forward = MuzzleLocation->GetForwardVector();
-    FVector End = Start + Forward * TraceDistance;
+	if (!OwnerEnemy) return;
 
-    FHitResult Hit;
-    FCollisionQueryParams Params;
-    Params.AddIgnoredActor(this); // 자기 자신은 무시
+	FVector MuzzlePos = MuzzleLocation->GetComponentLocation();
+	FVector TargetLocation = OwnerEnemy->target->GetActorLocation();
 
-    bool bHit = GetWorld()->LineTraceSingleByChannel(
-        Hit,
-        Start,
-        End,
-        ECC_Visibility,
-        Params
-    );
+	FVector Direction = (TargetLocation - MuzzlePos).GetSafeNormal();
+	FVector EndPoint = MuzzlePos + Direction * TraceDistance;
 
-    if (bHit && Hit.GetActor())
-    {
-        UGameplayStatics::ApplyDamage(Hit.GetActor(), Damage, nullptr, this, nullptr);
-    }
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+	Params.AddIgnoredActor(OwnerEnemy); // 총 주인 무시
 
-    if (bDrawDebugLine)
-    {
-        DrawDebugLine(GetWorld(), Start, End, bHit ? FColor::Red : FColor::Green, false, 1.0f, 0, 2.0f);
-    }
+	FHitResult Hit;
+	bool bHit = GetWorld()->LineTraceSingleByChannel(
+		Hit,
+		MuzzlePos,
+		EndPoint,
+		ECC_GameTraceChannel1, // 커스텀 트레이스 채널 설정해도 OK
+		Params
+	);
+
+	// 디버그 선
+	if (bDrawDebugLine)
+	{
+		FColor LineColor = bHit ? FColor::Red : FColor::Green;
+		DrawDebugLine(GetWorld(), MuzzlePos, EndPoint, LineColor, false, 1.0f, 0, 2.0f);
+	}
+
+	// 피격 처리
+	if (bHit)
+	{
+		AActor* HitActor = Hit.GetActor();
+		if (HitActor)
+		{
+			UGameplayStatics::ApplyDamage(HitActor, Damage, OwnerEnemy->GetController(), this, nullptr);
+			UKismetSystemLibrary::PrintString(this, TEXT("Hit Target!"), true, false, FLinearColor::Red, 1.5f);
+		}
+	}
 }
+
 

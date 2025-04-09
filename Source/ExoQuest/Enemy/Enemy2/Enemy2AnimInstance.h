@@ -25,6 +25,7 @@ UENUM(BlueprintType)
 enum class EFireActionType : uint8
 {
 	Fire	       UMETA(DisplayName = "Fire"),
+	FireMove	   UMETA(DisplayName = "FireMove"),
 	CrouchFire    UMETA(DisplayName = "CrouchFire"),
 	Stretching    UMETA(DisplayName = "Stretching")
 };
@@ -53,6 +54,9 @@ public:
 	void SetAnimState(EEnemyState newState);
 
 	UFUNCTION(BlueprintCallable, Category = "Anim")
+	virtual void NativeInitializeAnimation() override;
+
+	UFUNCTION(BlueprintCallable, Category = "Anim")
 	virtual void NativeUpdateAnimation(float DeltaSeconds)override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
@@ -61,12 +65,20 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Montage")
 	UAnimMontage* FireMontage;
 
-
 	UFUNCTION(BlueprintCallable)
 	void PlayHitMontage();
 
 	UFUNCTION(BlueprintCallable)
 	void PlayFireMontage();
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
+	float AimYaw;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Aim")
+	float AimPitch;
+
+
 
 	//// IK
 	//UPROPERTY(BlueprintReadOnly, Category = "IK")

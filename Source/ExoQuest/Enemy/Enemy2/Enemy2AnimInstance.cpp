@@ -3,6 +3,9 @@
 #include "Components/CapsuleComponent.h"  // UCapsuleComponent 정의 추가
 #include "Enemy2AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Character/CharacterBase.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Enemy/Weapon/EnemyRifle.h"
 
 //void UEnemy2AnimInstance::SetIdleActionType(int num)
 //{
@@ -14,10 +17,53 @@ void UEnemy2AnimInstance::SetAnimState(EEnemyState newState)
     animState = newState;
 }
 
+void UEnemy2AnimInstance::NativeInitializeAnimation()
+{
+    Super::NativeInitializeAnimation();
+
+    APawn* OwnerPawn = TryGetPawnOwner();
+    if (OwnerPawn)
+    {
+        enemyOwner = Cast<AEnemy2>(OwnerPawn);
+    }
+}
+
 void UEnemy2AnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
     Super::NativeUpdateAnimation(DeltaSeconds);
-    enemyOwner = Cast<AEnemy2>(TryGetPawnOwner()); // ← 이거 반드시 필요!
+    //// Enemy 캐릭터를 AnimInstance에서 가져오기
+    //if (!enemyOwner)
+    //{
+    //    enemyOwner = Cast<AEnemy2>(TryGetPawnOwner());
+    //}    
+    //// 방어 코드 추가!
+    //if (!enemyOwner || !enemyOwner->target)
+    //{
+    //    return;
+    //}
+    // 
+    // 
+    // 
+    // 
+    //
+    //  
+    if (!enemyOwner || !enemyOwner->target) return;
+    // 1. Muzzle 위치
+    FVector MuzzleLocation = enemyOwner->EnemyRifle->GetMuzzle()->GetComponentLocation();
+
+    // 2. 타겟 위치
+    FVector TargetLocation = enemyOwner->target->GetActorLocation();
+
+    // 3. Muzzle에서 Target을 바라보는 회전값 계산
+    FRotator LookRot = UKismetMathLibrary::FindLookAtRotation(MuzzleLocation, TargetLocation);
+
+    // 4. 총의 현재 회전 기준과 비교하려면...
+    // FRotator GunRot = enemyOwner->rifle->GetActorRotation();
+    // FRotator DeltaRot = UKismetMathLibrary::NormalizedDeltaRotator(LookRot, GunRot);
+
+    // 5. 직접 Pitch만 사용할 경우
+    AimPitch = LookRot.Pitch;
+    UE_LOG(LogTemp, Warning, TEXT("AimPitch: %.2f"), AimPitch);
 
     //SetEnableIK();
 

@@ -71,6 +71,7 @@ float AEnemyBase::TakeDamage(
 	// FSM 가져오기
 	auto fsmForDamage = Cast<UEnemyFSM>(GetComponentByClass(UEnemyFSM::StaticClass()));
 
+	
 	fsmForDamage->ChangeState(EEnemyState::Damage);
 
 	// 체력 

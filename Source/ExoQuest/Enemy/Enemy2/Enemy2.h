@@ -53,6 +53,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Rifle")
 	TObjectPtr<class AEnemyRifle> EnemyRifle;
 
+	UPROPERTY(EditAnywhere, Category = "Weapon")
+	TSubclassOf<class AEnemyRifle> RifleClass_BP;
+
+
 	// IK »ç¿ë
 	UPROPERTY(BlueprintReadOnly)
 	FVector LeftHandIKPosition;
@@ -85,7 +89,7 @@ public:
 
 	void Death() override;
 
-
+	void SetTarget(APawn* Pawn);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle")
 	float idleTime = 3.f;
@@ -93,4 +97,6 @@ public:
 	float patrolTime = 3.f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Patrol")
 	float fireDistance = 700.f;
+
+	float bDamaged = false;
 };

@@ -135,9 +135,15 @@ protected:
 	EnemyDeathState DeathState;
 
 	float currentTime = 0.f;
+	float unseenTime = 0.f;
 
 public:
 	void ResetTimer();
 	void AddTimer(float DeltaTime);
 	float GetTimer() const;
+
+
+	FORCEINLINE void ResetUnseenTimer() { unseenTime = 0.f; }
+	FORCEINLINE void AddUnseenTimer(float DeltaTime) { unseenTime += DeltaTime; }
+	FORCEINLINE float GetUnseenTime() const { return unseenTime; }
 };

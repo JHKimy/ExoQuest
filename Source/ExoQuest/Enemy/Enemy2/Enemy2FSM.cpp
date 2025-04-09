@@ -3,6 +3,8 @@
 #include "Enemy/Enemy2/Enemy2AIController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Character/CharacterBase.h"
+#include "BehaviorTree/BehaviorTreeComponent.h"
+
 
 UEnemy2FSM::UEnemy2FSM()
 {
@@ -42,7 +44,7 @@ void Enemy2IdleState::Update(UEnemyFSM* FSM, float DeltaTime)
     // EnemyIdleState::Update(FSM, DeltaTime);
 	FSM->AddTimer(DeltaTime);  // 시간 누적
 
-	if (FSM->enemy2->bIsPlayerDetected) {
+	if (FSM->enemy2->bIsPlayerDetected || FSM->enemy2->bDamaged) {
 		FSM->ChangeState(EEnemyState::Move);
 	}
 
@@ -57,9 +59,13 @@ void Enemy2IdleState::Update(UEnemyFSM* FSM, float DeltaTime)
 void Enemy2IdleState::Exit(UEnemyFSM* FSM)
 {
 	EnemyIdleState::Exit(FSM);
+	FSM->ResetTimer();
+
 
 	//FSM->ResetTimer();
 }
+
+
 
 
 
@@ -83,7 +89,7 @@ void Enemy2PatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
 	FSM->AddTimer(DeltaTime);  // 시간 누적
 
-	if (FSM->enemy2->bIsPlayerDetected) {
+	if (FSM->enemy2->bIsPlayerDetected || FSM->enemy2->bDamaged) {
 		FSM->ChangeState(EEnemyState::Move);
 	}
 
@@ -91,13 +97,8 @@ void Enemy2PatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
 	{
 		FSM->ChangeState(EEnemyState::Idle);
 	}
-	//FSM->enemy2->MoveToPatrolPoint();
 
-	//bool inSight = FSM->enemy1->IsPlayerInSight();
-
-	//// 플레이어 감지 시 바로 추적
-	//if (FSM->GetDistanceToTarget() < FSM->enemy1->GetDetectRange() && inSight)
-	//{
+	//if (FSM->enemy2->bDamaged) {
 	//	FSM->ChangeState(EEnemyState::Move);
 	//}
 }
@@ -105,8 +106,11 @@ void Enemy2PatrolState::Update(UEnemyFSM* FSM, float DeltaTime)
 void Enemy2PatrolState::Exit(UEnemyFSM* FSM)
 {
 	FSM->enemy2AIController->StopMovement();
+	FSM->ResetTimer();
 
 }
+
+
 
 
 
@@ -144,41 +148,17 @@ void Enemy2MoveState::Update(UEnemyFSM* FSM, float DeltaTime)
 		}
 	}
 
-	//FSM->enemy1->MoveToTarget();
-
-	//// 실제 움직임은 enemy1 안에서 처리됨 (FSM->enemy1->MoveToTarget())
-	//if (FSM->GetDistanceToTarget() < FSM->enemy1->GetAttackRange())
-	//{
-	//	FSM->ChangeState(EEnemyState::Attack);
-	//}
-	//else if (FSM->GetDistanceToTarget() >= FSM->enemy1->GetDetectRange())
-	//{
-	//	//// 탐지 범위 밖이면 복귀 시작
-	//	//if (!FSM->enemy1->bReturningToOrigin)
-	//	//{
-	//	FSM->enemy1->ReturnToPatrolLocation();
-	//	FSM->ChangeState(EEnemyState::Patrol);
-	//	//}
-
-	//	//float distanceToOrigin = FVector::Dist(FSM->enemy1->GetActorLocation(), FSM->enemy1->InitialPosition);
-	//	//if (distanceToOrigin < 100.f)
-	//	//{
-	//	//	FSM->enemy1->bReturningToOrigin = false;
-	//	//	FSM->ChangeState(EEnemyState::Patrol);
-	//	//}
-	//}
-	////if (FSM->GetDistanceToTarget() >= FSM->enemy1->GetDetectRange())
-	////{
-	////	FSM->ChangeState(EEnemyState::Idle);
-	////}
 }
 
 void Enemy2MoveState::Exit(UEnemyFSM* FSM)
 {
 	EnemyMoveState::Exit(FSM);
 	FSM->enemy2AIController->StopMovement();
+	FSM->ResetTimer();
 
 }
+
+
 
 
 
@@ -191,6 +171,8 @@ void Enemy2AttackState::Enter(UEnemyFSM* FSM)
 	if (FSM->enemy2AIController) {
 		FSM->enemy2AIController->RunAttackBT();
 	}
+
+
 	// FSM->enemy2->SetAttackPlay(true);
 	// FSM->enemy1->bDidAttackHit = false; // <- 공격 히트 여부 초기화
 
@@ -218,6 +200,23 @@ void Enemy2AttackState::Update(UEnemyFSM* FSM, float DeltaTime)
 		}
 	}
 
+
+	//if (!FSM->enemy2->bIsPlayerDetected)
+	//{
+		//FSM->AddUnseenTimer(DeltaTime);
+
+		//if (FSM->GetUnseenTime() > 5.0f)
+		//{
+		//	FSM->enemy2->bIsPlayerDetected = false;
+		//	FSM->ChangeState(EEnemyState::Patrol);
+		//	return;
+		//}
+	//}
+	//else
+	//{
+	//	FSM->ResetUnseenTimer();
+	//}
+
 	//if (FSM->GetTimer() > 2.5f)
 	//	FSM->ChangeState(EEnemyState::Idle);
 }
@@ -225,6 +224,7 @@ void Enemy2AttackState::Update(UEnemyFSM* FSM, float DeltaTime)
 void Enemy2AttackState::Exit(UEnemyFSM* FSM)
 {
 	FSM->enemy2AIController->StopMovement();
+	FSM->ResetTimer();
 
 	// EnemyAttackState::Exit(FSM);
 	// FSM->enemy1->SetAttackPlay(false);
@@ -235,10 +235,12 @@ void Enemy2AttackState::Exit(UEnemyFSM* FSM)
 
 
 
+
+
 void Enemy2DamageState::Enter(UEnemyFSM* FSM)
 {
-	FSM->enemy2->SetAnimState(EEnemyState::Damage);
-	FSM->ResetTimer();
+	//FSM->enemy2->SetAnimState(EEnemyState::Damage);
+	// FSM->ResetTimer();
 
 	// EnemyDamageState::Enter(FSM);
 
@@ -247,16 +249,19 @@ void Enemy2DamageState::Enter(UEnemyFSM* FSM)
 void Enemy2DamageState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
 	// EnemyDamageState::Update(FSM, DeltaTime);
-	FSM->AddTimer(DeltaTime);
-	if (FSM->GetTimer() > 1.0f)
-		FSM->ChangeState(EEnemyState::Idle);
+	//FSM->AddTimer(DeltaTime);
+	//if (FSM->GetTimer() > 1.0f)
+	//	FSM->ChangeState(EEnemyState::Idle);
 }
 
 void Enemy2DamageState::Exit(UEnemyFSM* FSM)
 {
-	EnemyDamageState::Exit(FSM);
+	//FSM->ResetTimer();
+	//EnemyDamageState::Exit(FSM);
 
 }
+
+
 
 
 
@@ -266,6 +271,13 @@ void Enemy2DeathState::Enter(UEnemyFSM* FSM)
 {
 	EnemyDeathState::Enter(FSM);
 	FSM->enemy2->SetAnimState(EEnemyState::Death);
+
+	UBehaviorTreeComponent* BTComp = Cast<UBehaviorTreeComponent>(FSM->enemy2AIController->BrainComponent);
+	if (BTComp)
+	{
+		BTComp->StopTree(EBTStopMode::Safe);
+	}
+
 
 	FSM->ResetTimer(); // 타이머 초기화
 }
@@ -282,6 +294,7 @@ void Enemy2DeathState::Update(UEnemyFSM* FSM, float DeltaTime)
 
 void Enemy2DeathState::Exit(UEnemyFSM* FSM)
 {
+	FSM->ResetTimer();
 	EnemyDeathState::Exit(FSM);
 
 }

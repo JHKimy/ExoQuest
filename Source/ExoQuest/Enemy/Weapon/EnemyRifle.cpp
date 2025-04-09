@@ -4,6 +4,7 @@
 #include "Enemy/Enemy2/Enemy2.h"
 #include "Enemy/EnemyBase.h"
 #include "Character/CharacterBase.h"
+#include <Kismet/GameplayStatics.h>
 
 AEnemyRifle::AEnemyRifle()
 {
@@ -26,7 +27,7 @@ AEnemyRifle::AEnemyRifle()
 
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("MuzzleLocation"));
 	MuzzleLocation->SetupAttachment(RootComponent);
-	MuzzleLocation->SetRelativeLocation(FVector(0.f, 77.f, 10.f));
+	MuzzleLocation->SetRelativeLocation(FVector(0.f, 55.f, 10.f));
 
 }
 
@@ -56,7 +57,7 @@ FTransform AEnemyRifle::GetLeftHandSocketTransform() const
 
 void AEnemyRifle::Fire()
 {
-	if (!OwnerEnemy) return;
+	if (!OwnerEnemy|| !OwnerEnemy->target) return;
 
 	FVector MuzzlePos = MuzzleLocation->GetComponentLocation();
 	FVector TargetLocation = OwnerEnemy->target->GetActorLocation();
@@ -77,6 +78,8 @@ void AEnemyRifle::Fire()
 		Params
 	);
 
+
+
 	// 디버그 선
 	if (bDrawDebugLine)
 	{
@@ -88,11 +91,37 @@ void AEnemyRifle::Fire()
 	if (bHit)
 	{
 		AActor* HitActor = Hit.GetActor();
-		if (HitActor)
+
+		ACharacterBase* Player = Cast<ACharacterBase>(HitActor);
+
+
+		if (Player)
 		{
-			UGameplayStatics::ApplyDamage(HitActor, Damage, OwnerEnemy->GetController(), this, nullptr);
+			UGameplayStatics::ApplyDamage(Player, Damage, OwnerEnemy->GetController(), this, nullptr);
 			UKismetSystemLibrary::PrintString(this, TEXT("Hit Target!"), true, false, FLinearColor::Red, 1.5f);
 		}
+	}
+
+	// 피격 이펙트 출력
+	if (bHit && hitEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			hitEffect,
+			Hit.ImpactPoint,
+			Hit.ImpactNormal.Rotation()
+		);
+	}
+
+	// 총구 이펙트 출력
+	if (muzzleEffect)
+	{
+		UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			muzzleEffect,
+			MuzzleLocation->GetComponentLocation(),
+			MuzzleLocation->GetComponentRotation()
+		);
 	}
 }
 

@@ -34,6 +34,8 @@ public:
     UPROPERTY(VisibleAnywhere,BlueprintReadWrite, Category = "Weapon")
     TObjectPtr<USceneComponent> MuzzleLocation;
 
+    FORCEINLINE USceneComponent* GetMuzzle() const { return MuzzleLocation; }
+    
     // ªÁ¡§∞≈∏Æ
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
     float TraceDistance = 5000.f;
@@ -51,4 +53,16 @@ public:
     UFUNCTION(BlueprintCallable)
     void Fire();
 
+
+
+
+
+
+    // √—æÀ ¿Ã∆Â∆Æ
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BulletEffect")
+    TObjectPtr<UParticleSystem> muzzleEffect;
+
+    // √—æÀ ¿Ã∆Â∆Æ
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BulletEffect)
+    TObjectPtr<UParticleSystem> hitEffect;;
 };

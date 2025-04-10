@@ -141,7 +141,7 @@ void Enemy2MoveState::Update(UEnemyFSM* FSM, float DeltaTime)
 	{
 		const float Distance = FVector::Dist(FSM->enemy2->GetActorLocation(), FSM->target->GetActorLocation());
 
-		if (Distance <= 700.0f)
+		if (Distance <= 1000.0f)
 		{
 			FSM->ChangeState(EEnemyState::Attack);
 			return; // 상태 전환 후 더 이상 Update하지 않음
@@ -193,7 +193,7 @@ void Enemy2AttackState::Update(UEnemyFSM* FSM, float DeltaTime)
 	{
 		const float Distance = FVector::Dist(FSM->enemy2->GetActorLocation(), FSM->target->GetActorLocation());
 
-		if (Distance > 700.0f)
+		if (Distance > 1000.0f)
 		{
 			FSM->ChangeState(EEnemyState::Move);
 			return; // 상태 전환 후 더 이상 Update하지 않음

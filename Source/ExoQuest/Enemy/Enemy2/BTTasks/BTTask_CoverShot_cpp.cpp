@@ -13,39 +13,73 @@
 UBTTask_CoverShot_cpp::UBTTask_CoverShot_cpp()
 {
     NodeName = TEXT("Cover Shot");
-    bNotifyTick = false;
+    bNotifyTick = true;
     bNotifyTaskFinished = true;
 }
 EBTNodeResult::Type UBTTask_CoverShot_cpp::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-    APawn* AIPawn = OwnerComp.GetAIOwner()->GetPawn();
-    UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
-    AAIController* AIController = OwnerComp.GetAIOwner();
+	APawn* AIPawn = OwnerComp.GetAIOwner()->GetPawn();
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
+	AAIController* AIController = OwnerComp.GetAIOwner();
 
-    if (!AIPawn || !BB || !AIController) return EBTNodeResult::Failed;
+	if (!AIPawn || !BB || !AIController) return EBTNodeResult::Failed;
 
-    const FVector CoverLocation = BB->GetValueAsVector("Cover");
-    const FVector PeekLocation = BB->GetValueAsVector("PeekPoint");
+	CachedOwnerComp = &OwnerComp;
 
+	// 초기 상태: Cover로 이동
+	MoveState = ECoverMoveState::ToCover;
+	bArrived = false;
 
-    // FHitResult Hit;
-    // FCollisionQueryParams Params;
-    // Params.AddIgnoredActor(AIPawn);
-    // bool bHit = World->LineTraceSingleByChannel(
-    //     Hit,
-    //     GetMuzzleLocation(AIPawn),
-    //     Player->GetActorLocation(),
-    //     ECC_Visibility,
-    //     Params
-    // );
-    // DrawDebugLine(World, GetMuzzleLocation(AIPawn), Player->GetActorLocation(), bHit ? FColor::Red : FColor::Green, false, 1.f, 0, 2.f);
+	const FVector CoverLocation = BB->GetValueAsVector("Cover");
+	MoveTo(AIController, CoverLocation);
 
+	return EBTNodeResult::InProgress;
 
+}
 
-    MoveTo(AIController, CoverLocation);
+void UBTTask_CoverShot_cpp::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	APawn* AIPawn = OwnerComp.GetAIOwner()->GetPawn();
+	AAIController* AIController = OwnerComp.GetAIOwner();
+	UBlackboardComponent* BB = OwnerComp.GetBlackboardComponent();
 
-    return EBTNodeResult::InProgress;
+	if (!AIPawn || !BB || !AIController) return;
 
+	const FVector CurrentLocation = AIPawn->GetActorLocation();
+	const FVector TargetLocation = (MoveState == ECoverMoveState::ToCover)
+		? BB->GetValueAsVector("Cover")
+		: BB->GetValueAsVector("PeekPoint");
+
+	if (FVector::DistSquared(CurrentLocation, TargetLocation) < FMath::Square(50.f) && !bArrived)
+	{
+		bArrived = true;
+
+		if (MoveState == ECoverMoveState::ToPeek)
+		{
+			Fire(AIPawn);
+		}
+
+		// 다음 이동을 잠시 대기 후 실행
+		AIPawn->GetWorldTimerManager().SetTimer(
+			MoveTimerHandle,
+			[this, AIController, BB]()
+			{
+				if (MoveState == ECoverMoveState::ToCover)
+				{
+					MoveState = ECoverMoveState::ToPeek;
+					bArrived = false;
+					MoveTo(AIController, BB->GetValueAsVector("PeekPoint"));
+				}
+				else
+				{
+					MoveState = ECoverMoveState::ToCover;
+					bArrived = false;
+					MoveTo(AIController, BB->GetValueAsVector("Cover"));
+				}
+			},
+			1.5f, false
+		);
+	}
 }
 void UBTTask_CoverShot_cpp::Fire(APawn* AIPawn)
 {

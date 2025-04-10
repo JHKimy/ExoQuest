@@ -22,12 +22,12 @@ enum class EIdleActionType : uint8
 // };
 
 UENUM(BlueprintType)
-enum class EFireActionType : uint8
+enum class EAttackActionType : uint8
 {
-	Fire	       UMETA(DisplayName = "Fire"),
-	FireMove	   UMETA(DisplayName = "FireMove"),
-	CrouchFire    UMETA(DisplayName = "CrouchFire"),
-	Stretching    UMETA(DisplayName = "Stretching")
+	Default	       UMETA(DisplayName = "Default"),
+	WalkLeft	   UMETA(DisplayName = "WalkLeft"),
+	WalkRight		UMETA(DisplayName = "WalkRight"),
+	// Stretching    UMETA(DisplayName = "Stretching")
 };
 
 
@@ -40,6 +40,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Idle")
 	EIdleActionType IdleActionType = EIdleActionType::Default;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attack")
+	EAttackActionType AttackActionType = EAttackActionType::Default;
+
 
 	//UFUNCTION(BlueprintCallable)
 	//void SetIdleActionType(int num);

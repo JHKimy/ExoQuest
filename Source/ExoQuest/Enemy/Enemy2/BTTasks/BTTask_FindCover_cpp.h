@@ -18,6 +18,9 @@ public:
     UBTTask_FindCover_cpp();
 
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+    
+    virtual void TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+
 protected:
     /* 플레이어가 피크 위치에서 보이는지 확인 */
     bool CanSensePlayerFromLocation(class UPawnSensingComponent* Sensing, const FVector& FromLocation, AActor* Player);

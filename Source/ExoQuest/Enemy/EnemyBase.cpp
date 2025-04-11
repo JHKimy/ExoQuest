@@ -14,6 +14,7 @@
 #include "Kismet/GameplayStatics.h"
 
 #include "AIController.h"
+#include "ObjectPool/ActorPoolManager.h"
 
 
 AEnemyBase::AEnemyBase()
@@ -108,6 +109,7 @@ float AEnemyBase::TakeDamage(
 
 
 
+
 void AEnemyBase::Death()
 {
 	// HPBarWidget->SetVisibility(false);
@@ -121,8 +123,16 @@ void AEnemyBase::Death()
 
 	if (P.Z < -200.f)
 	{
-		Destroy();
+		auto Pool = Cast<AActorPoolManager>(
+			UGameplayStatics::GetActorOfClass(GetWorld(), AActorPoolManager::StaticClass()));
+		if (Pool)
+		{
+			Pool->ReturnActorToPool(this);
+		}
+
+		// Destroy();
 	}
+
 	if (!bSpawnStarflux) {
 		bSpawnStarflux = true;
 		GetWorld()->SpawnActor<AStarflux>

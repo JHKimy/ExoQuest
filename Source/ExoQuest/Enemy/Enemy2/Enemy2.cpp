@@ -10,6 +10,7 @@
 #include "Character/CharacterBase.h"
 #include "Enemy/EnemyFSM.h"	// AI
 #include "Components/CapsuleComponent.h"
+#include "Enemy/Enemy2Manager.h"
 
 AEnemy2::AEnemy2()
 {
@@ -128,6 +129,7 @@ void AEnemy2::OnSeePlayer(APawn* Pawn)
 		target = Cast<ACharacterBase>(Pawn);
 
 		SetTarget(Pawn);
+		AlertNearbyEnemies();
 	}
 }
 
@@ -189,7 +191,6 @@ void AEnemy2::RotateToTarget()
 	SetActorRotation(NewRotation);
 }
 
-
 void AEnemy2::SetAnimState(EEnemyState NewState)
 {
 	if (anim)
@@ -244,7 +245,7 @@ float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	target = Player;
 
 	SetTarget(Player);
-
+	AlertNearbyEnemies();
 
 	////  플레이어와의 거리 확인
 	//ACharacterBase* Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
@@ -269,7 +270,6 @@ float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	return DamageAmount;
 }
 
-
 void AEnemy2::FireRifle()
 {
 	anim->PlayFireMontage();
@@ -285,6 +285,13 @@ void AEnemy2::FireRifle()
 void AEnemy2::Death()
 {
 	Super::Death();
+	
+	auto Manager = Cast<AEnemy2Manager>(
+		UGameplayStatics::GetActorOfClass(GetWorld(), AEnemy2Manager::StaticClass()));
+	if (Manager)
+	{
+		Manager->UnregisterEnemy(Cast<AEnemy2>(this));
+	}
 }
 
 void AEnemy2::SetTarget(APawn* Pawn)
@@ -295,5 +302,36 @@ void AEnemy2::SetTarget(APawn* Pawn)
 		// Blackboard에 TargetActor 키값 설정
 		EnemyController->BBComponent->SetValueAsObject("TargetActor", Pawn);
 		UKismetSystemLibrary::PrintString(this, TEXT("Set TargetActor in BB"), true, false, FLinearColor::Green, 1.5f);
+	}
+}
+
+void AEnemy2::AlertNearbyEnemies()
+{
+	UWorld* World = GetWorld();
+	if (!World || !target) return;
+
+	auto Manager = Cast<AEnemy2Manager>(
+		UGameplayStatics::GetActorOfClass(World, AEnemy2Manager::StaticClass()));
+
+	if (!Manager) return;
+
+	for (AEnemy2* OtherEnemy : Manager->AliveEnemies)
+	{
+		if (!OtherEnemy || OtherEnemy == this || !OtherEnemy->bIsAlive) continue;
+
+		float Distance = FVector::Dist(this->GetActorLocation(), OtherEnemy->GetActorLocation());
+		if (Distance <= 1500.f)
+		{
+			OtherEnemy->bIsPlayerDetected = true;
+			OtherEnemy->target = this->target;
+			OtherEnemy->SetTarget(this->target);
+
+			// FSM 상태 전환
+			auto FSM2 = Cast<UEnemy2FSM>(OtherEnemy->GetComponentByClass(UEnemy2FSM::StaticClass()));
+			if (FSM2)
+			{
+				FSM2->ChangeState(EEnemyState::Move); // Move == Chase
+			}
+		}
 	}
 }

@@ -99,4 +99,11 @@ public:
 	float fireDistance = 700.f;
 
 	float bDamaged = false;
+
+
+
+
+
+	void AlertNearbyEnemies();
+
 };

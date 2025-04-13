@@ -51,9 +51,10 @@ public:
 	float gravity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
-	float damage;
+	float damage = 100.f;
 
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Setting")
+	float explosionRadius = 300.f;
 
 
 

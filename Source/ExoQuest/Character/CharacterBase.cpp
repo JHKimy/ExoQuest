@@ -114,7 +114,7 @@ ACharacterBase::ACharacterBase()
 
 	GrenadeLaunchPosition = CreateDefaultSubobject<UArrowComponent>(TEXT("Grenade"));
 	GrenadeLaunchPosition->SetupAttachment(GetCapsuleComponent());
-	GrenadeLaunchPosition->SetRelativeLocation(FVector(200.f, 0.f, 100.f));
+	GrenadeLaunchPosition->SetRelativeLocation(FVector(70.f, 0.f, 80.f));
 
 
 
@@ -1413,6 +1413,9 @@ void ACharacterBase::ThrowGrenade()
 
 void ACharacterBase::ReadyAimGrenade()
 {
+	if (CurrentGrenadeCount <= 0) {
+		return;
+	}
 	if (bIsThrowingGrenade) return; // 이미 조준 중이면 실행하지 않음
 	if (bIsDashing || bIsRunning  || EquippedWeapons.IsEmpty()) return;
 
@@ -1591,7 +1594,7 @@ void ACharacterBase::ShowProjectilePrediction()
 	LaunchRotation = CameraRotation;
 
 	// 카메라 방향 또는 총구 방향을 기반으로 한 초기 속도 설정
-	FVector LaunchVelocity = LaunchRotation.Vector() * 3500.f; // 로켓 발사 속도와 일치하는 초기 속도 설정
+	FVector LaunchVelocity = LaunchRotation.Vector() * 3000.f; // 로켓 발사 속도와 일치하는 초기 속도 설정
 
 	// FPredictProjectilePathParams 설정
 	FPredictProjectilePathParams PredictParams;

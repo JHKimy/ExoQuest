@@ -100,7 +100,7 @@ public:
 
 	float bDamaged = false;
 
-
+	float detectRange = 1500.f;
 
 
 

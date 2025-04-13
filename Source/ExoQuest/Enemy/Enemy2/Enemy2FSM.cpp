@@ -141,7 +141,7 @@ void Enemy2MoveState::Update(UEnemyFSM* FSM, float DeltaTime)
 	{
 		const float Distance = FVector::Dist(FSM->enemy2->GetActorLocation(), FSM->target->GetActorLocation());
 
-		if (Distance <= 1000.0f)
+		if (Distance <= FSM->enemy2->detectRange)
 		{
 			FSM->ChangeState(EEnemyState::Attack);
 			return; // 상태 전환 후 더 이상 Update하지 않음
@@ -193,32 +193,12 @@ void Enemy2AttackState::Update(UEnemyFSM* FSM, float DeltaTime)
 	{
 		const float Distance = FVector::Dist(FSM->enemy2->GetActorLocation(), FSM->target->GetActorLocation());
 
-		if (Distance > 1000.0f)
+		if (Distance > FSM->enemy2->detectRange)
 		{
 			FSM->ChangeState(EEnemyState::Move);
 			return; // 상태 전환 후 더 이상 Update하지 않음
 		}
 	}
-
-
-	//if (!FSM->enemy2->bIsPlayerDetected)
-	//{
-		//FSM->AddUnseenTimer(DeltaTime);
-
-		//if (FSM->GetUnseenTime() > 5.0f)
-		//{
-		//	FSM->enemy2->bIsPlayerDetected = false;
-		//	FSM->ChangeState(EEnemyState::Patrol);
-		//	return;
-		//}
-	//}
-	//else
-	//{
-	//	FSM->ResetUnseenTimer();
-	//}
-
-	//if (FSM->GetTimer() > 2.5f)
-	//	FSM->ChangeState(EEnemyState::Idle);
 }
 
 void Enemy2AttackState::Exit(UEnemyFSM* FSM)
@@ -239,8 +219,10 @@ void Enemy2AttackState::Exit(UEnemyFSM* FSM)
 
 void Enemy2DamageState::Enter(UEnemyFSM* FSM)
 {
+	// EnemyDamageState::Enter(FSM);
+
 	//FSM->enemy2->SetAnimState(EEnemyState::Damage);
-	// FSM->ResetTimer();
+	 FSM->ResetTimer();
 
 	// EnemyDamageState::Enter(FSM);
 
@@ -248,16 +230,18 @@ void Enemy2DamageState::Enter(UEnemyFSM* FSM)
 
 void Enemy2DamageState::Update(UEnemyFSM* FSM, float DeltaTime)
 {
+	EnemyDamageState::Update(FSM, DeltaTime);
+
 	// EnemyDamageState::Update(FSM, DeltaTime);
-	//FSM->AddTimer(DeltaTime);
-	//if (FSM->GetTimer() > 1.0f)
-	//	FSM->ChangeState(EEnemyState::Idle);
+	 FSM->AddTimer(DeltaTime);
+	if (FSM->GetTimer() > 1.0f)
+		FSM->ChangeState(EEnemyState::Move);
 }
 
 void Enemy2DamageState::Exit(UEnemyFSM* FSM)
 {
-	//FSM->ResetTimer();
-	//EnemyDamageState::Exit(FSM);
+	FSM->ResetTimer();
+	// EnemyDamageState::Exit(FSM);
 
 }
 

@@ -92,11 +92,19 @@ EBTNodeResult::Type UBTTask_FindCover_cpp::ExecuteTask(UBehaviorTreeComponent& O
 			else if (bCanSeeRight)
 			{
 				ChosenPeek = PeekRight;
+				CurrentPeekDirection = EPeekDirection::PeekRight;
 			}
 			else if (bCanSeeLeft)
 			{
 				ChosenPeek = PeekLeft;
+				CurrentPeekDirection = EPeekDirection::PeekLeft;
 			}
+		}
+		if (ChosenPeek == PeekRight) {
+			CurrentPeekDirection = EPeekDirection::PeekRight;
+		}
+		else if (ChosenPeek == PeekLeft) {
+			CurrentPeekDirection = EPeekDirection::PeekLeft;
 		}
 
 
@@ -104,6 +112,7 @@ EBTNodeResult::Type UBTTask_FindCover_cpp::ExecuteTask(UBehaviorTreeComponent& O
 		BB->SetValueAsVector("Cover", CoverLocation);
 		BB->SetValueAsVector("PeekPoint", ChosenPeek);
 		BB->SetValueAsInt("CoverValid", 1);
+		BB->SetValueAsInt("PeekDirection", static_cast<int>(CurrentPeekDirection));
 
 		// 디버그 시각화
 		DrawDebugSphere(World, CoverLocation, 20.f, 12, FColor::Green, false, 1.f);
@@ -259,7 +268,7 @@ bool UBTTask_FindCover_cpp::CanSensePlayerFromLocation(UPawnSensingComponent* Se
 
 	FVector ToPlayer = Player->GetActorLocation() - FromLocation;
 	float Distance = ToPlayer.Size();
-	if (Distance > Sensing->SightRadius) return false;
+	//if (Distance > Sensing->SightRadius) return false;
 
 	FVector Direction = ToPlayer.GetSafeNormal();
 	FVector Forward = Sensing->GetOwner()->GetActorForwardVector();

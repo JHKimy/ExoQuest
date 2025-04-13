@@ -17,7 +17,7 @@ void AEnemy2Manager::BeginPlay()
 
     if (!Pool || !EnemyClass) return;
 
-    for (int i = 0; i < 10; ++i)
+    for (int i = 0; i < 3; ++i)
     {
         FVector Origin = GetActorLocation();
         FVector RandomOffset = FMath::VRand() * FMath::FRandRange(500.f, SpawnRadius);

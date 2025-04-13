@@ -39,11 +39,12 @@ AEnemy2::AEnemy2()
 	PawnSensing->SensingInterval = 0.25f;
 	PawnSensing->bSeePawns = true;
 	PawnSensing->SetPeripheralVisionAngle(50.f); // 시야각 설정
-	PawnSensing->SightRadius = 1000.f; // ← 15m 감지 거리로 설정
+	PawnSensing->SightRadius = 1500.f; // ← 15m 감지 거리로 설정
 
 
 	// FSM1의 주인으로 설정
 	FSM = CreateDefaultSubobject<UEnemy2FSM>(TEXT("FSM"));
+
 }
 
 void AEnemy2::BeginPlay()
@@ -213,6 +214,8 @@ float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 	// 체력 
 	health -= DamageAmount;
 
+	// ****************8
+	
 	// 현재 체력 출력
 	//FString HealthString = FString::Printf(TEXT("Current Health: %f"), health);
 	//UKismetSystemLibrary::PrintString(GetWorld(), HealthString, true, false, FLinearColor::Blue, 2.f);
@@ -229,6 +232,9 @@ float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 				SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 	}
+	else {
+		fsmForDamage->ChangeState(EEnemyState::Damage);
+	}
 
 	UpdateHealthBar();
 
@@ -240,6 +246,8 @@ float AEnemy2::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, A
 
 
 	anim->PlayHitMontage();
+
+
 
 	ACharacterBase* Player = Cast<ACharacterBase>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	target = Player;
@@ -295,7 +303,8 @@ void AEnemy2::Death()
 }
 
 void AEnemy2::SetTarget(APawn* Pawn)
-{		// AIController 가져오기
+{	
+	// AIController 가져오기
 	AEnemy2AIController* EnemyController = Cast<AEnemy2AIController>(GetController());
 	if (EnemyController && EnemyController->BBComponent)
 	{

@@ -57,6 +57,7 @@ public:
 
 	void Exit(UEnemyFSM* FSM) override;
 };
+
 UCLASS()
 class EXOQUEST_API UEnemy2FSM : public UEnemyFSM
 {

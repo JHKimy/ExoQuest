@@ -187,16 +187,24 @@ void EnemyAttackState::Exit(UEnemyFSM* FSM)
 }
 
 void EnemyDamageState::Enter(UEnemyFSM* FSM)
-{
+{	FSM->ResetTimer();
+
 	//FSM->ResetTimer();
 }
 void EnemyDamageState::Update(UEnemyFSM* FSM, float DeltaTime)
-{
+{	
+	FSM->AddTimer(DeltaTime);
+	if (FSM->GetTimer() > 0.1f)
+		FSM->ChangeState(EEnemyState::Move);
 	//FSM->AddTimer(DeltaTime);
 	//if (FSM->GetTimer() > 1.0f)
 	//	FSM->ChangeState(EEnemyState::Idle);
 }
-void EnemyDamageState::Exit(UEnemyFSM* FSM) {}
+void EnemyDamageState::Exit(UEnemyFSM* FSM) 
+{
+	FSM->ResetTimer();
+
+}
 
 void EnemyDeathState::Enter(UEnemyFSM* FSM)
 {

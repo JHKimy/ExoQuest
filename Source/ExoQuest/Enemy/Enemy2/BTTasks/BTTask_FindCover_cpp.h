@@ -9,6 +9,14 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EPeekDirection : uint8
+{
+    None        UMETA(DisplayName = "None"),
+    PeekLeft    UMETA(DisplayName = "Left"),
+    PeekRight   UMETA(DisplayName = "Right")
+};
+
 UCLASS(Blueprintable, meta = (DisplayName = "Find Cover and Peek Position"))
 class EXOQUEST_API UBTTask_FindCover_cpp : public UBTTaskNode
 {
@@ -16,6 +24,9 @@ class EXOQUEST_API UBTTask_FindCover_cpp : public UBTTaskNode
 
 public:
     UBTTask_FindCover_cpp();
+
+    UPROPERTY(BlueprintReadOnly, Category = "AI")
+    EPeekDirection CurrentPeekDirection = EPeekDirection::None;
 
     virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
     
